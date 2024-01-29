@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, upgrade
 
-from models import db
+from models import db, seed_countries, seed_data, seed_users
 
  
 app = Flask(__name__)
@@ -16,6 +16,8 @@ migrate = Migrate(app,db)
 if __name__  == "__main__":
     with app.app_context():
         upgrade()
-        #seedData(db)
+        seed_countries(db)
+        seed_data(db)
+        seed_users(db)
     
     app.run(debug=True)
