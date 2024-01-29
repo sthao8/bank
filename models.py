@@ -5,7 +5,14 @@ from decimal import Decimal
 from faker import Faker
 from flask_sqlalchemy import SQLAlchemy
 
-from countries.supported_countries import TelephoneCountryCode
+from business_logic.constants import (
+    TelephoneCountryCodes,
+    TransactionTypes,
+    TransactionOperations,
+    BusinessConstants,
+    AccountTypes
+    )
+
 
 db = SQLAlchemy()
 
@@ -15,7 +22,6 @@ class Country(db.Model):
     country_code = db.Column(db.String(2), primary_key=True)
     name = db.Column(db.String(30), unique=False, nullable=False)
     telephone_country_code = db.Column(db.String(5), unique=False, nullable=False)
-
 
 class Customer(db.Model):
     __tablename__= "Customers"
@@ -42,7 +48,7 @@ class Account(db.Model):
     created = db.Column(db.Date, unique=False, nullable=False)
     balance = db.Column(db.Numeric(15, 2), unique=False, nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey("Customers.id"), nullable=False)
-    
+
     transactions = db.relationship("Transaction", backref="account", lazy=True)
 
 class Transaction(db.Model):
@@ -55,7 +61,7 @@ class Transaction(db.Model):
     amount = db.Column(db.Numeric(15, 2), unique=False, nullable=False)
     new_balance = db.Column(db.Numeric(15,2), unique=False, nullable=False)
     account_id = db.Column(db.Integer, db.ForeignKey("Accounts.id"), nullable=False)
-    
+
 class User(db.Model):
     __tablename__ = "Users"
 
@@ -66,7 +72,7 @@ class User(db.Model):
 def seed_countries(db):
     existing_telephone_country_codes = [country.telephone_country_code for country in Country.query.all()]
 
-    for country_code in TelephoneCountryCode:
+    for country_code in TelephoneCountryCodes:
         if country_code.value not in existing_telephone_country_codes:
             fake = Faker(country_code.name)
             country = Country()
@@ -97,40 +103,28 @@ def seed_users(db):
             new_user.email = seed_user["email"]
             new_user.password = seed_user["password"]
             new_user.role = seed_user["role"]
-            
+
             db.session.add(new_user)
             db.session.commit()
 
 def seed_data(db):
-    SUPPORTED_LOCALES = [supported_country_locale.name for supported_country_locale in TelephoneCountryCode]
-    
-    MINIMUM_AGE = 18
-    MAXIMUM_AGE = 100
-    
-    BANK_ESTABLISHED_DATE = date(year=1905, month=12, day=5)
-    
     AVG_SALARY = 3500000
-    
-    ACCOUNT_TYPES = ("Personal", "Checking", "Savings")
-    TRANSACTION_TYPES = ("Debit", "Credit")
-    TRANSACTION_OPERATIONS_DEBIT = ("Deposit cash", "Salary", "Transfer")     
-    TRANSACTION_OPERATIONS_CREDIT = ("ATM withdrawal", "Payment", "Bank withdrawal", "Transfer")
 
     amount_users =  Customer.query.count()
     while amount_users < 50:
         # generate customer details based on random supported locale
-        random_locale = random.choice(SUPPORTED_LOCALES)
+        random_locale = random.choice(BusinessConstants.SUPPORTED_LOCALES)
         fake = Faker(random_locale)
 
         customer = Customer()
-        
+
         customer.first_name = fake.first_name()
         customer.last_name = fake.last_name()
         customer.address = fake.street_address()
         customer.postal_code = fake.postcode()
         customer.city = fake.city()
         customer.country = fake.current_country_code()
-        customer.birthday = fake.date_of_birth(minimum_age=MINIMUM_AGE, maximum_age=MAXIMUM_AGE)
+        customer.birthday = fake.date_of_birth(minimum_age=BusinessConstants.MINIMUM_AGE, maximum_age=BusinessConstants.MAXIMUM_AGE)
         customer.national_id = fake.ssn()
         customer.telephone = fake.phone_number()
         customer.email = fake.email()
@@ -138,16 +132,16 @@ def seed_data(db):
         # generate between 1 and 4 random accounts for each user
         for _ in range(random.randint(1,4)):
             account = Account()
-            
-            account.account_type = random.choice(ACCOUNT_TYPES)
+
+            account.account_type = random.choice(list(AccountTypes)).value
 
             # create random account open date between today and min age customer can open bank account
             AVG_WEEKS_PER_YEAR = 52.1775
-            WEEKS_IN_MINMUM_AGE = int(MINIMUM_AGE * AVG_WEEKS_PER_YEAR)
+            WEEKS_IN_MINMUM_AGE = int(BusinessConstants.MINIMUM_AGE * AVG_WEEKS_PER_YEAR)
             min_account_open_date = customer.birthday + timedelta(weeks=WEEKS_IN_MINMUM_AGE)
 
-            if min_account_open_date < BANK_ESTABLISHED_DATE:
-                min_account_open_date = BANK_ESTABLISHED_DATE
+            if min_account_open_date < BusinessConstants.BANK_ESTABLISHED_DATE:
+                min_account_open_date = BusinessConstants.BANK_ESTABLISHED_DATE
 
             account.created = fake.date_between(start_date=min_account_open_date)
             account.balance = 0
@@ -156,8 +150,8 @@ def seed_data(db):
             initial_deposit = Transaction()
             initial_deposit.timestamp = fake.date_time_between(start_date=account.created, end_date=account.created)
             initial_deposit.amount = Decimal(random.randint(10000, 100000) / 100)
-            initial_deposit.type = "Debit"
-            initial_deposit.operation = "Deposit cash"
+            initial_deposit.type = TransactionTypes.DEBIT.value
+            initial_deposit.operation = "Deposit cash" #TODO Is there a way to use enum here to check if proper
             account.balance = initial_deposit.amount
 
             initial_deposit.new_balance = account.balance
@@ -173,16 +167,16 @@ def seed_data(db):
 
                 # if transaction amount would drop balance below 0, make sure it's a debit
                 if account.balance - transaction.amount < 0:
-                    transaction.type = "Debit"
+                    transaction.type = TransactionTypes.DEBIT.value
                 else:
-                    transaction.type = random.choice(TRANSACTION_TYPES)
+                    transaction.type = random.choice(list(TransactionTypes)).value
 
-                if transaction.type == "Debit":
+                if transaction.type == TransactionTypes.DEBIT.value:
                     account.balance = account.balance + transaction.amount
-                    transaction.operation = random.choice(TRANSACTION_OPERATIONS_DEBIT)
+                    transaction.operation = random.choice(TransactionOperations.DEBIT_OPERATIONS.value)
                 else:
                     account.balance = account.balance - transaction.amount
-                    transaction.operation = random.choice(TRANSACTION_OPERATIONS_CREDIT)
+                    transaction.operation = random.choice(TransactionOperations.CREDIT_OPERATIONS.value)
 
                 transaction.new_balance = account.balance
                 account.transactions.append(transaction)
@@ -193,5 +187,5 @@ def seed_data(db):
 
         db.session.add(customer)
         db.session.commit()
-        
+
         amount_users += 1
