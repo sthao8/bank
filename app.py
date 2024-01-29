@@ -4,9 +4,9 @@ from flask_migrate import Migrate, upgrade
 
 from models import db, seed_countries, seed_data, seed_users
 
- 
+
 app = Flask(__name__)
-app.config.from_object('config.ConfigDebug')
+app.config.from_object('config.Config')
 
 db.app = app
 db.init_app(app)
