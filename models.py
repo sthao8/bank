@@ -1,127 +1,197 @@
-from flask_sqlalchemy import SQLAlchemy
-import barnum
 import random
-from datetime import datetime  
-from datetime import timedelta  
+from datetime import datetime, date
+from datetime import timedelta
+from decimal import Decimal
+from faker import Faker
+from flask_sqlalchemy import SQLAlchemy
+
+from countries.supported_countries import TelephoneCountryCode
 
 db = SQLAlchemy()
 
-# class Customer(db.Model):
-#     __tablename__= "Customers"
-#     Id = db.Column(db.Integer, primary_key=True)
-#     GivenName = db.Column(db.String(50), unique=False, nullable=False)
-#     Surname = db.Column(db.String(50), unique=False, nullable=False)
-#     Streetaddress = db.Column(db.String(50), unique=False, nullable=False)
-#     City = db.Column(db.String(50), unique=False, nullable=False)
-#     Zipcode = db.Column(db.String(10), unique=False, nullable=False)
-#     Country = db.Column(db.String(30), unique=False, nullable=False)
-#     CountryCode = db.Column(db.String(2), unique=False, nullable=False)
-#     Birthday = db.Column(db.DateTime, unique=False, nullable=False)
-#     NationalId = db.Column(db.String(20), unique=False, nullable=False)
-#     TelephoneCountryCode = db.Column(db.Integer, unique=False, nullable=False)
-#     Telephone = db.Column(db.String(20), unique=False, nullable=False)
-#     EmailAddress = db.Column(db.String(50), unique=False, nullable=False)
+class Country(db.Model):
+    __tablename__ = "Countries"
 
-#     Accounts = db.relationship('Account', backref='Customer',
-#      lazy=True)
-
-# class Account(db.Model):
-#     __tablename__= "Accounts"
-#     Id = db.Column(db.Integer, primary_key=True)
-#     AccountType = db.Column(db.String(10), unique=False, nullable=False)
-#     Created = db.Column(db.DateTime, unique=False, nullable=False)
-#     Balance = db.Column(db.Integer, unique=False, nullable=False)
-#     Transactions = db.relationship('Transaction', backref='Account',
-#      lazy=True)
-#     CustomerId = db.Column(db.Integer, db.ForeignKey('Customers.Id'), nullable=False)
-
-# class Transaction(db.Model):
-#     __tablename__= "Transactions"
-#     Id = db.Column(db.Integer, primary_key=True)
-#     Type = db.Column(db.String(20), unique=False, nullable=False)
-#     Operation = db.Column(db.String(50), unique=False, nullable=False)
-#     Date = db.Column(db.DateTime, unique=False, nullable=False)
-#     Amount = db.Column(db.Integer, unique=False, nullable=False)
-#     NewBalance = db.Column(db.Integer, unique=False, nullable=False)
-#     AccountId = db.Column(db.Integer, db.ForeignKey('Accounts.Id'), nullable=False)
-
-# def seedData(db):
-#     antal =  Customer.query.count()
-#     while antal < 5000:
-#         customer = Customer()
-        
-#         customer.GivenName, customer.Surname = barnum.create_name()
-
-#         customer.Streetaddress = barnum.create_street()
-#         customer.Zipcode, customer.City, _  = barnum.create_city_state_zip()
-#         customer.Country = "USA"
-#         customer.CountryCode = "US"
-#         customer.Birthday = barnum.create_birthday()
-#         n = barnum.create_cc_number()
-#         customer.NationalId = customer.Birthday.strftime("%Y%m%d-") + n[1][0][0:4]
-#         customer.TelephoneCountryCode = 55
-#         customer.Telephone = barnum.create_phone()
-#         customer.EmailAddress = barnum.create_email().lower()
-
-#         for x in range(random.randint(1,4)):
-#             account = Account()
-
-#             c = random.randint(0,100)
-#             if c < 33:
-#                 account.AccountType = "Personal"    
-#             elif c < 66:
-#                 account.AccountType = "Checking"    
-#             else:
-#                 account.AccountType = "Savings"    
+    country_code = db.Column(db.String(2), primary_key=True)
+    name = db.Column(db.String(30), unique=False, nullable=False)
+    telephone_country_code = db.Column(db.String(5), unique=False, nullable=False)
 
 
-#             start = datetime.now() + timedelta(days=-random.randint(1000,10000))
-#             account.Created = start
-#             account.Balance = 0
+class Customer(db.Model):
+    __tablename__= "Customers"
+
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String(50), unique=False, nullable=False)
+    last_name = db.Column(db.String(50), unique=False, nullable=False)
+    address = db.Column(db.String(50), unique=False, nullable=False)
+    city = db.Column(db.String(50), unique=False, nullable=False)
+    postal_code = db.Column(db.String(10), unique=False, nullable=False)
+    birthday = db.Column(db.Date, unique=False, nullable=False)
+    national_id = db.Column(db.String(20), unique=False, nullable=False)
+    telephone = db.Column(db.String(20), unique=False, nullable=False)
+    email = db.Column(db.String(50), unique=False, nullable=False)
+    country = db.Column(db.String(2), db.ForeignKey("Countries.country_code"), nullable=False)
+
+    accounts = db.relationship("Account", backref="customer", lazy=True)
+
+class Account(db.Model):
+    __tablename__ = "Accounts"
+
+    id = db.Column(db.Integer, primary_key=True)
+    account_type = db.Column(db.String(10), unique=False, nullable=False)
+    created = db.Column(db.Date, unique=False, nullable=False)
+    balance = db.Column(db.Numeric(15, 2), unique=False, nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey("Customers.id"), nullable=False)
+    
+    transactions = db.relationship("Transaction", backref="account", lazy=True)
+
+class Transaction(db.Model):
+    __tablename__ = "Transactions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(20), unique=False, nullable=False)
+    operation = db.Column(db.String(50), unique=False, nullable=False)
+    timestamp = db.Column(db.DateTime, unique=False, nullable=False)
+    amount = db.Column(db.Numeric(15, 2), unique=False, nullable=False)
+    new_balance = db.Column(db.Numeric(15,2), unique=False, nullable=False)
+    account_id = db.Column(db.Integer, db.ForeignKey("Accounts.id"), nullable=False)
+    
+class User(db.Model):
+    __tablename__ = "Users"
+
+    email = db.Column(db.String(100), primary_key=True)
+    password = db.Column(db.String(100), unique=False)
+    role = db.Column(db.String(7), unique=False)
+
+def seed_countries(db):
+    existing_telephone_country_codes = [country.telephone_country_code for country in Country.query.all()]
+
+    for country_code in TelephoneCountryCode:
+        if country_code.value not in existing_telephone_country_codes:
+            fake = Faker(country_code.name)
+            country = Country()
+            country.country_code = fake.current_country_code()
+            country.name = fake.current_country()
+            country.telephone_country_code = country_code.value
+            db.session.add(country)
+            db.session.commit()
+
+def seed_users(db):
+    existing_user_emails = [user.email for user in User.query.all()]
+    seed_users = [
+        {
+            "email": "stefan.holmberg@systementor.se",
+            "password": "Hejsan123#",
+            "role": "admin"
+        },
+        {
+            "email": "stefan.holmberg@nackademin.se",
+            "password": "Hejsan123#",
+            "role": "cashier"
+        }
+    ]
+
+    for seed_user in seed_users:
+        if seed_user["email"] not in existing_user_emails:
+            new_user = User()
+            new_user.email = seed_user["email"]
+            new_user.password = seed_user["password"]
+            new_user.role = seed_user["role"]
             
-#             for n in range(random.randint(0,30)):
-#                 belopp = random.randint(0,30)*100
-#                 tran = Transaction()
-#                 start = start+ timedelta(days=-random.randint(10,100))
-#                 if start > datetime.now():
-#                     break
-#                 tran.Date = start
-#                 account.Transactions.append(tran)
-#                 tran.Amount = belopp
-#                 if account.Balance - belopp < 0:
-#                     tran.Type = "Debit"
-#                 else:
-#                     if random.randint(0,100) > 70:
-#                         tran.Type = "Debit"
-#                     else:
-#                         tran.Type = "Credit"
+            db.session.add(new_user)
+            db.session.commit()
 
-#                 r = random.randint(0,100)
-#                 if tran.Type == "Debit":
-#                     account.Balance = account.Balance + belopp
-#                     if r < 20:
-#                         tran.Operation = "Deposit cash"
-#                     elif r < 66:
-#                         tran.Operation = "Salary"
-#                     else:
-#                         tran.Operation = "Transfer"
-#                 else:
-#                     account.Balance = account.Balance - belopp
-#                     if r < 40:
-#                         tran.Operation = "ATM withdrawal"
-#                     if r < 75:
-#                         tran.Operation = "Payment"
-#                     elif r < 85:
-#                         tran.Operation = "Bank withdrawal"
-#                     else:
-#                         tran.Operation = "Transfer"
+def seed_data(db):
+    SUPPORTED_LOCALES = [supported_country_locale.name for supported_country_locale in TelephoneCountryCode]
+    
+    MINIMUM_AGE = 18
+    MAXIMUM_AGE = 100
+    
+    BANK_ESTABLISHED_DATE = date(year=1905, month=12, day=5)
+    
+    AVG_SALARY = 3500000
+    
+    ACCOUNT_TYPES = ("Personal", "Checking", "Savings")
+    TRANSACTION_TYPES = ("Debit", "Credit")
+    TRANSACTION_OPERATIONS_DEBIT = ("Deposit cash", "Salary", "Transfer")     
+    TRANSACTION_OPERATIONS_CREDIT = ("ATM withdrawal", "Payment", "Bank withdrawal", "Transfer")
 
-#                 tran.NewBalance = account.Balance
+    amount_users =  Customer.query.count()
+    while amount_users < 50:
+        # generate customer details based on random supported locale
+        random_locale = random.choice(SUPPORTED_LOCALES)
+        fake = Faker(random_locale)
 
-
-#             customer.Accounts.append(account)
-
-#         db.session.add(customer)
-#         db.session.commit()
+        customer = Customer()
         
-#         antal = antal + 1
+        customer.first_name = fake.first_name()
+        customer.last_name = fake.last_name()
+        customer.address = fake.street_address()
+        customer.postal_code = fake.postcode()
+        customer.city = fake.city()
+        customer.country = fake.current_country_code()
+        customer.birthday = fake.date_of_birth(minimum_age=MINIMUM_AGE, maximum_age=MAXIMUM_AGE)
+        customer.national_id = fake.ssn()
+        customer.telephone = fake.phone_number()
+        customer.email = fake.email()
+
+        # generate between 1 and 4 random accounts for each user
+        for _ in range(random.randint(1,4)):
+            account = Account()
+            
+            account.account_type = random.choice(ACCOUNT_TYPES)
+
+            # create random account open date between today and min age customer can open bank account
+            AVG_WEEKS_PER_YEAR = 52.1775
+            WEEKS_IN_MINMUM_AGE = int(MINIMUM_AGE * AVG_WEEKS_PER_YEAR)
+            min_account_open_date = customer.birthday + timedelta(weeks=WEEKS_IN_MINMUM_AGE)
+
+            if min_account_open_date < BANK_ESTABLISHED_DATE:
+                min_account_open_date = BANK_ESTABLISHED_DATE
+
+            account.created = fake.date_between(start_date=min_account_open_date)
+            account.balance = 0
+
+            # start every new account with a deposit
+            initial_deposit = Transaction()
+            initial_deposit.timestamp = fake.date_time_between(start_date=account.created, end_date=account.created)
+            initial_deposit.amount = Decimal(random.randint(10000, 100000) / 100)
+            initial_deposit.type = "Debit"
+            initial_deposit.operation = "Deposit cash"
+            account.balance = initial_deposit.amount
+
+            initial_deposit.new_balance = account.balance
+            account.transactions.append(initial_deposit)
+            db.session.add(initial_deposit)
+
+            # generate between 0 and 30 random transactions per account
+            for _ in range(random.randint(0,30)):
+                transaction = Transaction()
+
+                transaction.timestamp = fake.date_time_between(start_date=account.created)
+                transaction.amount = Decimal(random.randint(1, AVG_SALARY) / 100)
+
+                # if transaction amount would drop balance below 0, make sure it's a debit
+                if account.balance - transaction.amount < 0:
+                    transaction.type = "Debit"
+                else:
+                    transaction.type = random.choice(TRANSACTION_TYPES)
+
+                if transaction.type == "Debit":
+                    account.balance = account.balance + transaction.amount
+                    transaction.operation = random.choice(TRANSACTION_OPERATIONS_DEBIT)
+                else:
+                    account.balance = account.balance - transaction.amount
+                    transaction.operation = random.choice(TRANSACTION_OPERATIONS_CREDIT)
+
+                transaction.new_balance = account.balance
+                account.transactions.append(transaction)
+                db.session.add(transaction)
+
+            customer.accounts.append(account)
+            db.session.add(account)
+
+        db.session.add(customer)
+        db.session.commit()
+        
+        amount_users += 1
