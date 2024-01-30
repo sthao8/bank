@@ -3,6 +3,7 @@ from datetime import datetime, date
 from datetime import timedelta
 from decimal import Decimal
 from faker import Faker
+from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 
 from business_logic.constants import (
@@ -62,12 +63,13 @@ class Transaction(db.Model):
     new_balance = db.Column(db.Numeric(15,2), unique=False, nullable=False)
     account_id = db.Column(db.Integer, db.ForeignKey("Accounts.id"), nullable=False)
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = "Users"
 
-    email = db.Column(db.String(100), primary_key=True)
-    password = db.Column(db.String(100), unique=False)
-    role = db.Column(db.String(7), unique=False)
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(100), unique=True, nullable=True)
+    password = db.Column(db.String(100), unique=False,nullable=True)
+    role = db.Column(db.String(7), unique=False, nullable=True)
 
 def seed_countries(db):
     existing_telephone_country_codes = [country.telephone_country_code for country in Country.query.all()]
