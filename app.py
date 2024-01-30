@@ -1,11 +1,15 @@
-import imp
 from flask import Flask, flash, render_template, request, session, url_for, redirect
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_migrate import Migrate, upgrade
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import select, func
+from sqlalchemy.orm import joinedload
 
 from models import (
     User,
+    Customer,
+    Account,
+    Country,
     db,
     seed_countries,
     seed_data,
@@ -51,7 +55,53 @@ def logout():
 @app.route("/", methods=["GET"])
 @login_required
 def index():
-    return render_template("index.html")
+    number_of_customers_expr = func.count(func.distinct(Customer.id)).label("number_of_customers")
+    number_of_accounts_expr = func.count(Account.id).label("number_of_accounts")
+    sum_of_accounts_expr = func.sum(Account.balance).label("sum_of_accounts")
+
+    country_stmt = (select(
+            Country.name,
+            number_of_customers_expr,
+            number_of_accounts_expr,
+            sum_of_accounts_expr
+            )
+            .join(Customer, Customer.country==Country.country_code)
+            .join(Account, Account.customer_id==Customer.id)
+            .group_by(Customer.country)
+            .order_by("sum_of_accounts")
+    )
+    country_stats = [
+        {
+            "country": name,
+            "number_of_customers": number_of_customers,
+            "number_of_accounts": number_of_accounts,
+            "sum_of_accounts": sum_of_accounts
+        }
+        for (name, number_of_customers, number_of_accounts, sum_of_accounts) in db.session.execute(country_stmt).all()
+    ]
+
+    global_stmt = (select(
+            number_of_customers_expr,
+            number_of_accounts_expr,
+            sum_of_accounts_expr
+            )
+            .join(Account, Account.customer_id==Customer.id)
+    )
+
+    global_number_of_customers, global_number_of_accounts, global_sum_of_accounts = db.session.execute(global_stmt).one()
+    global_sum_of_accounts = global_sum_of_accounts or 0
+
+    global_stats = {
+        "number_of_customers": global_number_of_customers,
+        "number_of_accounts": global_number_of_accounts,
+        "sum_of_accounts": global_sum_of_accounts
+    }
+
+    return render_template(
+        "index.html",
+        country_stats=country_stats,
+        global_stats=global_stats
+    )
 
 if __name__  == "__main__":
     with app.app_context():
