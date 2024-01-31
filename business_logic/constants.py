@@ -11,10 +11,6 @@ class TransactionTypes(Enum):
     DEBIT = "Debit"
     CREDIT = "Credit"
 
-class TransactionOperations(Enum):
-    DEBIT_OPERATIONS = ("Deposit cash", "Salary", "Transfer")
-    CREDIT_OPERATIONS = ("ATM withdrawal", "Payment", "Bank withdrawal", "Transfer")
-
 class BusinessConstants:
     SUPPORTED_LOCALES = [supported_country_locale.name for supported_country_locale in TelephoneCountryCodes]
     MINIMUM_AGE = 18
