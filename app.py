@@ -55,16 +55,11 @@ def logout():
 @app.route("/", methods=["GET"])
 @login_required
 def index():
-    number_of_customers_expr = func.count(func.distinct(Customer.id)).label("number_of_customers")
-    number_of_accounts_expr = func.count(Account.id).label("number_of_accounts")
-    sum_of_accounts_expr = func.sum(Account.balance).label("sum_of_accounts")
-
     country_stmt = (select(
             Country.name,
-            number_of_customers_expr,
-            number_of_accounts_expr,
-            sum_of_accounts_expr
-            )
+            func.count(func.distinct(Customer.id)).label("number_of_customers"),
+            func.count(Account.id).label("number_of_accounts"),
+            func.sum(Account.balance).label("sum_of_accounts"))
             .join(Customer, Customer.country==Country.country_code)
             .join(Account, Account.customer_id==Customer.id)
             .group_by(Customer.country)
@@ -80,22 +75,10 @@ def index():
         for (name, number_of_customers, number_of_accounts, sum_of_accounts) in db.session.execute(country_stmt).all()
     ]
 
-    # TODO: maybe do this part in python instead of querying the db again
-    global_stmt = (select(
-            number_of_customers_expr,
-            number_of_accounts_expr,
-            sum_of_accounts_expr
-            )
-            .join(Account, Account.customer_id==Customer.id)
-    )
-
-    global_number_of_customers, global_number_of_accounts, global_sum_of_accounts = db.session.execute(global_stmt).one()
-    global_sum_of_accounts = global_sum_of_accounts or 0
-
     global_stats = {
-        "number_of_customers": global_number_of_customers,
-        "number_of_accounts": global_number_of_accounts,
-        "sum_of_accounts": global_sum_of_accounts
+        "number_of_customers": sum([country["number_of_customers"] for country in country_stats]),
+        "number_of_accounts": sum([country["number_of_accounts"] for country in country_stats]),
+        "sum_of_accounts": sum([country["sum_of_accounts"] for country in country_stats])
     }
 
     return render_template(
