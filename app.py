@@ -87,6 +87,16 @@ def index():
         global_stats=global_stats
     )
 
+@app.route("/country-page/<country>")
+def country_page(country):
+    country_customer = (select(
+        Account)
+        .join(Customer, Customer.id==Account.customer_id)
+        .join(Country, Country.country_code==Customer.country)
+        .where(Country.name==country)
+    )
+    return render_template("country_page.html")
+
 if __name__  == "__main__":
     with app.app_context():
         upgrade()
