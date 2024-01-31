@@ -8,7 +8,7 @@
     <table>
         {% for country in country_stats %}
             <tr>
-                <td>{{ country["country"] }}</td>
+                <td><a href="{{ url_for('country_page', country=country['country']) }}">{{ country["country"] }}</a></td>
                 <td>customers: {{ country["number_of_customers"] }}</td>
                 <td>accounts: {{ country["number_of_accounts"] }}</td>
                 <td>sum: {{ country["sum_of_accounts"] }}</td>            
