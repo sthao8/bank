@@ -5,11 +5,12 @@
 {% endblock %}
 
 {% block main %}
-    <h1>{{ country }} Top Customers</h1>    
+    <h1>{{ country }} Top 10 Customers</h1>    
     <div>
         <table>
             <thead>
                 <tr>
+                    <th></th>
                     <th>customer</th>
                     <th>accounts</th>
                     <th>total balance</th>
@@ -17,9 +18,10 @@
             </thead>
             {% for customer in country_customers %}
             <tr>
-                <td> {{ customer["customer"].first_name }} {{ customer["customer"].last_name }} </td>
-                <td> {{ customer["number_of_accounts"] }} </td>
-                <td> {{ customer["sum_of_accounts"] }} </td>
+                <td> {{ loop.index }}. </td>
+                <td><a href="{{ url_for('customer_page', customer_id=customer.Customer.id) }}"> {{ customer.Customer.first_name }} {{ customer.Customer.last_name }} </a></td>
+                <td> {{ customer.number_of_accounts }} </td>
+                <td> {{ customer.sum_of_accounts }} </td>
             </tr>
             {% endfor %}
         </table>

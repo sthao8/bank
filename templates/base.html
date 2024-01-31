@@ -9,6 +9,15 @@
         {% if current_user.is_authenticated %}
             <a href="{{ url_for('logout') }}">Logout</a>
         {% endif %}
+        
+        <form action="{{ url_for('search_account_number') }}" method="post">
+            {{ search_account_form.hidden_tag() }}
+            {{ search_account_form.search_account_number() }}
+            <div>
+                {{ search_account_form.submit() }}
+            </div>
+        </form>
+
         <header>
             {% if get_flashed_messages() %}
                 <div role="alert">
