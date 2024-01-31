@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Account History
+{% endblock %}
+
+{% block main %}
+    account number {{ account.id }}
+    <table>
+        <thead>
+            <th>type</th>
+            <th>date</th>
+            <th>amount</th>
+            <th>new balance</th>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+            <tr>
+                <td> {{ transaction.type }} </td>
+                <td> {{ transaction.timestamp }} </td>
+                <td> {{ transaction.amount }} </td>
+                <td> {{ transaction.new_balance }} </td>
+            </tr>
+            {% endfor %}
+            <tr></tr>
+        </tbody>
+    </table>
+
+{% endblock %}

@@ -160,12 +160,16 @@ def seed_data(db):
             account.transactions.append(initial_deposit)
             db.session.add(initial_deposit)
 
+            previous_transaction_date = initial_deposit.timestamp
+
+
             # generate between 0 and 30 random transactions per account
             for _ in range(random.randint(0,30)):
                 transaction = Transaction()
 
-                transaction.timestamp = fake.date_time_between(start_date=account.created)
+                transaction.timestamp = fake.date_time_between(start_date=previous_transaction_date)
                 transaction.amount = Decimal(random.randint(1, AVG_SALARY) / 100)
+                previous_transaction_date = transaction.timestamp
 
                 # if transaction amount would drop balance below 0, make sure it's a debit
                 if account.balance - transaction.amount < 0:

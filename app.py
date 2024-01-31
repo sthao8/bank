@@ -10,6 +10,7 @@ from models import (
     Customer,
     Account,
     Country,
+    Transaction,
     db,
     seed_countries,
     seed_data,
@@ -135,6 +136,17 @@ def customer_page(customer_id):
     if customer:
         total_balance = sum([account.balance for account in customer.accounts])
         return render_template("customer_page.html", customer=customer, total_balance=total_balance)
+    else:
+        return render_template("404.html")
+    
+@app.route("/account/<account_id>", methods=["GET"])
+@login_required
+def account_page(account_id):
+    account = Account.query.filter_by(id=account_id).one_or_none()
+    if account:
+        transactions = Transaction.query.filter_by(account_id=account_id).order_by(Transaction.timestamp.desc()).all()
+        print(transactions)
+        return render_template("account_page.html", account=account, transactions=transactions)
     else:
         return render_template("404.html")
 
