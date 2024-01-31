@@ -1,11 +1,28 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Country
+    {{country}}
 {% endblock %}
 
 {% block main %}
-    <table>
-    </table>
-   
+    <h1>{{ country }} Top Customers</h1>    
+    <div>
+        <table>
+            <thead>
+                <tr>
+                    <th>customer</th>
+                    <th>accounts</th>
+                    <th>total balance</th>
+                </tr>
+            </thead>
+            {% for customer in country_customers %}
+            <tr>
+                <td> {{ customer["customer"].first_name }} {{ customer["customer"].last_name }} </td>
+                <td> {{ customer["number_of_accounts"] }} </td>
+                <td> {{ customer["sum_of_accounts"] }} </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
 {% endblock %}
