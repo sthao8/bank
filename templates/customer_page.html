@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}
+    customer profile
+{% endblock %}
+
+{% block main %}
+
+    <h1> customer id {{ customer.id }}</h1>
+    <div>
+        <h3>customer details:</h3>
+        <ul>
+            <li>name: {{ customer.first_name }} {{ customer.last_name }} </li>
+            <li>personal id: {{ customer.national_id }} </li>
+            <li>address: {{ customer.address }}, {{ customer.city }} {{ customer.postalcode }} {{ customer.country_details.name }}</li>
+            <li>birthday: {{ customer.birthday }} </li>
+            <li>telephone: {{ customer.country_details.telephone_country_code }}  {{ customer.telephone }} </li>
+        </ul>
+    </div>
+
+    <div>
+        <h3>Accounts:</h3>
+        <ol>
+            {% for account in customer.accounts %}
+                <li>{{ account.account_type }} {{ account.balance }} </li>
+            {% endfor %}
+        </ol>
+        <b>Total balance: </b> {{ total_balance }}
+    </div>
+
+{% endblock %}
