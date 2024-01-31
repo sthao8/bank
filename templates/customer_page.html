@@ -20,12 +20,28 @@
 
     <div>
         <h3>Accounts:</h3>
-        <ol>
-            {% for account in customer.accounts %}
-                <li>{{ account.account_type }} {{ account.balance }} </li>
-            {% endfor %}
-        </ol>
-        <b>Total balance: </b> {{ total_balance }}
+        <table>
+            <thead>
+                <tr>
+                    <th>account number</th>
+                    <th>type</th>
+                    <th>balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in customer.accounts %}
+                <tr>
+                    <td> {{ account.id }} </td>
+                    <td> {{ account.account_type }} </td>
+                    <td> {{ account.balance }} </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td><b>Total balance: </b></td>
+                    <td>{{ total_balance }}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
 {% endblock %}
