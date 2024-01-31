@@ -23,6 +23,8 @@ class Country(db.Model):
     name = db.Column(db.String(30), unique=False, nullable=False)
     telephone_country_code = db.Column(db.String(5), unique=False, nullable=False)
 
+    customers = db.relationship("Customer", backref="country_details", lazy=True)
+
 class Customer(db.Model):
     __tablename__= "Customers"
 

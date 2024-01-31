@@ -89,36 +89,55 @@ def index():
         global_stats=global_stats
     )
 
-@app.route("/country-page/<country>")
+@app.route("/country-page/<country>", methods=["GET"])
+@login_required
 def country_page(country):
-    country_customers_results = db.session.execute(
-        select(
-        Customer, 
-        func.count(Account.id),
-        func.sum(Account.balance).label("sum_of_accounts"))
-        .join(Account, Account.customer_id==Customer.id)
-        .join(Country, Country.country_code==Customer.country)
-        .where(Country.name==country)
-        .group_by(Customer.id)
-        .order_by(desc("sum_of_accounts"))
-        .limit(10)
-    ).all()
-
-    country_customers = [
-        {
-        "customer": customer,
-        "number_of_accounts": number_of_accounts,
-        "sum_of_accounts": sum_of_accounts}
-        for (customer, number_of_accounts, sum_of_accounts) in country_customers_results
-    ]
-
-    print(country_customers_results)
-    print(country_customers)
+    countries = db.session.execute(select(Country.name)).scalars().all()
     
-    return render_template(
+    if country in countries:
+        country_customers_results = db.session.execute(
+            select(
+            Customer, 
+            func.count(Account.id),
+            func.sum(Account.balance).label("sum_of_accounts"))
+            .join(Account, Account.customer_id==Customer.id)
+            .join(Country, Country.country_code==Customer.country)
+            .where(Country.name==country)
+            .group_by(Customer.id)
+            .order_by(desc("sum_of_accounts"))
+            .limit(10)
+        ).all()
+
+        country_customers = [
+            {
+            "customer": customer,
+            "number_of_accounts": number_of_accounts,
+            "sum_of_accounts": sum_of_accounts}
+            for (customer, number_of_accounts, sum_of_accounts) in country_customers_results
+        ]
+
+        return render_template(
         "country_page.html",
         country=country,
         country_customers=country_customers)
+    
+    else:
+        return render_template("404.html")
+
+@app.route("/customer/<customer_id>", methods=["GET"])
+@login_required
+def customer_page(customer_id):
+    customer = Customer.query.filter_by(id=customer_id).options(
+        joinedload(Customer.accounts),
+        joinedload(Customer.country_details)
+    ).one_or_none()
+    
+    if customer:
+        total_balance = sum([account.balance for account in customer.accounts])
+        return render_template("customer_page.html", customer=customer, total_balance=total_balance)
+    else:
+        return render_template("404.html")
+
 
 if __name__  == "__main__":
     with app.app_context():
