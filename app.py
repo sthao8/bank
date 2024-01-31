@@ -80,6 +80,7 @@ def index():
         for (name, number_of_customers, number_of_accounts, sum_of_accounts) in db.session.execute(country_stmt).all()
     ]
 
+    # TODO: maybe do this part in python instead of querying the db again
     global_stmt = (select(
             number_of_customers_expr,
             number_of_accounts_expr,

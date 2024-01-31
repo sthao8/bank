@@ -9,7 +9,6 @@ from flask_sqlalchemy import SQLAlchemy
 from business_logic.constants import (
     TelephoneCountryCodes,
     TransactionTypes,
-    TransactionOperations,
     BusinessConstants,
     AccountTypes
     )
@@ -57,7 +56,6 @@ class Transaction(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column(db.String(20), unique=False, nullable=False)
-    operation = db.Column(db.String(50), unique=False, nullable=False)
     timestamp = db.Column(db.DateTime, unique=False, nullable=False)
     amount = db.Column(db.Numeric(15, 2), unique=False, nullable=False)
     new_balance = db.Column(db.Numeric(15,2), unique=False, nullable=False)
@@ -111,9 +109,10 @@ def seed_users(db):
 
 def seed_data(db):
     AVG_SALARY = 3500000
+    SEED_AMOUNT_CUSTOMERS = 50
 
     amount_users =  Customer.query.count()
-    while amount_users < 50:
+    while amount_users < SEED_AMOUNT_CUSTOMERS:
         # generate customer details based on random supported locale
         random_locale = random.choice(BusinessConstants.SUPPORTED_LOCALES)
         fake = Faker(random_locale)
@@ -150,10 +149,9 @@ def seed_data(db):
 
             # start every new account with a deposit
             initial_deposit = Transaction()
-            initial_deposit.timestamp = fake.date_time_between(start_date=account.created, end_date=account.created)
+            initial_deposit.timestamp = fake.date_time_between(start_date=account.created, end_date=account.created) #TODO this didn't generate any datetime
             initial_deposit.amount = Decimal(random.randint(10000, 100000) / 100)
             initial_deposit.type = TransactionTypes.DEBIT.value
-            initial_deposit.operation = "Deposit cash" #TODO Is there a way to use enum here to check if proper
             account.balance = initial_deposit.amount
 
             initial_deposit.new_balance = account.balance
@@ -175,10 +173,8 @@ def seed_data(db):
 
                 if transaction.type == TransactionTypes.DEBIT.value:
                     account.balance = account.balance + transaction.amount
-                    transaction.operation = random.choice(TransactionOperations.DEBIT_OPERATIONS.value)
                 else:
                     account.balance = account.balance - transaction.amount
-                    transaction.operation = random.choice(TransactionOperations.CREDIT_OPERATIONS.value)
 
                 transaction.new_balance = account.balance
                 account.transactions.append(transaction)
