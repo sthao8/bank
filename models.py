@@ -127,7 +127,9 @@ def seed_data(db):
         customer.postal_code = fake.postcode()
         customer.city = fake.city()
         customer.country = fake.current_country_code()
-        customer.birthday = fake.date_of_birth(minimum_age=BusinessConstants.MINIMUM_AGE, maximum_age=BusinessConstants.MAXIMUM_AGE)
+        customer.birthday = fake.date_of_birth(
+            minimum_age=BusinessConstants.MINIMUM_AGE,
+            maximum_age=BusinessConstants.MAXIMUM_AGE)
         customer.national_id = fake.ssn()
         customer.telephone = fake.phone_number()
         customer.email = fake.email()
@@ -151,7 +153,9 @@ def seed_data(db):
 
             # start every new account with a deposit
             initial_deposit = Transaction()
-            initial_deposit.timestamp = fake.date_time_between(start_date=account.created, end_date=account.created) #TODO this didn't generate any datetime
+            initial_deposit.timestamp = fake.date_time_between(
+                start_date=account.created,
+                end_date=account.created + timedelta(days=1))
             initial_deposit.amount = Decimal(random.randint(10000, 100000) / 100)
             initial_deposit.type = TransactionTypes.DEBIT.value
             account.balance = initial_deposit.amount
@@ -162,13 +166,13 @@ def seed_data(db):
 
             previous_transaction_date = initial_deposit.timestamp
 
-
             # generate between 0 and 30 random transactions per account
             for _ in range(random.randint(0,30)):
                 transaction = Transaction()
 
                 transaction.timestamp = fake.date_time_between(start_date=previous_transaction_date)
                 transaction.amount = Decimal(random.randint(1, AVG_SALARY) / 100)
+
                 previous_transaction_date = transaction.timestamp
 
                 # if transaction amount would drop balance below 0, make sure it's a debit

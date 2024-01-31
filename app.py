@@ -2,7 +2,7 @@ from flask import Flask, flash, render_template, request, session, url_for, redi
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_migrate import Migrate, upgrade
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import select, func, desc
+from sqlalchemy import select, func, desc, asc
 from sqlalchemy.orm import joinedload
 
 from models import (
@@ -16,7 +16,7 @@ from models import (
     seed_data,
     seed_users
 )
-from views.forms import LoginForm
+from views.forms import LoginForm, SearchAccountForm, SearchCustomerForm
 
 
 app = Flask(__name__)
@@ -25,6 +25,11 @@ app.config.from_object('config.Config')
 db.app = app
 db.init_app(app)
 migrate = Migrate(app, db)
+
+@app.context_processor
+def context_processor():
+    search_account_form = SearchAccountForm()
+    return dict(search_account_form=search_account_form)
 
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
@@ -56,7 +61,7 @@ def logout():
 @app.route("/", methods=["GET"])
 @login_required
 def index():
-    country_results = db.session.execute(
+    country_stats = db.session.execute(
         select(
             Country.name,
             func.count(func.distinct(Customer.id)).label("number_of_customers"),
@@ -65,23 +70,13 @@ def index():
             .join(Customer, Customer.country==Country.country_code)
             .join(Account, Account.customer_id==Customer.id)
             .group_by(Customer.country)
-            .order_by("sum_of_accounts")
+            .order_by(desc("sum_of_accounts"))
     ).all()
 
-    country_stats = [
-        {
-            "country": name,
-            "number_of_customers": number_of_customers,
-            "number_of_accounts": number_of_accounts,
-            "sum_of_accounts": sum_of_accounts
-        }
-        for (name, number_of_customers, number_of_accounts, sum_of_accounts) in country_results
-    ]
-
     global_stats = {
-        "number_of_customers": sum([country["number_of_customers"] for country in country_stats]),
-        "number_of_accounts": sum([country["number_of_accounts"] for country in country_stats]),
-        "sum_of_accounts": sum([country["sum_of_accounts"] for country in country_stats])
+        "number_of_customers": sum([country.number_of_customers for country in country_stats]),
+        "number_of_accounts": sum([country.number_of_accounts for country in country_stats]),
+        "sum_of_accounts": sum([country.sum_of_accounts for country in country_stats])
     }
 
     return render_template(
@@ -90,16 +85,54 @@ def index():
         global_stats=global_stats
     )
 
+@app.route("/search-account-number", methods=["POST"])
+@login_required
+def search_account_number():
+    form = SearchAccountForm()
+
+    if form.validate_on_submit():
+        customer = db.session.execute(
+            select(Customer)
+            .join(Account, Customer.id==Account.id)
+            .where(Customer.id==form.search_account_number.data)
+        ).one_or_none()
+
+        if customer:
+            print(customer)
+            return redirect(url_for("customer_page", customer_id=customer.Customer.id))
+        else:
+            flash("No results found!")
+            return redirect(url_for("search_customer"))
+    #TODO actually decide what to do here if they can't validate. maybe front end validation beforehands and then??
+    return render_template("404.html")
+
+@app.route("/search-customer", methods=["GET", "POST"])
+@login_required
+def search_customer():
+    #TODO i think add ability to sort and paginate
+    form = SearchCustomerForm()
+
+    customers = None
+
+    if form.validate_on_submit():
+        customers = Customer.query.filter(
+            func.lower(Customer.first_name)==form.search_first_name.data.lower(),
+            func.lower(Customer.last_name)==form.search_last_name.data.lower(),
+            func.lower(Customer.city)==form.search_city.data.lower()
+        ).all()
+
+    return render_template("search_customer.html", form=form, customers=customers)
+
 @app.route("/country-page/<country>", methods=["GET"])
 @login_required
 def country_page(country):
     countries = db.session.execute(select(Country.name)).scalars().all()
     
     if country in countries:
-        country_customers_results = db.session.execute(
+        country_customers = db.session.execute(
             select(
             Customer, 
-            func.count(Account.id),
+            func.count(Account.id).label("number_of_accounts"),
             func.sum(Account.balance).label("sum_of_accounts"))
             .join(Account, Account.customer_id==Customer.id)
             .join(Country, Country.country_code==Customer.country)
@@ -109,18 +142,10 @@ def country_page(country):
             .limit(10)
         ).all()
 
-        country_customers = [
-            {
-            "customer": customer,
-            "number_of_accounts": number_of_accounts,
-            "sum_of_accounts": sum_of_accounts}
-            for (customer, number_of_accounts, sum_of_accounts) in country_customers_results
-        ]
-
         return render_template(
-        "country_page.html",
-        country=country,
-        country_customers=country_customers)
+            "country_page.html",
+            country=country,
+            country_customers=country_customers)
     
     else:
         return render_template("404.html")
@@ -142,6 +167,7 @@ def customer_page(customer_id):
 @app.route("/account/<account_id>", methods=["GET"])
 @login_required
 def account_page(account_id):
+    #TODO Like ajax fetch this in html OR something
     account = Account.query.filter_by(id=account_id).one_or_none()
     if account:
         transactions = Transaction.query.filter_by(account_id=account_id).order_by(Transaction.timestamp.desc()).all()

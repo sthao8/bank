@@ -23,7 +23,7 @@
                 <span>{{ form.password.errors[0] }}</span>
             {% endif %}
         </div>
-            <input type="submit" value="Submit">
+            {{ form.submit() }}
         </div>
     </form>
 
