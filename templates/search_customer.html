@@ -7,8 +7,7 @@
 {% block main %}
 customer search:
 <div>
-    <form action="{{ url_for('search_customer') }}" method="post">
-        {{ form.hidden_tag() }}
+    <form action="{{ url_for('display_search_results') }}" method="get">
         <div>
             {{ form.search_first_name() }}
             {{ form.search_last_name() }}
@@ -17,39 +16,4 @@ customer search:
         {{ form.submit() }}
     </form>
 </div>
-<div>
-    {% if customers %}
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>id</th>
-                    <th>national id</th>
-                    <th>first name</th>
-                    <th>last name</th>
-                    <th>address</th>
-                    <th>city</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for customer in customers %}
-                <tr>
-                    <td>{{ loop.index }}.</td>
-                    <td><a href="{{ url_for('customer_page', customer_id=customer.id) }}"> {{ customer.id }} </a></td>
-                    <td>{{ customer.national_id }}</td>
-                    <td>{{ customer.first_name }}</td>
-                    <td>{{ customer.last_name }}</td>
-                    <td>{{ customer.address }}</td>
-                    <td>{{ customer.city }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        {% if form.validate_on_submit() %}
-            no results found
-        {% endif %}
-    {% endif %}
-</div>
-
 {% endblock %}

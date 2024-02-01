@@ -3,20 +3,23 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="stylesheet" href="https://unpkg.com/boxicons@latest/css/boxicons.min.css">
         <title>{% block title %}{% endblock %} | Blueprint Bank</title>
     </head>
     <body>
         {% if current_user.is_authenticated %}
             <a href="{{ url_for('logout') }}">Logout</a>
+            <a href="{{ url_for('index') }}" class="{{ 'active' if activePage=='index' }}">Home</a>
+            <a href="{{ url_for('search_customer') }}" class="{{ 'active' if activePage=='search_customer' }}">Find customer</a>
+            <form action="{{ url_for('search_account_number') }}" method="post">
+                {{ search_account_form.hidden_tag() }}
+                {{ search_account_form.search_account_number() }}
+                <div>
+                    {{ search_account_form.submit() }}
+                </div>
+            </form>
         {% endif %}
-        
-        <form action="{{ url_for('search_account_number') }}" method="post">
-            {{ search_account_form.hidden_tag() }}
-            {{ search_account_form.search_account_number() }}
-            <div>
-                {{ search_account_form.submit() }}
-            </div>
-        </form>
 
         <header>
             {% if get_flashed_messages() %}
