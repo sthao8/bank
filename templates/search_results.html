@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Search Customer
+{% endblock %}
+
+{% block main %}
+customer search:
+<div>
+    <form action="{{ url_for('display_search_results') }}" method="get">
+        <div>
+            {{ form.search_first_name() }}
+            {{ form.search_last_name() }}
+            {{ form.search_city() }}
+        </div>
+        {{ form.submit() }}
+    </form>
+</div>
+<div>
+    {% if customers %}
+        {% set query_params = {
+            'search_first_name': form.search_first_name.data,
+            'search_last_name': form.search_last_name.data,
+            'search_city': form.search_city.data
+        } %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>
+                        id
+                        <a href="{{ url_for('display_search_results', sort_col='id', sort_order='asc', **query_params) }}">
+                            <i class="bx bx-up-arrow"></i>
+                        </a>
+                        <a href="{{ url_for('display_search_results', sort_col='id', sort_order='desc', **query_params) }}">
+                            <i class="bx bx-down-arrow"></i>
+                        </a>
+                    </th>
+                    <th>
+                        national id
+                        <a href="{{ url_for('display_search_results', sort_col='national_id', sort_order='asc', **query_params) }}">
+                            <i class="bx bx-up-arrow"></i>
+                        </a>
+                        <a href="{{ url_for('display_search_results', sort_col='national_id', sort_order='desc', **query_params) }}">
+                            <i class="bx bx-down-arrow"></i>
+                        </a>
+                    </th>
+                    <th>
+                        first name
+                        <a href="{{ url_for('display_search_results', sort_col='first_name', sort_order='asc', **query_params) }}">
+                            <i class="bx bx-up-arrow"></i>
+                        </a>
+                        <a href="{{ url_for('display_search_results', sort_col='first_name', sort_order='desc', **query_params) }}">
+                            <i class="bx bx-down-arrow"></i>
+                        </a>
+                    </th>
+                    <th>
+                        last name
+                        <a href="{{ url_for('display_search_results', sort_col='last_name', sort_order='asc', **query_params) }}">
+                            <i class="bx bx-up-arrow"></i>
+                        </a>
+                        <a href="{{ url_for('display_search_results', sort_col='last_name', sort_order='desc', **query_params) }}">
+                            <i class="bx bx-down-arrow"></i>
+                        </a>
+                    </th>
+                    <th>
+                        address
+                        <a href="{{ url_for('display_search_results', sort_col='address', sort_order='asc', **query_params) }}">
+                            <i class="bx bx-up-arrow"></i>
+                        </a>
+                        <a href="{{ url_for('display_search_results', sort_col='address', sort_order='desc', **query_params) }}">
+                            <i class="bx bx-down-arrow"></i>
+                        </a>
+                    </th>
+                    <th>
+                        city
+                        <a href="{{ url_for('display_search_results', sort_col='city', sort_order='asc', **query_params) }}">
+                            <i class="bx bx-up-arrow"></i>
+                        </a>
+                        <a href="{{ url_for('display_search_results', sort_col='city', sort_order='desc', **query_params) }}">
+                            <i class="bx bx-down-arrow"></i>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for customer in customers %}
+                <tr>
+                    <td>{{ loop.index }}.</td>
+                    <td><a href="{{ url_for('customer_page', customer_id=customer.id) }}"> {{ customer.id }} </a></td>
+                    <td>{{ customer.national_id }}</td>
+                    <td>{{ customer.first_name }}</td>
+                    <td>{{ customer.last_name }}</td>
+                    <td>{{ customer.address }}</td>
+                    <td>{{ customer.city }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        {% if form.validate_on_submit() %}
+            no results found
+        {% endif %}
+    {% endif %}
+</div>
+
+{% endblock %}

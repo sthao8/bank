@@ -81,6 +81,7 @@ def index():
 
     return render_template(
         "index.html",
+        activePage="index",
         country_stats=country_stats,
         global_stats=global_stats
     )
@@ -99,29 +100,75 @@ def search_account_number():
 
         if customer:
             print(customer)
-            return redirect(url_for("customer_page", customer_id=customer.Customer.id))
+            return redirect(url_for(
+                "customer_page",
+                activePage="search_customer", #TODO this is not strictly true
+                customer_id=customer.Customer.id,)
+            )
         else:
             flash("No results found!")
-            return redirect(url_for("search_customer"))
+            return redirect(url_for("search_customer", activePage="search_customer"))
     #TODO actually decide what to do here if they can't validate. maybe front end validation beforehands and then??
     return render_template("404.html")
 
-@app.route("/search-customer", methods=["GET", "POST"])
+@app.route("/search-customer")
 @login_required
 def search_customer():
-    #TODO i think add ability to sort and paginate
     form = SearchCustomerForm()
 
-    customers = None
+    return render_template(
+    "search_customer.html",
+    activePage="search_customer",
+    form=form)
 
-    if form.validate_on_submit():
-        customers = Customer.query.filter(
-            func.lower(Customer.first_name)==form.search_first_name.data.lower(),
-            func.lower(Customer.last_name)==form.search_last_name.data.lower(),
-            func.lower(Customer.city)==form.search_city.data.lower()
-        ).all()
+@app.route("/search-results")
+@login_required
+def display_search_results():
+    form = SearchCustomerForm(request.args) #needed bc it's a get
 
-    return render_template("search_customer.html", form=form, customers=customers)
+    if form.validate():
+        sort_col = request.args.get("sort_col", "id")
+        sort_order = request.args.get("sort_order", "asc")
+
+        sort_critera = getattr(Customer, sort_col) # gets the attr from string
+
+        if sort_order == "asc":
+            stmt = Customer.query.filter(
+                func.lower(Customer.first_name)==form.search_first_name.data.lower(),
+                func.lower(Customer.last_name)==form.search_last_name.data.lower(),
+                func.lower(Customer.city)==form.search_city.data.lower()
+            ).order_by(asc(sort_critera))
+            customers = Customer.query.filter(
+                func.lower(Customer.first_name)==form.search_first_name.data.lower(),
+                func.lower(Customer.last_name)==form.search_last_name.data.lower(),
+                func.lower(Customer.city)==form.search_city.data.lower()
+            ).order_by(asc(sort_critera)).all()
+        else:
+            stmt = customers = Customer.query.filter(
+                func.lower(Customer.first_name)==form.search_first_name.data.lower(),
+                func.lower(Customer.last_name)==form.search_last_name.data.lower(),
+                func.lower(Customer.city)==form.search_city.data.lower()
+            ).order_by(desc(sort_critera))
+            customers = Customer.query.filter(
+                func.lower(Customer.first_name)==form.search_first_name.data.lower(),
+                func.lower(Customer.last_name)==form.search_last_name.data.lower(),
+                func.lower(Customer.city)==form.search_city.data.lower()
+            ).order_by(desc(sort_critera)).all()
+
+        print(stmt) 
+
+        return render_template(
+            "search_results.html",
+            activePage="search_customer",
+            sort_col=sort_col,
+            sort_order=sort_order,
+            form=form,
+            customers=customers)
+
+    else:
+        #TODO maybe something else?
+        # return redirect(url_for("search_customer"))
+        return render_template('404.html')
 
 @app.route("/country-page/<country>", methods=["GET"])
 @login_required
@@ -144,6 +191,7 @@ def country_page(country):
 
         return render_template(
             "country_page.html",
+            activePage="index",
             country=country,
             country_customers=country_customers)
     
@@ -160,7 +208,10 @@ def customer_page(customer_id):
     
     if customer:
         total_balance = sum([account.balance for account in customer.accounts])
-        return render_template("customer_page.html", customer=customer, total_balance=total_balance)
+        return render_template(
+            "customer_page.html",
+            customer=customer,
+            total_balance=total_balance)
     else:
         return render_template("404.html")
     

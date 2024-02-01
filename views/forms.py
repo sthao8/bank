@@ -53,6 +53,10 @@ class SearchAccountForm(FlaskForm):
     submit = SubmitField("Search")
 
 class SearchCustomerForm(FlaskForm):
+    #IS THIS OK
+    class Meta:
+        csrf = False
+
     search_first_name = StringField(
         "first name",
         id="search_first_name",
