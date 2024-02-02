@@ -53,7 +53,6 @@ class SearchAccountForm(FlaskForm):
     submit = SubmitField("Search")
 
 class SearchCustomerForm(FlaskForm):
-    #IS THIS OK
     class Meta:
         csrf = False
 
@@ -61,30 +60,30 @@ class SearchCustomerForm(FlaskForm):
         "first name",
         id="search_first_name",
         render_kw={"placeholder": "first name", "size": 20}, # you can even put css classes here
-        validators=[
-            InputRequired(),
-            Length(min=2)
-        ]
+        # validators=[
+        #     InputRequired(),
+        #     Length(min=2)
+        # ]
     )
 
     search_last_name = StringField(
         "last name",
         id="search_last_name",
         render_kw={"placeholder": "last name", "size": 20}, # you can even put css classes here
-        validators=[
-            InputRequired(),
-            Length(min=2)
-        ]
+        # validators=[
+        #     InputRequired(),
+        #     Length(min=2)
+        # ]
     )
 
     search_city = StringField(
         "city",
         id="search_city",
         render_kw={"placeholder": "city", "size": 20},
-        validators=(
-            InputRequired(),
-            Length(min=1)
-        )
+        # validators=(
+        #     InputRequired(),
+        #     Length(min=1)
+        # )
     )
 
     submit = SubmitField("Search")

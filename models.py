@@ -111,7 +111,7 @@ def seed_users(db):
 
 def seed_data(db):
     AVG_SALARY = 3500000
-    SEED_AMOUNT_CUSTOMERS = 50
+    SEED_AMOUNT_CUSTOMERS = 500
 
     amount_users =  Customer.query.count()
     while amount_users < SEED_AMOUNT_CUSTOMERS:

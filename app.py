@@ -1,10 +1,15 @@
-from flask import Flask, flash, render_template, request, session, url_for, redirect
+from flask import Flask, flash, render_template, request, url_for, redirect
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_migrate import Migrate, upgrade
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select, func, desc, asc
 from sqlalchemy.orm import joinedload
 
+from utils import (
+    extract_query_criteria,
+    apply_filters,
+    apply_sorting
+)
 from models import (
     User,
     Customer,
@@ -124,39 +129,37 @@ def search_customer():
 @app.route("/search-results")
 @login_required
 def display_search_results():
-    form = SearchCustomerForm(request.args) #needed bc it's a get
+    form = SearchCustomerForm(request.args)
+    query_criteria = extract_query_criteria(form)
+    query = Customer.query
 
-    if form.validate():
+    if query_criteria:
+        query = apply_filters(query, query_criteria, Customer)
+
+        # Extract args
+        previous_sort_col = request.args.get("previous_sort_col", "id")
         sort_col = request.args.get("sort_col", "id")
         sort_order = request.args.get("sort_order", "asc")
-
-        sort_critera = getattr(Customer, sort_col) # gets the attr from string
-
-        if sort_order == "asc":
-            stmt = Customer.query.filter(
-                func.lower(Customer.first_name)==form.search_first_name.data.lower(),
-                func.lower(Customer.last_name)==form.search_last_name.data.lower(),
-                func.lower(Customer.city)==form.search_city.data.lower()
-            ).order_by(asc(sort_critera))
-            customers = Customer.query.filter(
-                func.lower(Customer.first_name)==form.search_first_name.data.lower(),
-                func.lower(Customer.last_name)==form.search_last_name.data.lower(),
-                func.lower(Customer.city)==form.search_city.data.lower()
-            ).order_by(asc(sort_critera)).all()
+        toggle_order = request.args.get("toggle_order", False)
+        
+        order_by_col = getattr(Customer, sort_col)
+        
+        # Determine sort order: toggle sort order if the same column is clicked, otherwise reset to ascending
+        if sort_col == previous_sort_col and toggle_order:
+            sort_order = "desc" if sort_order == "asc" else "asc"
         else:
-            stmt = customers = Customer.query.filter(
-                func.lower(Customer.first_name)==form.search_first_name.data.lower(),
-                func.lower(Customer.last_name)==form.search_last_name.data.lower(),
-                func.lower(Customer.city)==form.search_city.data.lower()
-            ).order_by(desc(sort_critera))
-            customers = Customer.query.filter(
-                func.lower(Customer.first_name)==form.search_first_name.data.lower(),
-                func.lower(Customer.last_name)==form.search_last_name.data.lower(),
-                func.lower(Customer.city)==form.search_city.data.lower()
-            ).order_by(desc(sort_critera)).all()
+            sort_order = "asc"
 
-        print(stmt) 
+        # Apply sort order
+        if sort_order == "asc":
+            query = query.order_by(asc(order_by_col))
+        elif sort_order == "desc":
+            query = query.order_by(desc(order_by_col))
 
+        customers = query.all()
+
+        # TODO let's work on pagination next!! maybe actually an api so we can use it with js first
+        
         return render_template(
             "search_results.html",
             activePage="search_customer",
@@ -164,11 +167,12 @@ def display_search_results():
             sort_order=sort_order,
             form=form,
             customers=customers)
-
     else:
-        #TODO maybe something else?
-        # return redirect(url_for("search_customer"))
-        return render_template('404.html')
+        return render_template(
+            "search_results.html",
+            activePage="search_customer",
+            form=form,
+            customers=None)
 
 @app.route("/country-page/<country>", methods=["GET"])
 @login_required
