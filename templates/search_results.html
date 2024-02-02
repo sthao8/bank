@@ -5,104 +5,68 @@
 {% endblock %}
 
 {% block main %}
-customer search:
-<div>
-    <form action="{{ url_for('display_search_results') }}" method="get">
-        <div>
-            {{ form.search_first_name() }}
-            {{ form.search_last_name() }}
-            {{ form.search_city() }}
-        </div>
-        {{ form.submit() }}
-    </form>
-</div>
-<div>
-    {% if customers %}
-        {% set query_params = {
-            'search_first_name': form.search_first_name.data,
-            'search_last_name': form.search_last_name.data,
-            'search_city': form.search_city.data
-        } %}
+    customer search:
+    {% include "_search_form.html" %}
+    <div>
+        {% if customers %}
+            <!-- Used to dynamically generate get url params for each href -->
+            {% set query_params = {
+                "sort_order": sort_order,
+                "toggle_order": True,
+                "previous_sort_col": sort_col,
+                "search_first_name": form.search_first_name.data,
+                "search_last_name": form.search_last_name.data,
+                "search_city": form.search_city.data
+            } %}
 
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>
-                        id
-                        <a href="{{ url_for('display_search_results', sort_col='id', sort_order='asc', **query_params) }}">
-                            <i class="bx bx-up-arrow"></i>
-                        </a>
-                        <a href="{{ url_for('display_search_results', sort_col='id', sort_order='desc', **query_params) }}">
-                            <i class="bx bx-down-arrow"></i>
-                        </a>
-                    </th>
-                    <th>
-                        national id
-                        <a href="{{ url_for('display_search_results', sort_col='national_id', sort_order='asc', **query_params) }}">
-                            <i class="bx bx-up-arrow"></i>
-                        </a>
-                        <a href="{{ url_for('display_search_results', sort_col='national_id', sort_order='desc', **query_params) }}">
-                            <i class="bx bx-down-arrow"></i>
-                        </a>
-                    </th>
-                    <th>
-                        first name
-                        <a href="{{ url_for('display_search_results', sort_col='first_name', sort_order='asc', **query_params) }}">
-                            <i class="bx bx-up-arrow"></i>
-                        </a>
-                        <a href="{{ url_for('display_search_results', sort_col='first_name', sort_order='desc', **query_params) }}">
-                            <i class="bx bx-down-arrow"></i>
-                        </a>
-                    </th>
-                    <th>
-                        last name
-                        <a href="{{ url_for('display_search_results', sort_col='last_name', sort_order='asc', **query_params) }}">
-                            <i class="bx bx-up-arrow"></i>
-                        </a>
-                        <a href="{{ url_for('display_search_results', sort_col='last_name', sort_order='desc', **query_params) }}">
-                            <i class="bx bx-down-arrow"></i>
-                        </a>
-                    </th>
-                    <th>
-                        address
-                        <a href="{{ url_for('display_search_results', sort_col='address', sort_order='asc', **query_params) }}">
-                            <i class="bx bx-up-arrow"></i>
-                        </a>
-                        <a href="{{ url_for('display_search_results', sort_col='address', sort_order='desc', **query_params) }}">
-                            <i class="bx bx-down-arrow"></i>
-                        </a>
-                    </th>
-                    <th>
-                        city
-                        <a href="{{ url_for('display_search_results', sort_col='city', sort_order='asc', **query_params) }}">
-                            <i class="bx bx-up-arrow"></i>
-                        </a>
-                        <a href="{{ url_for('display_search_results', sort_col='city', sort_order='desc', **query_params) }}">
-                            <i class="bx bx-down-arrow"></i>
-                        </a>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for customer in customers %}
-                <tr>
-                    <td>{{ loop.index }}.</td>
-                    <td><a href="{{ url_for('customer_page', customer_id=customer.id) }}"> {{ customer.id }} </a></td>
-                    <td>{{ customer.national_id }}</td>
-                    <td>{{ customer.first_name }}</td>
-                    <td>{{ customer.last_name }}</td>
-                    <td>{{ customer.address }}</td>
-                    <td>{{ customer.city }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        {% if form.validate_on_submit() %}
-            no results found
+            <!-- Add any customer details to be added here -->
+            {% set columns = {
+                "id": "id",
+                "national id": "national_id",
+                "first name": "first_name",
+                "last name": "last_name",
+                "address": "address",
+                "city": "city" 
+            } %}
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        {% for label, url_param in columns.items() %}
+                            <th>
+                                <a href="{{ url_for('display_search_results', sort_col=url_param, **query_params) }}">
+                                    {{ label }}
+                                </a>
+                                {% if sort_col == url_param %}
+                                    <i class="bx {{ 'bx-up-arrow' if sort_order == 'asc' else 'bx-down-arrow' }}"></i>
+                                {% endif %}
+                            </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                        <tr>
+                            <td>{{ loop.index }}.</td>
+                            {% for label, attribute_name in columns.items() %}
+                                {% if attribute_name == "id" %}
+                                    <td><a href="{{ url_for('customer_page', customer_id=customer.id) }}"> {{ customer[attribute_name] }} </a></td>
+                                {% else %}
+                                    <td>{{ customer[attribute_name] }}</td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            {% if form.search_first_name.data or form.search_last_name.data or form.search_city.data %}
+                no results found!
+            {% else %}
+                please enter search terms
+            {% endif %}
         {% endif %}
-    {% endif %}
-</div>
+    </div>
 
 {% endblock %}

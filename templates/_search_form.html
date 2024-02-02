@@ -1,0 +1,11 @@
+<!-- _search_form.html to be included at top of search_customer.html and search_results.html -->
+<div>
+    <form action="{{ url_for('display_search_results') }}" method="get">
+        <div>
+            {{ form.search_first_name() }}
+            {{ form.search_last_name() }}
+            {{ form.search_city() }}
+        </div>
+        {{ form.submit() }}
+    </form>
+</div>
