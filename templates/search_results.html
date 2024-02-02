@@ -8,11 +8,10 @@
     customer search:
     {% include "_search_form.html" %}
     <div>
-        {% if customers %}
+        {% if customers and customers.total > 0 %}
             <!-- Used to dynamically generate get url params for each href -->
             {% set query_params = {
                 "sort_order": sort_order,
-                "toggle_order": True,
                 "previous_sort_col": sort_col,
                 "search_first_name": form.search_first_name.data,
                 "search_last_name": form.search_last_name.data,
@@ -29,13 +28,15 @@
                 "city": "city" 
             } %}
             
+            Showing page {{ page }} of total {{ customers.pages }} pages
+
             <table>
                 <thead>
                     <tr>
                         <th></th>
                         {% for label, url_param in columns.items() %}
                             <th>
-                                <a href="{{ url_for('display_search_results', sort_col=url_param, **query_params) }}">
+                                <a href="{{ url_for('display_search_results', page = page, sort_col = url_param, toggle_order = 'on', **query_params) }}">
                                     {{ label }}
                                 </a>
                                 {% if sort_col == url_param %}
@@ -48,24 +49,29 @@
                 <tbody>
                     {% for customer in customers %}
                         <tr>
-                            <td>{{ loop.index }}.</td>
+                            <td>{{ loop.index0 + customers.first }}.</td>
+                            <td><a href="{{ url_for('customer_page', customer_id = customer.id) }}"> {{ customer.id }} </a></td>
                             {% for label, attribute_name in columns.items() %}
-                                {% if attribute_name == "id" %}
-                                    <td><a href="{{ url_for('customer_page', customer_id=customer.id) }}"> {{ customer[attribute_name] }} </a></td>
-                                {% else %}
+                                {% if attribute_name != "id" %}
                                     <td>{{ customer[attribute_name] }}</td>
                                 {% endif %}
                             {% endfor %}
                         </tr>
                     {% endfor %}
+                    <tr>
+                        {% if customers.has_prev %}
+                            <td><a href="{{ url_for('display_search_results', page = ( page - 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">previous</a></td>
+                        {% endif %}
+                        {% if customers.has_next %}
+                            <td><a href="{{ url_for('display_search_results', page = ( page + 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">next</a></td>
+                        {% endif %}
+                    </tr>
                 </tbody>
             </table>
-        {% else %}
-            {% if form.search_first_name.data or form.search_last_name.data or form.search_city.data %}
+        {% elif form.search_first_name.data or form.search_last_name.data or form.search_city.data %}
                 no results found!
-            {% else %}
+        {% else %}
                 please enter search terms
-            {% endif %}
         {% endif %}
     </div>
 

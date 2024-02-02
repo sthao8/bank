@@ -18,8 +18,8 @@
             <tr>
                 <td> {{ transaction.type }} </td>
                 <td> {{ transaction.timestamp }} </td>
-                <td> {{ transaction.amount }} </td>
-                <td> {{ transaction.new_balance }} </td>
+                <td> {{ transaction.amount | format_money }} </td>
+                <td> {{ transaction.new_balance | format_money}} </td>
             </tr>
             {% endfor %}
             <tr></tr>

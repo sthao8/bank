@@ -13,7 +13,6 @@ from business_logic.constants import (
     AccountTypes
     )
 
-
 db = SQLAlchemy()
 
 class Country(db.Model):

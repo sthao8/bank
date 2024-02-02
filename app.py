@@ -1,3 +1,6 @@
+import locale
+from babel.numbers import format_currency
+from decimal import Decimal
 from flask import Flask, flash, render_template, request, url_for, redirect
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_migrate import Migrate, upgrade
@@ -5,10 +8,10 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select, func, desc, asc
 from sqlalchemy.orm import joinedload
 
+from search_results_handler import SearchResultsHandler
+
 from utils import (
-    extract_query_criteria,
-    apply_filters,
-    apply_sorting
+    string_to_bool,
 )
 from models import (
     User,
@@ -23,6 +26,7 @@ from models import (
 )
 from views.forms import LoginForm, SearchAccountForm, SearchCustomerForm
 
+locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
@@ -30,6 +34,12 @@ app.config.from_object('config.Config')
 db.app = app
 db.init_app(app)
 migrate = Migrate(app, db)
+
+app.jinja_env.filters["enumerate"] = enumerate
+
+@app.template_filter()
+def format_money(value, currency="SEK"):
+    return format_currency(value, currency, locale="sv_SE")
 
 @app.context_processor
 def context_processor():
@@ -86,7 +96,7 @@ def index():
 
     return render_template(
         "index.html",
-        activePage="index",
+        active_page="index",
         country_stats=country_stats,
         global_stats=global_stats
     )
@@ -107,12 +117,12 @@ def search_account_number():
             print(customer)
             return redirect(url_for(
                 "customer_page",
-                activePage="search_customer", #TODO this is not strictly true
+                active_page="search_customer", #TODO this is not strictly true
                 customer_id=customer.Customer.id,)
             )
         else:
             flash("No results found!")
-            return redirect(url_for("search_customer", activePage="search_customer"))
+            return redirect(url_for("search_customer", active_page="search_customer"))
     #TODO actually decide what to do here if they can't validate. maybe front end validation beforehands and then??
     return render_template("404.html")
 
@@ -123,55 +133,31 @@ def search_customer():
 
     return render_template(
     "search_customer.html",
-    activePage="search_customer",
+    active_page="search_customer",
     form=form)
 
 @app.route("/search-results")
 @login_required
 def display_search_results():
-    form = SearchCustomerForm(request.args)
-    query_criteria = extract_query_criteria(form)
-    query = Customer.query
+    handler = SearchResultsHandler(request.args, Customer)
+    RESULTS_PER_PAGE = 3
 
-    if query_criteria:
-        query = apply_filters(query, query_criteria, Customer)
+    if handler.has_query_criteria:
+        customers = handler.get_paginated_sorted_ordered_results(RESULTS_PER_PAGE)
 
-        # Extract args
-        previous_sort_col = request.args.get("previous_sort_col", "id")
-        sort_col = request.args.get("sort_col", "id")
-        sort_order = request.args.get("sort_order", "asc")
-        toggle_order = request.args.get("toggle_order", False)
-        
-        order_by_col = getattr(Customer, sort_col)
-        
-        # Determine sort order: toggle sort order if the same column is clicked, otherwise reset to ascending
-        if sort_col == previous_sort_col and toggle_order:
-            sort_order = "desc" if sort_order == "asc" else "asc"
-        else:
-            sort_order = "asc"
-
-        # Apply sort order
-        if sort_order == "asc":
-            query = query.order_by(asc(order_by_col))
-        elif sort_order == "desc":
-            query = query.order_by(desc(order_by_col))
-
-        customers = query.all()
-
-        # TODO let's work on pagination next!! maybe actually an api so we can use it with js first
-        
         return render_template(
             "search_results.html",
-            activePage="search_customer",
-            sort_col=sort_col,
-            sort_order=sort_order,
-            form=form,
-            customers=customers)
+            active_page="search_customer",
+            sort_col=handler.current_sort_col,
+            sort_order=handler.sort_order,
+            form=handler.form,
+            customers=customers,
+            page=handler.page)
     else:
         return render_template(
             "search_results.html",
-            activePage="search_customer",
-            form=form,
+            active_page="search_customer",
+            form=handler.form,
             customers=None)
 
 @app.route("/country-page/<country>", methods=["GET"])
@@ -195,7 +181,7 @@ def country_page(country):
 
         return render_template(
             "country_page.html",
-            activePage="index",
+            active_page="index",
             country=country,
             country_customers=country_customers)
     

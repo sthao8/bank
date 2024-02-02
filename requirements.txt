@@ -1,4 +1,5 @@
 alembic==1.13.1
+Babel==2.14.0
 barnum==0.5.1
 blinker==1.7.0
 click==8.1.7
