@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+from typing import Any
 from flask_wtf import FlaskForm
 from wtforms import (
     Form,
@@ -7,14 +9,38 @@ from wtforms import (
     BooleanField,
     TextAreaField,
     IntegerField,
-    SubmitField)
+    SubmitField,
+    DateField,
+    TelField,
+    SelectField,
+    RadioField)
 from wtforms.validators import (
     InputRequired,
     Email,
     Length,
     EqualTo,
     NumberRange,
-    Regexp)
+    Regexp,
+    Optional)
+from views.validators import (
+    Age,
+    CheckIfAllPasswordFieldsHaveDataIfOneHasData,
+    CheckIfFormHasData)
+from business_logic.constants import BusinessConstants
+
+class PrefixedForm(FlaskForm):
+    """
+    Parent class of prefixed forms use a naming convention of prefix + _ + ORM model column 
+    name for easier retreival of form data via for looping
+
+    Children classes must override field_prefix attribute with their own prefix
+    """
+    field_prefix = ""
+
+    @classmethod
+    def get_column_name(cls, field_name):
+        """Remove prefix and return the ORM model column name"""
+        return field_name.removeprefix(cls.field_prefix)
 
 class LoginForm(FlaskForm):
     email = EmailField(
@@ -52,38 +78,152 @@ class SearchAccountForm(FlaskForm):
     )
     submit = SubmitField("Search")
 
-class SearchCustomerForm(FlaskForm):
+class SearchCustomerForm(PrefixedForm):
     class Meta:
         csrf = False
 
+    field_prefix = "search_"
+
     search_first_name = StringField(
         "first name",
-        id="search_first_name",
         render_kw={"placeholder": "first name", "size": 20}, # you can even put css classes here
-        # validators=[
-        #     InputRequired(),
-        #     Length(min=2)
-        # ]
     )
 
     search_last_name = StringField(
         "last name",
-        id="search_last_name",
         render_kw={"placeholder": "last name", "size": 20}, # you can even put css classes here
-        # validators=[
-        #     InputRequired(),
-        #     Length(min=2)
-        # ]
     )
 
     search_city = StringField(
         "city",
-        id="search_city",
-        render_kw={"placeholder": "city", "size": 20},
-        # validators=(
-        #     InputRequired(),
-        #     Length(min=1)
-        # )
+        render_kw={"placeholder": "city", "size": 20}
     )
 
     submit = SubmitField("Search")
+
+class RegisterCustomerForm(PrefixedForm):
+    field_prefix = "register_"
+
+    register_first_name = StringField(
+        "first name",
+        validators=[Length(min=1, max=50, message="First name cannot exceed 50 characters."), InputRequired()],
+        render_kw={"placeholder": "first name", "size": 20, "autofocus": True}
+    )
+
+    register_last_name = StringField(
+        "last name",
+        validators=[Length(min=1, max=50, message="Last name cannot exceed 50 characters."), InputRequired()],
+        render_kw={"placeholder": "last name", "size": 20}
+    )
+
+    register_address = StringField(
+        "address",
+        validators=[Length(min=1, max=50, message="Address cannot exceed 50 characters."), InputRequired()],
+        render_kw={"placeholder": "address", "size": 20}
+    )
+
+    register_city = StringField(
+        "city",
+        validators=[Length(min=1, max=50, message="City cannot exceed 50 characters."), InputRequired()],
+        render_kw={"placeholder": "city", "size": 20}
+    )
+
+    register_postal_code = StringField(
+        "postal code",
+        validators=[Length(min=1, max=10, message="Postal code cannot exceed 50 characters."), InputRequired()],
+        render_kw={"placeholder": "postal code", "size": 20}
+    )
+
+    #TODO you need a custom check here in js to prevent submission
+    register_birthday = DateField(
+        "birthday",
+        validators=[InputRequired(), Age()],
+        render_kw={"placeholder": "birthday"}
+    )
+
+    register_national_id = StringField(
+        "national id",
+        validators=[Length(min=1, max=20, message="National ID cannot exceed 50 characters."), InputRequired()],
+        render_kw={"placeholder": "national id"}
+    )
+
+    register_telephone = TelField(
+        "telephone",
+        validators=[Length(min=1, max=20, message="Telephone number cannot exceed 20 characters."), InputRequired()],
+        render_kw={"placeholder": "telephone"}
+    )
+
+    register_email = EmailField(
+        "email",
+        validators=[Length(min=1, max=50, message="Email cannot exceed 50 characters."), InputRequired()],
+        render_kw={"placeholder": "email"}
+    )
+
+    register_country = SelectField(
+        "country",
+        validate_choice=[InputRequired()]
+    )
+
+    submit = SubmitField("Register")
+
+class RegisterUserForm(PrefixedForm):
+    field_prefix = "register_"
+
+    register_email = EmailField(
+        "email",
+        validators=[InputRequired(), Length(min=1, max=50, message="Email cannot exceed 50 characters.")],
+        render_kw={"placeholder": "email", "autocomplete": "new-email"}
+    )
+
+    register_password = PasswordField(
+        "password",
+        validators=[InputRequired(), Length(min=8, max=32, message="Password must be between 8 and 32 characters")],
+        render_kw={"placeholder": "password", "autocomplete": "new-password"}
+    )
+
+    register_confirm_password = PasswordField(
+        "conform password",
+        validators=[InputRequired(), Length(min=8, max=32, message="Password must be between 8 and 32 characters"), EqualTo("register_password")],
+        render_kw={"placeholder": "confirm password", "autocomplete": "new-password"}
+    )
+
+    register_role = SelectField(
+        "role",
+        validators=[InputRequired()]
+    )
+
+    submit = SubmitField("Register")
+
+class CrudUserForm(PrefixedForm):
+    field_prefix = "crud_"
+
+    crud_old_password = PasswordField(
+        "old password",
+        validators=[Optional(strip_whitespace=True)],
+        render_kw={"placeholder": "old password", "autocomplete": "new-password"}
+    )
+
+    crud_new_password = PasswordField(
+        "new password",
+        validators=[Optional(strip_whitespace=True), Length(min=8, max=32, message="Password must be between 8 and 32 characters")],
+        render_kw={"placeholder": "new password", "autocomplete": "new-password"}
+    )
+
+    crud_confirm_password = PasswordField(
+        "confirm password",
+        validators=[Optional(strip_whitespace=True), Length(min=8, max=32, message="Password must be between 8 and 32 characters"),
+                    EqualTo("crud_new_password")],
+        render_kw={"placeholder": "confirm password", "autocomplete": "new-password"}
+    )
+
+    crud_role = SelectField(
+        "role",
+        validators=[]
+    )
+
+    submit_update = SubmitField(
+        "Update",
+        validators=[CheckIfAllPasswordFieldsHaveDataIfOneHasData(), CheckIfFormHasData()]
+    )
+
+    submit_deactivate = SubmitField("Deactivate")

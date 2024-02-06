@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from sqlalchemy import func, desc, asc
 
-from views.forms import SearchCustomerForm
+from views.forms import PrefixedForm
 from utils import string_to_bool
 
 
@@ -9,33 +9,33 @@ from utils import string_to_bool
 
 class SearchResultsHandler():
     """
-    Takes request.args from a GET request along with the ORM model to query against.
-    Dynamically filters query with optional fields returned by search form.
+    Takes flaskform, request.args from a GET request, and the ORM model to query against.
+    Has ability to dynamically filter, sort, and order results based on form and args.
     """
-    def __init__(self, args, model) -> None:
-        self.form: FlaskForm = SearchCustomerForm(args)
+    def __init__(self, form: PrefixedForm, args, model) -> None:
+        self.form = form
         self.args = args
         self.model = model
         self.previous_sort_col = args.get("previous_sort_col", "id")
         self.current_sort_col = args.get("sort_col", "id")
+        self.toggle_order = self.args.get("toggle_order", False, string_to_bool)
 
     @property
     def page(self) -> int:
-        # Reset the page to 1 if a new sort column is clicked 
+        # Reset the page to 1 if a new sort column is clicked or toggle order requested 
         page = self.args.get("page", 1, int)
-        if self.current_sort_col != self.previous_sort_col:
-            page = 1       
+        if self.current_sort_col != self.previous_sort_col or self.toggle_order:
+            page = 1
         return page
 
     @property
     def sort_order(self) -> str:
         sort_order = self.args.get("sort_order", "asc")
-        toggle_order = self.args.get("toggle_order", False, string_to_bool)
 
         # Reset the order to ascending if new column clicked, otherwise swap if toggled
         if self.current_sort_col != self.previous_sort_col:
             sort_order = "asc"
-        elif toggle_order:
+        elif self.toggle_order:
             sort_order = "desc" if sort_order == "asc" else "asc"
         return sort_order
 
@@ -47,8 +47,8 @@ class SearchResultsHandler():
         """
         query_criteria = {}
         for field_name, field_object in self.form._fields.items():
-            if field_name.startswith("search_") and field_object.data:
-                col_name = field_name.removeprefix("search_")
+            if field_name.startswith(self.form.field_prefix) and field_object.data:
+                col_name = self.form.get_column_name(field_name)
                 query_criteria[col_name] = field_object.data.lower()
         return query_criteria
 
@@ -56,7 +56,7 @@ class SearchResultsHandler():
     def has_query_criteria(self) -> bool:
         """True if any form fields are not empty """
         return bool(self.query_criteria)
-        
+
     def _apply_filters(self, query):
         """Apply filters from query criteria onto query based on given args"""
         if self.has_query_criteria:

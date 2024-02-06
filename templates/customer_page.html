@@ -33,12 +33,12 @@
                 <tr>
                     <td><a href="{{ url_for('account_page', account_id=account.id) }}"> {{ account.id }} </a></td>
                     <td> {{ account.account_type }} </td>
-                    <td> {{ account.balance }} </td>
+                    <td> {{ account.balance |format_money }} </td>
                 </tr>
                 {% endfor %}
                 <tr>
                     <td><b>Total balance: </b></td>
-                    <td>{{ total_balance }}</td>
+                    <td>{{ total_balance |format_money }}</td>
                 </tr>
             </tbody>
         </table>

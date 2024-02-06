@@ -20,7 +20,7 @@
                 <td><a href="{{ url_for('country_page', country=country.name) }}">{{ country.name }}</a></td>
                 <td> {{ country.number_of_customers }} </td>
                 <td> {{ country.number_of_accounts }} </td>
-                <td> {{ country.sum_of_accounts }} </td>            
+                <td> {{ country.sum_of_accounts | format_money }} </td>            
             </tr>
         {% endfor %}
 
@@ -28,7 +28,7 @@
             <td>Total: </td>
             <td> {{ global_stats["number_of_customers"] }} </td>
             <td> {{ global_stats["number_of_accounts"] }} </td>
-            <td> {{ global_stats["sum_of_accounts"] }} </td>
+            <td> {{ global_stats["sum_of_accounts"] | format_money }} </td>
         </tr>
         
     </table>

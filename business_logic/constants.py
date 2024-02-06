@@ -21,3 +21,8 @@ class AccountTypes(Enum):
     PERSONAL = "Personal"
     CHECKING = "Checking"
     SAVINGS = "Savings"
+
+#TODO move this somewhere else i guess
+class UserRoles(Enum):
+    ADMIN = "admin"
+    CASHIER = "cashier"

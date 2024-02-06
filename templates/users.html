@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Register Customer
+{% endblock %}
+
+{% block main %}
+<div>
+    <h3>Register User</h3>
+    <form action="{{ url_for('register_user') }}" method="POST">
+        {{ register_form.hidden_tag() }}
+        {{ register_form.register_email() }}
+        {{ register_form.register_password() }}
+        {{ register_form.register_confirm_password }}
+        {{ register_form.register_role }}
+        {{ register_form.submit() }}
+    </form>
+</div>
+
+<div>
+    <h3>current users</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>email</th>
+                <th>role</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in current_users %}
+            <tr>
+                <td>{{ user.email }}</td>
+                <!-- TODO: this is a little weird, think about how to update the user role or password better. maybe make pw fields optional or something-->
+                <form id="updateUserForm" action="{{ url_for('update_user') }}" method="POST">
+                    {{ crud_form.hidden_tag() }}
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <td>{{ crud_form.crud_role(class="update") }}</td>
+                    <td>{{ crud_form.crud_old_password(class="update") }}</td>
+                    <td>{{ crud_form.crud_new_password(class="update") }}</td>
+                    <td>{{ crud_form.crud_confirm_password(class="update")}}</td>
+                    <td>{{ crud_form.submit_update(id="submitButton") }}</td>
+                </form>
+                <form action="{{ url_for('delete_user') }}" method="POST">
+                    {{ crud_form.hidden_tag() }}
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <td>{{ crud_form.submit_deactivate() }}</td>
+                </form>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+    // this doesn't actually work yet. we need to be able to replicate the validator in js
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById("updateUserForm");
+        const submitButton = document.getElementById("submitButton");
+        const updateFields = document.querySelectorAll(".update")
+
+        updateFields.forEach(function(field) {
+            field.addEventListener("change", function() {
+                if (!form.validate_on_submit()) {
+                    submitButton.setAttribute("disabled", "True");
+                } else {
+                    submitButton.removeAttribute("disabled")
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
