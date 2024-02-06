@@ -1,30 +1,56 @@
 import locale
 from babel.numbers import format_currency
+from datetime import datetime
 from decimal import Decimal
 from flask import Flask, flash, render_template, request, url_for, redirect
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_login import login_required
+from flask_mail import Mail
 from flask_migrate import Migrate, upgrade
+from flask_security import (
+    Security,
+    SQLAlchemyUserDatastore,
+    RoleMixin,
+    UserMixin,
+    login_user,
+    logout_user,
+    roles_required,
+    roles_accepted)
+from flask_security.utils import hash_password, verify_password
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select, func, desc, asc
 from sqlalchemy.orm import joinedload
+from flask_wtf import FlaskForm
 
 from search_results_handler import SearchResultsHandler
 
 from utils import (
-    string_to_bool,
-)
+    string_to_bool
+    )
 from models import (
     User,
     Customer,
     Account,
     Country,
     Transaction,
-    db,
+    Role,
+    db)
+from seed import (
     seed_countries,
     seed_data,
+    seed_roles,
     seed_users
-)
-from views.forms import LoginForm, SearchAccountForm, SearchCustomerForm
+    )
+from views.forms import (
+    LoginForm,
+    RegisterCustomerForm,
+    RegisterUserForm,
+    CrudUserForm,
+    SearchAccountForm,
+    SearchCustomerForm
+    )
+from business_logic.constants import BusinessConstants, AccountTypes, UserRoles
+
+# TODO let's work on customer/user registration next, OR api for transactions/customer lookup
 
 locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
 
@@ -34,6 +60,11 @@ app.config.from_object('config.Config')
 db.app = app
 db.init_app(app)
 migrate = Migrate(app, db)
+
+mail = Mail(app)
+
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(app, user_datastore)
 
 app.jinja_env.filters["enumerate"] = enumerate
 
@@ -45,13 +76,6 @@ def format_money(value, currency="SEK"):
 def context_processor():
     search_account_form = SearchAccountForm()
     return dict(search_account_form=search_account_form)
-
-login_manager = LoginManager(app)
-login_manager.login_view = "login"
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -139,8 +163,9 @@ def search_customer():
 @app.route("/search-results")
 @login_required
 def display_search_results():
-    handler = SearchResultsHandler(request.args, Customer)
-    RESULTS_PER_PAGE = 3
+    form = SearchCustomerForm(request.args)
+    handler = SearchResultsHandler(form, request.args, Customer)
+    RESULTS_PER_PAGE = 50
 
     if handler.has_query_criteria:
         customers = handler.get_paginated_sorted_ordered_results(RESULTS_PER_PAGE)
@@ -150,14 +175,14 @@ def display_search_results():
             active_page="search_customer",
             sort_col=handler.current_sort_col,
             sort_order=handler.sort_order,
-            form=handler.form,
+            form=form,
             customers=customers,
             page=handler.page)
     else:
         return render_template(
             "search_results.html",
             active_page="search_customer",
-            form=handler.form,
+            form=form,
             customers=None)
 
 @app.route("/country-page/<country>", methods=["GET"])
@@ -217,12 +242,128 @@ def account_page(account_id):
     else:
         return render_template("404.html")
 
+@app.route("/register_customer", methods=["GET", "POST"])
+@login_required
+def register_customer():
+    # TODO: do maybe some more validation stuff here
+
+    countries = Country.query.all()
+    form = RegisterCustomerForm()
+    form.register_country.choices = [(country.country_code, country.name) for country in countries]
+
+    if form.validate_on_submit():
+        new_customer = Customer()
+
+        for field_name, field in form._fields.items():
+            if field_name.startswith(form.field_prefix):
+                model_col_name = form.get_column_name(field_name)
+                setattr(new_customer, model_col_name, field.data)
+
+        new_account = Account()
+        new_account.account_type = AccountTypes.CHECKING.value
+        new_account.created = datetime.now()
+        new_account.balance = 0 # TODO: not sure about this. maybe all accounts should start with 0?
+        new_customer.accounts.append(new_account)
+
+        db.session.add(new_customer)
+        db.session.add(new_account)
+        db.session.commit()
+
+        flash("Successfully added customer")
+        return redirect(url_for("customer_page", customer_id=new_customer.id))
+    else:
+        flash("did not pass validation")
+
+    return render_template(
+        "register_customer.html",
+        form=form,
+        active_page="register_customer")
+
+@app.route("/users", methods=["GET", "POST"])
+@roles_required("admin")
+def crud_user():
+    user_roles = [role.value for role in UserRoles]
+
+    crud_form = CrudUserForm()
+    crud_form.crud_role.choices = user_roles
+
+    register_form = RegisterUserForm()
+    register_form.register_role.choices = user_roles
+
+    current_users  = User.query.filter_by(active=True).all()
+
+    return render_template("users.html", active_page="register_user", crud_form=crud_form, register_form=register_form, current_users=current_users)
+
+@app.route("/register_user", methods=["POST"])
+@roles_accepted("admin")
+def register_user():
+    form: FlaskForm = RegisterUserForm()
+    form.register_role.choices = [role.value for role in UserRoles]
+
+    if form.validate_on_submit():
+        user_datastore.create_user(
+            email=form.register_email.data,
+            password=hash_password(form.register_password.data),
+            active=True,
+            roles=[form.register_role.data])
+        
+        db.session.commit()
+        flash("user registered")
+    else:
+        flash("didn't pass validation")
+    return redirect(url_for("crud_user"))
+
+@app.route("/update_user", methods=["POST"])
+@roles_accepted("admin")
+def update_user():
+    form = CrudUserForm()
+    form.crud_role.choices = [role.value for role in UserRoles]
+
+    user_id = request.form.get("user_id", None, int)
+    user = user_datastore.find_user(id=user_id)
+
+    if user and form.validate_on_submit():
+        new_role = form.crud_role.data
+        new_password = form.crud_new_password.data
+        if new_password:
+            if not verify_password(form.crud_old_password.data, user.password):
+                flash("Invalid password")
+            else:
+                if verify_password(new_password, user.password):
+                    flash("password cannot be the same as old password")
+                else:
+                    user.password = hash_password(new_password)
+                    flash("password changed")
+        if new_role not in user.roles:
+            user_datastore.remove_role_from_user(user, user.roles[0])
+            user_datastore.add_role_to_user(user, new_role)
+            flash(f"role {new_role} added")
+        db.session.commit()
+    else:
+        flash("didn't pass validation")
+    return redirect(url_for("crud_user"))
+
+@app.route("/delete_user", methods=["POST"])
+@roles_accepted("admin")
+def delete_user():
+    user_id = request.form.get("user_id", None, int)
+    user = user_datastore.find_user(id=user_id)
+
+    if user:
+        user_datastore.deactivate_user(user)
+        db.session.commit()
+        flash("user deleted")
+    else:
+        flash("no such user")
+    return redirect(url_for("crud_user"))
+
 
 if __name__  == "__main__":
     with app.app_context():
         upgrade()
         seed_countries(db)
         seed_data(db)
-        seed_users(db)
+        seed_roles(db, user_datastore)
+        seed_users(db, user_datastore)
     
     app.run(debug=True)
