@@ -1,6 +1,6 @@
 import locale
 from babel.numbers import format_currency
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from flask import Flask, flash, render_template, request, url_for, redirect
 from flask_login import login_required
@@ -46,11 +46,16 @@ from views.forms import (
     RegisterUserForm,
     CrudUserForm,
     SearchAccountForm,
-    SearchCustomerForm
+    SearchCustomerForm,
+    TransactionForm,
+    TransferForm,
+    PrefixedForm
     )
-from business_logic.constants import BusinessConstants, AccountTypes, UserRoles
+from business_logic.constants import BusinessConstants, AccountTypes, UserRoles, TransactionTypes
+from views.authentication import authenticationBluePrint
 
-# TODO let's work on customer/user registration next, OR api for transactions/customer lookup
+# TODO let's work on transactions next
+# TODO remove confirm old password for admins, maybe keep if there is a user page
 
 locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
 
@@ -60,6 +65,8 @@ app.config.from_object('config.Config')
 db.app = app
 db.init_app(app)
 migrate = Migrate(app, db)
+
+app.register_blueprint(authenticationBluePrint)
 
 mail = Mail(app)
 
@@ -271,8 +278,6 @@ def register_customer():
 
         flash("Successfully added customer")
         return redirect(url_for("customer_page", customer_id=new_customer.id))
-    else:
-        flash("did not pass validation")
 
     return render_template(
         "register_customer.html",
@@ -292,7 +297,7 @@ def crud_user():
 
     current_users  = User.query.filter_by(active=True).all()
 
-    return render_template("users.html", active_page="register_user", crud_form=crud_form, register_form=register_form, current_users=current_users)
+    return render_template("users.html", active_page="crud_user", crud_form=crud_form, register_form=register_form, current_users=current_users)
 
 @app.route("/register_user", methods=["POST"])
 @roles_accepted("admin")
@@ -357,6 +362,76 @@ def delete_user():
         flash("no such user")
     return redirect(url_for("crud_user"))
 
+@app.route("/transactions", methods=["POST"])
+@roles_accepted("cashier")
+def transactions():
+    customer_id = request.form.get("customer_id", None)
+    customer = Customer.query.filter_by(id=customer_id).options(joinedload(Customer.accounts)).one_or_none()
+    if customer:
+        form: PrefixedForm = TransactionForm()
+        form.trans_type.choices = ["withdraw", "deposit"]
+        accounts_labels = [(account.id, f"{account.id}: current balance: {format_money(account.balance)}") for account in customer.accounts]
+        form.trans_accounts.choices = accounts_labels
+        current_date = date.today()
+
+        return render_template("transactions.html", active_page="transaction", form=form, current_date=current_date, customer=customer)
+    else:
+        flash("no such customer")
+        return redirect(url_for("index"))
+
+@app.route("/transfer", methods=["POST"])
+@roles_accepted("cashier")
+def transfer():
+    customer_id = request.form.get("customer_id", None)
+    customer = Customer.query.filter_by(id=customer_id).options(joinedload(Customer.accounts)).one_or_none()
+    if customer:
+        form = TransferForm()
+        current_date = date.today()
+
+        return render_template(active_page="transfer", form=form, current_date=current_date)
+    else:
+        flash("no such customer")
+        return redirect(url_for("index"))
+    
+@app.route("/process-transaction", methods=["POST"])
+@roles_accepted("cashier")
+def process_transaction():
+    customer_id = request.form.get("customer_id", None)
+    customer = Customer.query.filter_by(id=customer_id).options(joinedload(Customer.accounts)).one_or_none()
+    
+    form = TransactionForm()
+    form: PrefixedForm = TransactionForm()
+    form.trans_type.choices = ["withdraw", "deposit"]
+    accounts_labels = [(account.id, f"{account.id}: current balance: {format_money(account.balance)}") for account in customer.accounts]
+    form.trans_accounts.choices = accounts_labels
+
+    account: Account = Account.query.filter_by(id=int(form.trans_accounts.data)).one_or_none()
+    
+    if customer and account and form.validate_on_submit():
+
+        amount = form.trans_amount.data
+        if form.trans_type.data == "withdraw":
+            transaction_type = TransactionTypes.CREDIT.value
+            if amount > account.balance:
+                flash("Cannot withdraw more than account balance")
+                return redirect(url_for("customer_page", customer_id=customer.id))
+        elif form.trans_type.data == "deposit":
+            transaction_type = TransactionTypes.DEBIT.value
+
+        transaction = Transaction()
+        transaction.amount = amount
+        transaction.type = transaction_type
+        transaction.timestamp = datetime.now()
+        # TODO need to test this some more. math not working out right
+        transaction.new_balance = account.balance + amount if transaction_type == "deposit" else account.balance - amount
+        transaction.account_id = account.id
+
+        db.session.add(transaction)
+        db.session.commit()
+        flash(f"success! {transaction.type} money in account number {account.id}.")
+        return redirect(url_for("customer_page", customer_id=customer.id))
+    flash("didn't pass validation")
+    return redirect(url_for("customer_page"), customer_id=customer.id)
 
 if __name__  == "__main__":
     with app.app_context():

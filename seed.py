@@ -75,7 +75,7 @@ def seed_users(db, user_datastore):
 
 def seed_data(db):
     AVG_SALARY = 3500000
-    SEED_AMOUNT_CUSTOMERS = 10
+    SEED_AMOUNT_CUSTOMERS = 50
 
     existing_national_ids = [customer.national_id for customer in Customer.query.all()]
 
