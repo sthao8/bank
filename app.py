@@ -33,7 +33,8 @@ from models import (
     Country,
     Transaction,
     Role,
-    db)
+    db,
+    user_datastore)
 from seed import (
     seed_countries,
     seed_data,
@@ -52,7 +53,10 @@ from views.forms import (
     PrefixedForm
     )
 from business_logic.constants import BusinessConstants, AccountTypes, UserRoles, TransactionTypes
-from views.authentication import authenticationBluePrint
+from views.authentication.authentication_pages import authentication_blueprint
+from views.user_management.user_management_pages import user_management_blueprint
+from views.customer_management.customer_management_pages import customer_management_blueprint
+
 
 # TODO let's work on transactions next
 # TODO remove confirm old password for admins, maybe keep if there is a user page
@@ -66,11 +70,12 @@ db.app = app
 db.init_app(app)
 migrate = Migrate(app, db)
 
-app.register_blueprint(authenticationBluePrint)
+app.register_blueprint(authentication_blueprint)
+app.register_blueprint(user_management_blueprint)
+app.register_blueprint(customer_management_blueprint)
 
 mail = Mail(app)
 
-user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
 app.jinja_env.filters["enumerate"] = enumerate
@@ -84,25 +89,25 @@ def context_processor():
     search_account_form = SearchAccountForm()
     return dict(search_account_form=search_account_form)
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    form = LoginForm()
+# @app.route("/login", methods=["GET", "POST"])
+# def login():
+#     form = LoginForm()
 
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data, password=form.password.data).one_or_none()
-        if user:
-            login_user(user)
-            return redirect(url_for("index"))
-        else:
-            flash("Invalid username or password")
+#     if form.validate_on_submit():
+#         user = User.query.filter_by(email=form.email.data, password=form.password.data).one_or_none()
+#         if user:
+#             login_user(user)
+#             return redirect(url_for("index"))
+#         else:
+#             flash("Invalid username or password")
 
-    return render_template("login.html", form=form)
+#     return render_template("login.html", form=form)
 
-@app.route("/logout", methods=["GET"])
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for("login"))
+# @app.route("/logout", methods=["GET"])
+# @login_required
+# def logout():
+#     logout_user()
+#     return redirect(url_for("login"))
 
 @app.route("/", methods=["GET"])
 @login_required
@@ -220,147 +225,147 @@ def country_page(country):
     else:
         return render_template("404.html")
 
-@app.route("/customer/<customer_id>", methods=["GET"])
-@login_required
-def customer_page(customer_id):
-    customer = Customer.query.filter_by(id=customer_id).options(
-        joinedload(Customer.accounts),
-        joinedload(Customer.country_details)
-    ).one_or_none()
+# @app.route("/customer/<customer_id>", methods=["GET"])
+# @login_required
+# def customer_page(customer_id):
+#     customer = Customer.query.filter_by(id=customer_id).options(
+#         joinedload(Customer.accounts),
+#         joinedload(Customer.country_details)
+#     ).one_or_none()
     
-    if customer:
-        total_balance = sum([account.balance for account in customer.accounts])
-        return render_template(
-            "customer_page.html",
-            customer=customer,
-            total_balance=total_balance)
-    else:
-        return render_template("404.html")
+#     if customer:
+#         total_balance = sum([account.balance for account in customer.accounts])
+#         return render_template(
+#             "customer_page.html",
+#             customer=customer,
+#             total_balance=total_balance)
+#     else:
+#         return render_template("404.html")
     
-@app.route("/account/<account_id>", methods=["GET"])
-@login_required
-def account_page(account_id):
-    #TODO Like ajax fetch this in html OR something
-    account = Account.query.filter_by(id=account_id).one_or_none()
-    if account:
-        transactions = Transaction.query.filter_by(account_id=account_id).order_by(Transaction.timestamp.desc()).all()
-        print(transactions)
-        return render_template("account_page.html", account=account, transactions=transactions)
-    else:
-        return render_template("404.html")
+# @app.route("/account/<account_id>", methods=["GET"])
+# @login_required
+# def account_page(account_id):
+#     #TODO Like ajax fetch this in html OR something
+#     account = Account.query.filter_by(id=account_id).one_or_none()
+#     if account:
+#         transactions = Transaction.query.filter_by(account_id=account_id).order_by(Transaction.timestamp.desc()).all()
+#         print(transactions)
+#         return render_template("account_page.html", account=account, transactions=transactions)
+#     else:
+#         return render_template("404.html")
 
-@app.route("/register_customer", methods=["GET", "POST"])
-@login_required
-def register_customer():
-    # TODO: do maybe some more validation stuff here
+# @app.route("/register_customer", methods=["GET", "POST"])
+# @login_required
+# def register_customer():
+#     # TODO: do maybe some more validation stuff here
 
-    countries = Country.query.all()
-    form = RegisterCustomerForm()
-    form.register_country.choices = [(country.country_code, country.name) for country in countries]
+#     countries = Country.query.all()
+#     form = RegisterCustomerForm()
+#     form.register_country.choices = [(country.country_code, country.name) for country in countries]
 
-    if form.validate_on_submit():
-        new_customer = Customer()
+#     if form.validate_on_submit():
+#         new_customer = Customer()
 
-        for field_name, field in form._fields.items():
-            if field_name.startswith(form.field_prefix):
-                model_col_name = form.get_column_name(field_name)
-                setattr(new_customer, model_col_name, field.data)
+#         for field_name, field in form._fields.items():
+#             if field_name.startswith(form.field_prefix):
+#                 model_col_name = form.get_column_name(field_name)
+#                 setattr(new_customer, model_col_name, field.data)
 
-        new_account = Account()
-        new_account.account_type = AccountTypes.CHECKING.value
-        new_account.created = datetime.now()
-        new_account.balance = 0 # TODO: not sure about this. maybe all accounts should start with 0?
-        new_customer.accounts.append(new_account)
+#         new_account = Account()
+#         new_account.account_type = AccountTypes.CHECKING.value
+#         new_account.created = datetime.now()
+#         new_account.balance = 0 # TODO: not sure about this. maybe all accounts should start with 0?
+#         new_customer.accounts.append(new_account)
 
-        db.session.add(new_customer)
-        db.session.add(new_account)
-        db.session.commit()
+#         db.session.add(new_customer)
+#         db.session.add(new_account)
+#         db.session.commit()
 
-        flash("Successfully added customer")
-        return redirect(url_for("customer_page", customer_id=new_customer.id))
+#         flash("Successfully added customer")
+#         return redirect(url_for("customer_page", customer_id=new_customer.id))
 
-    return render_template(
-        "register_customer.html",
-        form=form,
-        active_page="register_customer")
+#     return render_template(
+#         "register_customer.html",
+#         form=form,
+#         active_page="register_customer")
 
-@app.route("/users", methods=["GET", "POST"])
-@roles_required("admin")
-def crud_user():
-    user_roles = [role.value for role in UserRoles]
+# @app.route("/users", methods=["GET", "POST"])
+# @roles_required("admin")
+# def crud_user():
+#     user_roles = [role.value for role in UserRoles]
 
-    crud_form = CrudUserForm()
-    crud_form.crud_role.choices = user_roles
+#     crud_form = CrudUserForm()
+#     crud_form.crud_role.choices = user_roles
 
-    register_form = RegisterUserForm()
-    register_form.register_role.choices = user_roles
+#     register_form = RegisterUserForm()
+#     register_form.register_role.choices = user_roles
 
-    current_users  = User.query.filter_by(active=True).all()
+#     current_users  = User.query.filter_by(active=True).all()
 
-    return render_template("users.html", active_page="crud_user", crud_form=crud_form, register_form=register_form, current_users=current_users)
+#     return render_template("users.html", active_page="crud_user", crud_form=crud_form, register_form=register_form, current_users=current_users)
 
-@app.route("/register_user", methods=["POST"])
-@roles_accepted("admin")
-def register_user():
-    form: FlaskForm = RegisterUserForm()
-    form.register_role.choices = [role.value for role in UserRoles]
+# @app.route("/register_user", methods=["POST"])
+# @roles_accepted("admin")
+# def register_user():
+#     form: FlaskForm = RegisterUserForm()
+#     form.register_role.choices = [role.value for role in UserRoles]
 
-    if form.validate_on_submit():
-        user_datastore.create_user(
-            email=form.register_email.data,
-            password=hash_password(form.register_password.data),
-            active=True,
-            roles=[form.register_role.data])
+#     if form.validate_on_submit():
+#         user_datastore.create_user(
+#             email=form.register_email.data,
+#             password=hash_password(form.register_password.data),
+#             active=True,
+#             roles=[form.register_role.data])
         
-        db.session.commit()
-        flash("user registered")
-    else:
-        flash("didn't pass validation")
-    return redirect(url_for("crud_user"))
+#         db.session.commit()
+#         flash("user registered")
+#     else:
+#         flash("didn't pass validation")
+#     return redirect(url_for("crud_user"))
 
-@app.route("/update_user", methods=["POST"])
-@roles_accepted("admin")
-def update_user():
-    form = CrudUserForm()
-    form.crud_role.choices = [role.value for role in UserRoles]
+# @app.route("/update_user", methods=["POST"])
+# @roles_accepted("admin")
+# def update_user():
+#     form = CrudUserForm()
+#     form.crud_role.choices = [role.value for role in UserRoles]
 
-    user_id = request.form.get("user_id", None, int)
-    user = user_datastore.find_user(id=user_id)
+#     user_id = request.form.get("user_id", None, int)
+#     user = user_datastore.find_user(id=user_id)
 
-    if user and form.validate_on_submit():
-        new_role = form.crud_role.data
-        new_password = form.crud_new_password.data
-        if new_password:
-            if not verify_password(form.crud_old_password.data, user.password):
-                flash("Invalid password")
-            else:
-                if verify_password(new_password, user.password):
-                    flash("password cannot be the same as old password")
-                else:
-                    user.password = hash_password(new_password)
-                    flash("password changed")
-        if new_role not in user.roles:
-            user_datastore.remove_role_from_user(user, user.roles[0])
-            user_datastore.add_role_to_user(user, new_role)
-            flash(f"role {new_role} added")
-        db.session.commit()
-    else:
-        flash("didn't pass validation")
-    return redirect(url_for("crud_user"))
+#     if user and form.validate_on_submit():
+#         new_role = form.crud_role.data
+#         new_password = form.crud_new_password.data
+#         if new_password:
+#             if not verify_password(form.crud_old_password.data, user.password):
+#                 flash("Invalid password")
+#             else:
+#                 if verify_password(new_password, user.password):
+#                     flash("password cannot be the same as old password")
+#                 else:
+#                     user.password = hash_password(new_password)
+#                     flash("password changed")
+#         if new_role not in user.roles:
+#             user_datastore.remove_role_from_user(user, user.roles[0])
+#             user_datastore.add_role_to_user(user, new_role)
+#             flash(f"role {new_role} added")
+#         db.session.commit()
+#     else:
+#         flash("didn't pass validation")
+#     return redirect(url_for("crud_user"))
 
-@app.route("/delete_user", methods=["POST"])
-@roles_accepted("admin")
-def delete_user():
-    user_id = request.form.get("user_id", None, int)
-    user = user_datastore.find_user(id=user_id)
+# @app.route("/delete_user", methods=["POST"])
+# @roles_accepted("admin")
+# def delete_user():
+#     user_id = request.form.get("user_id", None, int)
+#     user = user_datastore.find_user(id=user_id)
 
-    if user:
-        user_datastore.deactivate_user(user)
-        db.session.commit()
-        flash("user deleted")
-    else:
-        flash("no such user")
-    return redirect(url_for("crud_user"))
+#     if user:
+#         user_datastore.deactivate_user(user)
+#         db.session.commit()
+#         flash("user deleted")
+#     else:
+#         flash("no such user")
+#     return redirect(url_for("crud_user"))
 
 @app.route("/transactions", methods=["POST"])
 @roles_accepted("cashier")

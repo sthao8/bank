@@ -3,7 +3,7 @@ from datetime import datetime, date
 from datetime import timedelta
 from decimal import Decimal
 from faker import Faker
-from flask_security import UserMixin, RoleMixin
+from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore
 from flask_security.utils import hash_password
 from flask_sqlalchemy import SQLAlchemy
 
@@ -87,3 +87,4 @@ class User(UserMixin, db.Model):
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('user', lazy='dynamic'))
 
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)

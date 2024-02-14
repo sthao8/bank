@@ -7,7 +7,7 @@
 {% block main %}
 <div>
     <h3>Register User</h3>
-    <form action="{{ url_for('register_user') }}" method="POST">
+    <form action="{{ url_for('user_management.register_user') }}" method="POST">
         {{ register_form.hidden_tag() }}
         {{ register_form.register_email() }}
         {{ register_form.register_password() }}
@@ -31,7 +31,7 @@
             <tr>
                 <td>{{ user.email }}</td>
                 <!-- TODO: this is a little weird, think about how to update the user role or password better. maybe make pw fields optional or something-->
-                <form id="updateUserForm" action="{{ url_for('update_user') }}" method="POST">
+                <form id="updateUserForm" action="{{ url_for('user_management.update_user') }}" method="POST">
                     {{ crud_form.hidden_tag() }}
                     <input type="hidden" name="user_id" value="{{ user.id }}">
                     <td>{{ crud_form.crud_role(class="update") }}</td>
@@ -40,7 +40,7 @@
                     <td>{{ crud_form.crud_confirm_password(class="update")}}</td>
                     <td>{{ crud_form.submit_update(id="submitButton") }}</td>
                 </form>
-                <form action="{{ url_for('delete_user') }}" method="POST">
+                <form action="{{ url_for('user_management.delete_user') }}" method="POST">
                     {{ crud_form.hidden_tag() }}
                     <input type="hidden" name="user_id" value="{{ user.id }}">
                     <td>{{ crud_form.submit_deactivate() }}</td>

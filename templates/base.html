@@ -9,11 +9,11 @@
     </head>
     <body>
         {% if current_user.is_authenticated %}
-            <a href="{{ url_for('logout') }}">Logout</a>
+            <a href="{{ url_for('authentication.logout') }}">Logout</a>
             <a href="{{ url_for('index') }}" class="{{ 'active' if active_page=='index' }}">Home</a>
             <a href="{{ url_for('search_customer') }}" class="{{ 'active' if active_page=='search_customer' }}">Find customer</a>
-            <a href="{{ url_for('register_customer') }}" class="{{ 'active' if active_page=='register_customer' }}">Register customer</a>
-            <a href="{{ url_for('crud_user') }}" class="{{ 'active' if active_page=='crud_user' }}">Manage users</a>
+            <a href="{{ url_for('customer_management.register_customer') }}" class="{{ 'active' if active_page=='register_customer' }}">Register customer</a>
+            <a href="{{ url_for('user_management.crud_user') }}" class="{{ 'active' if active_page=='crud_user' }}">Manage users</a>
             <form action="{{ url_for('search_account_number') }}" method="post">
                 {{ search_account_form.hidden_tag() }}
                 {{ search_account_form.search_account_number() }}
