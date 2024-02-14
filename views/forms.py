@@ -13,7 +13,8 @@ from wtforms import (
     DateField,
     TelField,
     SelectField,
-    RadioField)
+    RadioField,
+    DecimalField)
 from wtforms.validators import (
     InputRequired,
     Email,
@@ -30,10 +31,12 @@ from business_logic.constants import BusinessConstants
 
 class PrefixedForm(FlaskForm):
     """
-    Parent class of prefixed forms use a naming convention of prefix + _ + ORM model column 
+    Prefixed forms use a field naming convention of prefix_ + ORM model column 
     name for easier retreival of form data via for looping
 
-    Children classes must override field_prefix attribute with their own prefix
+    Example:
+    field_prefix = "search_"
+    search_email = EmailField()
     """
     field_prefix = ""
 
@@ -227,3 +230,38 @@ class CrudUserForm(PrefixedForm):
     )
 
     submit_deactivate = SubmitField("Deactivate")
+
+class TransactionForm(PrefixedForm):
+    field_prefix = "trans_"
+
+    trans_accounts = SelectField(
+        "account",
+        validators=[InputRequired()],
+        render_kw={"placeholder": "accounts"})
+
+    trans_type = SelectField(
+        "type",
+        validators=[InputRequired()])
+
+    trans_amount = DecimalField(
+        "amount",
+        use_locale=False,
+        places=2,
+        validators=[InputRequired(), NumberRange(min=0, message="deposit/withdrawal amount cannot be less than 0.")],
+        render_kw={"placeholder": "amount", "min": 0, "type": "number", "step": "0.01"}
+    )
+
+    submit = SubmitField()
+    
+class TransferForm(PrefixedForm):
+    field_prefix = "transfer_"
+
+    transfer_amount = DecimalField(
+        "amount",
+        places=2,
+        use_locale=False,
+        validators=[InputRequired(), NumberRange(min=0, message="Transfer amount cannot be less than 0.")],
+        render_kw={"placeholder": "amount", "min": 0, "type": "number", "step": "0.01"}
+    )
+
+    submit = SubmitField()

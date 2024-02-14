@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Register customer
+{% endblock %}
+
+{% block main %}
+<div>
+    <h1>Register new customer</h1>
+    <form action="{{ url_for('register_customer') }}" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.register_first_name() }}
+        {{ form.register_last_name() }}
+        {{ form.register_address() }}
+        {{ form.register_city() }}
+        {{ form.register_postal_code() }}
+        {{ form.register_birthday() }}
+        {{ form.register_national_id() }}
+        {{ form.register_telephone() }}
+        {{ form.register_email() }}
+        {{ form.register_country() }}
+        {{ form.submit() }}
+    </form>
+</div>
+   
+{% endblock %}
