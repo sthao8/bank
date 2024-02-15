@@ -6,7 +6,7 @@
 
 {% block main %}
     customer search:
-    {% include "_search_form.html" %}
+    {% include "search/_search_form.html" %}
     <div>
         {% if customers and customers.total > 0 %}
             <!-- Used to dynamically generate get url params for each href -->
@@ -36,7 +36,7 @@
                         <th></th>
                         {% for label, url_param in columns.items() %}
                             <th>
-                                <a href="{{ url_for('display_search_results', page = page, sort_col = url_param, toggle_order = 'on', **query_params) }}">
+                                <a href="{{ url_for('search.display_search_results', page = page, sort_col = url_param, toggle_order = 'on', **query_params) }}">
                                     {{ label }}
                                 </a>
                                 {% if sort_col == url_param %}
@@ -50,7 +50,7 @@
                     {% for customer in customers %}
                         <tr>
                             <td>{{ loop.index0 + customers.first }}.</td>
-                            <td><a href="{{ url_for('customer_page', customer_id = customer.id) }}"> {{ customer.id }} </a></td>
+                            <td><a href="{{ url_for('customers.customer_page', customer_id = customer.id) }}"> {{ customer.id }} </a></td>
                             {% for label, attribute_name in columns.items() %}
                                 {% if attribute_name != "id" %}
                                     <td>{{ customer[attribute_name] }}</td>
@@ -60,10 +60,10 @@
                     {% endfor %}
                     <tr>
                         {% if customers.has_prev %}
-                            <td><a href="{{ url_for('display_search_results', page = ( page - 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">previous</a></td>
+                            <td><a href="{{ url_for('search.display_search_results', page = ( page - 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">previous</a></td>
                         {% endif %}
                         {% if customers.has_next %}
-                            <td><a href="{{ url_for('display_search_results', page = ( page + 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">next</a></td>
+                            <td><a href="{{ url_for('search.display_search_results', page = ( page + 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">next</a></td>
                         {% endif %}
                     </tr>
                 </tbody>

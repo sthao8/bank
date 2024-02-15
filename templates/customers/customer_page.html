@@ -31,7 +31,7 @@
             <tbody>
                 {% for account in customer.accounts %}
                 <tr>
-                    <td><a href="{{ url_for('account_page', account_id=account.id) }}"> {{ account.id }} </a></td>
+                    <td><a href="{{ url_for('customers.account_page', account_id=account.id) }}"> {{ account.id }} </a></td>
                     <td> {{ account.account_type }} </td>
                     <td> {{ account.balance |format_money }} </td>
                 </tr>
@@ -45,11 +45,11 @@
     </div>
 
     <div>
-        <form action="{{ url_for('transactions') }}" method="post">
+        <form action="{{ url_for('transactions.transactions') }}" method="post">
             <input hidden value="{{ customer.id }}" name="customer_id">
             <button type="submit">Withdraw/Deposit</button>
         </form>
-        <form action="{{ url_for('transfer') }}" method="post" >
+        <form action="{{ url_for('transactions.transfer') }}" method="post" >
             <input hidden value="{{ customer.id }}" name="customer_id">
             <button type="submit">Transfer</button>
         </form>

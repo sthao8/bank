@@ -7,7 +7,7 @@
 {% block main %}
     <h1>Login</h1>
 
-    <form action="/login" method="post" novalidate>
+    <form action="{{ url_for('authentication.login') }}" method="post" novalidate>
         {{ form.hidden_tag() }}
         <div>
             {{ form.email.label}}            
