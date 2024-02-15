@@ -250,6 +250,16 @@ class TransactionForm(PrefixedForm):
 class TransferForm(PrefixedForm):
     field_prefix = "transfer_"
 
+    account_from = SelectField(
+        "account from",
+        validators=[InputRequired()]
+    )
+
+    account_to = SelectField(
+        "account to",
+        validators=[InputRequired()]
+    )
+
     transfer_amount = DecimalField(
         "amount",
         places=2,
