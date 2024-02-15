@@ -7,7 +7,7 @@
 {% block main %}
 <div>
     <h3>Transactions</h3>
-    <form action="{{ url_for('process_transaction') }}" method="post">
+    <form action="{{ url_for('transactions.process_transaction') }}" method="post">
         {{ form.hidden_tag() }}
         <input hidden value="{{customer.id}}" name="customer_id">
         {{ form.trans_accounts() }}

@@ -6,10 +6,10 @@ from views.forms import CrudUserForm, RegisterUserForm, FlaskForm
 
 from .services import get_user_roles, get_current_users, create_and_register_user, update_password, update_role
 
-user_management_blueprint = Blueprint("user_management", __name__)
+users_blueprint = Blueprint("users", __name__)
 
 
-@user_management_blueprint.route("/users", methods=["GET", "POST"])
+@users_blueprint.route("/users", methods=["GET", "POST"])
 @roles_required("admin")
 def crud_user():
     user_roles = get_user_roles()
@@ -22,9 +22,9 @@ def crud_user():
 
     current_users  = get_current_users()
 
-    return render_template("user_management/users.html", active_page="crud_user", crud_form=crud_form, register_form=register_form, current_users=current_users)
+    return render_template("users/users.html", active_page="crud_user", crud_form=crud_form, register_form=register_form, current_users=current_users)
 
-@user_management_blueprint.route("/register_user", methods=["POST"])
+@users_blueprint.route("/register_user", methods=["POST"])
 @roles_accepted("admin")
 def register_user():
     form: FlaskForm = RegisterUserForm()
@@ -36,9 +36,9 @@ def register_user():
         flash("user registered")
     else:
         flash("didn't pass validation")
-    return redirect(url_for("user_management.crud_user"))
+    return redirect(url_for("users.crud_user"))
 
-@user_management_blueprint.route("/update_user", methods=["POST"])
+@users_blueprint.route("/update_user", methods=["POST"])
 @roles_accepted("admin")
 def update_user():
     form = CrudUserForm()
@@ -65,10 +65,10 @@ def update_user():
         db.session.commit()
     else:
         flash("didn't pass validation")
-    return redirect(url_for("user_management.crud_user"))
+    return redirect(url_for("users.crud_user"))
 
 
-@user_management_blueprint.route("/delete_user", methods=["POST"])
+@users_blueprint.route("/delete_user", methods=["POST"])
 @roles_accepted("admin")
 def delete_user():
     user_id = request.form.get("user_id", None, int)
@@ -80,4 +80,4 @@ def delete_user():
         flash("user deleted")
     else:
         flash("no such user")
-    return redirect(url_for("user_management.crud_user"))
+    return redirect(url_for("users.crud_user"))

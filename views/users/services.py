@@ -6,6 +6,7 @@ def get_user_roles():
     return [role.value for role in UserRoles]
 
 def get_current_users():
+    #TODO take away active to show all users? or maybe we want to implement an activate user button as well
     return User.query.filter_by(active=True).all()
 
 def create_and_register_user(form) -> None:

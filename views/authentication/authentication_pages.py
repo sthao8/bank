@@ -17,7 +17,7 @@ def login():
 
         if user and verify_password(form.password.data, user.password):
             login_user(user)
-            return redirect(url_for("index"))
+            return redirect(url_for("customers.index"))
         else:
             flash("Invalid username or password")
 

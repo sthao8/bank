@@ -7,7 +7,7 @@
 {% block main %}
 <div>
     <h1>Register new customer</h1>
-    <form action="{{ url_for('customer_management.register_customer') }}" method="post">
+    <form action="{{ url_for('customers.register_customer') }}" method="post">
         {{ form.hidden_tag() }}
         {{ form.register_first_name() }}
         {{ form.register_last_name() }}

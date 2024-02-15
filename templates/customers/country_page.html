@@ -19,7 +19,7 @@
             {% for customer in country_customers %}
             <tr>
                 <td> {{ loop.index }}. </td>
-                <td><a href="{{ url_for('customer_page', customer_id=customer.Customer.id) }}"> {{ customer.Customer.first_name }} {{ customer.Customer.last_name }} </a></td>
+                <td><a href="{{ url_for('customers.customer_page', customer_id=customer.Customer.id) }}"> {{ customer.Customer.first_name }} {{ customer.Customer.last_name }} </a></td>
                 <td> {{ customer.number_of_accounts }} </td>
                 <td> {{ customer.sum_of_accounts | format_money }} </td>
             </tr>
