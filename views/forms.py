@@ -26,7 +26,8 @@ from wtforms.validators import (
 from views.validators import (
     Age,
     CheckIfAllPasswordFieldsHaveDataIfOneHasData,
-    CheckIfFormHasData)
+    CheckIfFormHasData,
+    CheckThatTwoFieldsDoNotMatch)
 from business_logic.constants import BusinessConstants
 
 class PrefixedForm(FlaskForm):
@@ -250,14 +251,14 @@ class TransactionForm(PrefixedForm):
 class TransferForm(PrefixedForm):
     field_prefix = "transfer_"
 
-    account_from = SelectField(
+    transfer_account_from = SelectField(
         "account from",
-        validators=[InputRequired()]
+        validators=[InputRequired(), CheckThatTwoFieldsDoNotMatch("transfer_account_to", "You have choosen the same account.")]
     )
 
-    account_to = SelectField(
+    transfer_account_to = SelectField(
         "account to",
-        validators=[InputRequired()]
+        validators=[InputRequired(), CheckThatTwoFieldsDoNotMatch("transfer_account_from", "You have choosen the same account.")]
     )
 
     transfer_amount = DecimalField(

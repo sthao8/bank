@@ -1,3 +1,4 @@
+from typing import Any
 from business_logic.constants import BusinessConstants
 from datetime import date, timedelta
 from wtforms.validators import (ValidationError)
@@ -42,4 +43,17 @@ class CheckIfAllPasswordFieldsHaveDataIfOneHasData(object):
         filled_password_fields = [True if field.data else False for field in password_fields]
         
         if any(filled_password_fields) and not all(filled_password_fields):
+            raise ValidationError(self.message)
+
+class CheckThatTwoFieldsDoNotMatch(object):
+    """Checks if two fields have the same value, Fails if they do"""
+    def __init__(self, other_field_name, message=None) -> None:
+        self.other_field_name = other_field_name
+        if not message:
+            message = "Fields cannot have same value"
+        self.message = message
+
+    def __call__(self, form, field) -> Any:
+        other_field = form._fields.get(self.other_field_name)
+        if field.data == other_field.data:
             raise ValidationError(self.message)
