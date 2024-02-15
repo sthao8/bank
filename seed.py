@@ -129,7 +129,7 @@ def seed_data(db):
                 start_date=account.created,
                 end_date=account.created + timedelta(days=1))
             initial_deposit.amount = Decimal(random.randint(10000, 100000) / 100)
-            initial_deposit.type = TransactionTypes.DEBIT.value
+            initial_deposit.type = TransactionTypes.DEPOSIT.value
             account.balance = initial_deposit.amount
 
             initial_deposit.new_balance = account.balance
@@ -149,11 +149,11 @@ def seed_data(db):
 
                 # if transaction amount would drop balance below 0, make sure it's a debit
                 if account.balance - transaction.amount < 0:
-                    transaction.type = TransactionTypes.DEBIT.value
+                    transaction.type = TransactionTypes.DEPOSIT.value
                 else:
                     transaction.type = random.choice(list(TransactionTypes)).value
 
-                if transaction.type == TransactionTypes.DEBIT.value:
+                if transaction.type == TransactionTypes.DEPOSIT.value:
                     account.balance = account.balance + transaction.amount
                 else:
                     account.balance = account.balance - transaction.amount

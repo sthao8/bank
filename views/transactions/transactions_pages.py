@@ -47,12 +47,12 @@ def process_transaction():
         amount = form.trans_amount.data
 
         if form.trans_type.data == "withdraw":
-            transaction_type = TransactionTypes.CREDIT.value
+            transaction_type = TransactionTypes.WITHDRAW.value
             if amount > account.balance:
                 flash("Cannot withdraw more than account balance")
                 return redirect(url_for("customers.customer_page", customer_id=customer.id))
         elif form.trans_type.data == "deposit":
-            transaction_type = TransactionTypes.DEBIT.value
+            transaction_type = TransactionTypes.DEPOSIT.value
 
         transaction = create_transaction(account, amount, transaction_type)
         update_account_balance(account, transaction)

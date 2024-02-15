@@ -8,8 +8,8 @@ class TelephoneCountryCodes(Enum):
     sv_SE = "+46"   # Sweden
 
 class TransactionTypes(Enum):
-    DEBIT = "Debit"
-    CREDIT = "Credit"
+    DEPOSIT = "Debit"
+    WITHDRAW = "Credit"
 
 class BusinessConstants:
     SUPPORTED_LOCALES = [supported_country_locale.name for supported_country_locale in TelephoneCountryCodes]

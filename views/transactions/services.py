@@ -16,7 +16,7 @@ def create_transaction(account, amount, transaction_type):
     transaction.type = transaction_type
     transaction.timestamp = datetime.now()
     # TODO need to test this some more. math not working out right
-    transaction.new_balance = account.balance + amount if transaction_type == TransactionTypes.DEBIT.value else account.balance - amount
+    transaction.new_balance = account.balance + amount if transaction_type == TransactionTypes.DEPOSIT.value else account.balance - amount
     transaction.account_id = account.id
 
     return transaction
