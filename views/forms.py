@@ -242,7 +242,7 @@ class TransactionForm(PrefixedForm):
         "amount",
         use_locale=False,
         places=2,
-        validators=[InputRequired(), NumberRange(min=0, message="deposit/withdrawal amount cannot be less than 0.")],
+        validators=[InputRequired(), NumberRange(min=0.01, message="deposit/withdrawal amount cannot be less than 0.")],
         render_kw={"placeholder": "amount", "min": 0, "type": "number", "step": "0.01"}
     )
 
@@ -265,7 +265,7 @@ class TransferForm(PrefixedForm):
         "amount",
         places=2,
         use_locale=False,
-        validators=[InputRequired(), NumberRange(min=0, message="Transfer amount cannot be less than 0.")],
+        validators=[InputRequired(), NumberRange(min=0.01, message="Transfer amount cannot be less than 0.")],
         render_kw={"placeholder": "amount", "min": 0, "type": "number", "step": "0.01"}
     )
 
