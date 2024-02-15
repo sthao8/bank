@@ -200,12 +200,6 @@ class RegisterUserForm(PrefixedForm):
 class CrudUserForm(PrefixedForm):
     field_prefix = "crud_"
 
-    crud_old_password = PasswordField(
-        "old password",
-        validators=[Optional(strip_whitespace=True)],
-        render_kw={"placeholder": "old password", "autocomplete": "new-password"}
-    )
-
     crud_new_password = PasswordField(
         "new password",
         validators=[Optional(strip_whitespace=True), Length(min=8, max=32, message="Password must be between 8 and 32 characters")],

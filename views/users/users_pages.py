@@ -51,14 +51,11 @@ def update_user():
         new_role = form.crud_role.data
         new_password = form.crud_new_password.data
         if new_password:
-            if not verify_password(form.crud_old_password.data, user.password):
-                flash("Invalid password")
+            if verify_password(new_password, user.password):
+                flash("password cannot be the same as old password")
             else:
-                if verify_password(new_password, user.password):
-                    flash("password cannot be the same as old password")
-                else:
-                    update_password(user, new_password)
-                    flash("password changed")
+                update_password(user, new_password)
+                flash("password changed")
         if new_role not in user.roles:
             update_role(user, new_role)
             flash(f"role {new_role} added")
