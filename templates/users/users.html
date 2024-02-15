@@ -35,7 +35,6 @@
                     {{ crud_form.hidden_tag() }}
                     <input type="hidden" name="user_id" value="{{ user.id }}">
                     <td>{{ crud_form.crud_role(class="update") }}</td>
-                    <td>{{ crud_form.crud_old_password(class="update") }}</td>
                     <td>{{ crud_form.crud_new_password(class="update") }}</td>
                     <td>{{ crud_form.crud_confirm_password(class="update")}}</td>
                     <td>{{ crud_form.submit_update(id="submitButton") }}</td>
