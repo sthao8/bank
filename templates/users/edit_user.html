@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}
+    Edit User
+{% endblock %}
+
+{% block main %}
+<div>
+    <h3>User {{ user.id }}</h3>
+    {% if user.active %}
+        <table>
+            <thead>
+                <tr>
+                    <th>email</th>
+                    <th>role</th>
+                    <th>password</th>
+                    <th>confirm password</th>
+                    <th>status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ user.email }}</td>
+                    <form id="updateUserForm" action="{{ url_for('users.update_user') }}" method="post">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <td>{{ form.crud_role() }}</td>
+                        <td>{{ form.crud_new_password() }}</td>
+                        <td>{{ form.crud_confirm_password()}}</td>
+                        <td>Active</td>
+                        <td>{{ form.submit_update() }}</td>
+                    </form>
+                    <form action="{{ url_for('users.change_user_status') }}" method="post">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <td>{{ form.submit_deactivate() }}</td>
+                    </form>
+                </tr>
+            </tbody>
+        </table>
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th>email</th>
+                    <th>role</th>
+                    <th>status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.roles[0].name }}</td>
+                    <td>Inactive</td>
+                </tr>
+                <form action="{{ url_for('users.change_user_status') }}" method="post">
+                    {{ form.hidden_tag() }}
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <td>{{ form.submit_activate() }}</td>
+                </form>
+            </tbody>
+        </table>
+
+    {% endif %}
+</div>
+
+{% endblock %}

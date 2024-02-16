@@ -226,6 +226,9 @@ class CrudUserForm(PrefixedForm):
 
     submit_deactivate = SubmitField("Deactivate")
 
+    submit_activate = SubmitField("Activate")
+
+
 class TransactionForm(PrefixedForm):
     field_prefix = "trans_"
 
