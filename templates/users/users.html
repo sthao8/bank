@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Register Customer
+    Users
 {% endblock %}
 
 {% block main %}
 <div>
     <h3>Register User</h3>
-    <form action="{{ url_for('users.register_user') }}" method="POST">
+    <form action="{{ url_for('users.register_user') }}" method="post">
         {{ register_form.hidden_tag() }}
         {{ register_form.register_email() }}
         {{ register_form.register_password() }}
@@ -18,55 +18,42 @@
 </div>
 
 <div>
-    <h3>current users</h3>
+    <h3>Users</h3>
+    <form action="{{ url_for('users.crud_user') }}" method="get">
+        <input type="checkbox" id="show_inactive_users" name="show_inactive_users" {{ "checked" if show_inactive_users else '' }}> Show inactive users
+    </form>
     <table>
         <thead>
             <tr>
                 <th>email</th>
                 <th>role</th>
+                <th>status</th>
             </tr>
         </thead>
         <tbody>
-            {% for user in current_users %}
-            <tr>
-                <td>{{ user.email }}</td>
-                <!-- TODO: this is a little weird, think about how to update the user role or password better. maybe make pw fields optional or something-->
-                <form id="updateUserForm" action="{{ url_for('users.update_user') }}" method="POST">
-                    {{ crud_form.hidden_tag() }}
-                    <input type="hidden" name="user_id" value="{{ user.id }}">
-                    <td>{{ crud_form.crud_role(class="update") }}</td>
-                    <td>{{ crud_form.crud_new_password(class="update") }}</td>
-                    <td>{{ crud_form.crud_confirm_password(class="update")}}</td>
-                    <td>{{ crud_form.submit_update(id="submitButton") }}</td>
-                </form>
-                <form action="{{ url_for('users.delete_user') }}" method="POST">
-                    {{ crud_form.hidden_tag() }}
-                    <input type="hidden" name="user_id" value="{{ user.id }}">
-                    <td>{{ crud_form.submit_deactivate() }}</td>
-                </form>
-            </tr>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.roles[0].name }}</td>
+                    {% if user.active %}
+                        <td>Active</td>
+                    {% else %}
+                        <td>Inactive</td>
+                    {% endif %}
+                    <td><a href="{{ url_for('users.user_page', user_id=user.id) }}">Edit User</a></td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
 
 <script>
-
-    // this doesn't actually work yet. we need to be able to replicate the validator in js
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById("updateUserForm");
-        const submitButton = document.getElementById("submitButton");
-        const updateFields = document.querySelectorAll(".update")
-
-        updateFields.forEach(function(field) {
-            field.addEventListener("change", function() {
-                if (!form.validate_on_submit()) {
-                    submitButton.setAttribute("disabled", "True");
-                } else {
-                    submitButton.removeAttribute("disabled")
-                }
-            });
+        var showOnlyActive = document.getElementById('show_inactive_users');
+        showOnlyActive.addEventListener('change', function() {
+            this.form.submit();
         });
     });
 </script>
+    
 {% endblock %}

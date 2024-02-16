@@ -19,9 +19,9 @@ from views.customers.customers_pages import customers_blueprint
 from views.search.search_pages import search_blueprint
 from views.transactions.transactions_pages import transactions_blueprint
 
-# TODO let's work on transactions next
-# TODO remove confirm old password for admins, maybe keep if there is a user page
-# TODO search, transactions, and statistics views
+# TODO FIX so that in crud users, deactivate/activate + populate each with old role
+# TODO maybe simplify my prefixed forms
+
 
 locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
 

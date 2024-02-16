@@ -5,9 +5,8 @@ from flask_security.utils import verify_password, hash_password
 def get_user_roles():
     return [role.value for role in UserRoles]
 
-def get_current_users():
-    #TODO take away active to show all users? or maybe we want to implement an activate user button as well
-    return User.query.filter_by(active=True).all()
+def get_all_users():
+    return User.query.all()
 
 def create_and_register_user(form) -> None:
     user_datastore.create_user(
@@ -22,3 +21,6 @@ def update_password(user, new_password):
 def update_role(user, new_role):
     user_datastore.remove_role_from_user(user, user.roles[0])
     user_datastore.add_role_to_user(user, new_role)
+
+def get_user(user_id):
+    return User.query.filter_by(id=user_id).one_or_404()
