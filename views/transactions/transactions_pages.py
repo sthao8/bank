@@ -15,7 +15,6 @@ from utils import format_money
 
 transactions_blueprint = Blueprint("transactions", __name__)
 
-
 @transactions_blueprint.route("/transactions", methods=["POST"])
 @roles_accepted("cashier")
 def transactions():
@@ -81,7 +80,6 @@ def process_transfer():
     customer_id = request.form.get("customer_id", None)
     customer = get_customer_or_404(customer_id)
     form: FlaskForm = TransferForm()
-    current_date = date.today()
 
     accounts_choices = get_account_choices(customer)
     form.transfer_account_from.choices = accounts_choices

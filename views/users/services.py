@@ -1,7 +1,6 @@
 from models import UserRoles, User, db, user_datastore
 from flask_security.utils import verify_password, hash_password
 
-
 def get_user_roles():
     return [role.value for role in UserRoles]
 
@@ -24,3 +23,4 @@ def update_role(user, new_role):
 
 def get_user(user_id):
     return User.query.filter_by(id=user_id).one_or_404()
+

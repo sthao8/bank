@@ -8,22 +8,54 @@
     account number {{ account.id }}
     <table>
         <thead>
+            <th></th>
             <th>type</th>
             <th>date</th>
             <th>amount</th>
             <th>balance</th>
         </thead>
         <tbody>
-            {% for transaction in transactions %}
-            <tr>
-                <td> {{ transaction.type }} </td>
-                <td> {{ transaction.timestamp }} </td>
-                <td> {{ transaction.amount | format_money }} </td>
-                <td> {{ transaction.new_balance | format_money}} </td>
-            </tr>
-            {% endfor %}
-            <tr></tr>
         </tbody>
     </table>
+    <button id="incrementPageButton">Load more transactions</button>
+
+<script>
+    const pageCounter = document.getElementById("incrementPageButton");
+    let page = 1
+    let counter = 1;
+
+    async function LoadAccountTransactions() {
+        const url = `/api/accounts/{{ account.id }}/${page}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        const allTransactions = data.transactions;
+        const transactionTable = document.querySelector("table tbody");
+        
+        // Disable load more button if no more transactions/pages
+        if (!data.has_more) {
+            pageCounter.disabled = true;
+        }
+
+        allTransactions.forEach(transaction => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>${counter++}</td>
+            <td>${transaction.type}</td>
+            <td>${transaction.timestamp}</td>
+            <td>${transaction.amount}</td>
+            <td>${transaction.new_balance}</td>
+            `;
+            transactionTable.appendChild(row);
+        });
+    }
+
+    pageCounter.addEventListener("click", function() {
+        page++;
+        console.log(page);
+        LoadAccountTransactions();
+    });
+
+    window.onload = () => LoadAccountTransactions();
+</script>
 
 {% endblock %}
