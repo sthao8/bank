@@ -5,8 +5,8 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import select, func, desc, asc
 
 
-def get_supported_country_names():
-    return db.session.execute(select(Country.name)).scalars().all()
+def get_country_or_404(country_name):
+    return Country.query.filter(func.lower(Country.name)==country_name.lower()).one_or_404()
 
 def get_country_customer(country):
     return db.session.execute(
@@ -22,17 +22,21 @@ def get_country_customer(country):
             .limit(10)
             ).all()
 
-def get_customer_from_id(customer_id):
+def get_customer_or_404(customer_id):
     return Customer.query.filter_by(id=customer_id).options(
         joinedload(Customer.accounts),
         joinedload(Customer.country_details)
         ).one_or_404()
 
-def get_account_from_id(account_id):
+def get_account_or_404(account_id):
     return Account.query.filter_by(id=account_id).one_or_404()
 
-def get_transactions_from_account_id(account_id):
-    return Transaction.query.filter_by(account_id=account_id).order_by(Transaction.timestamp.desc()).all()
+def get_limited_offset_transactions(account_id, transactions_per_page, page):
+    offset_value = (page - 1) * transactions_per_page
+    return Transaction.query.filter_by(account_id=account_id).order_by(Transaction.timestamp.desc()).limit(transactions_per_page).offset(offset_value).all()
+
+def get_count_of_transactions(account_id):
+    return Transaction.query.filter_by(account_id=account_id).count()
 
 def get_all_countries():
     return Country.query.all()
@@ -65,3 +69,23 @@ def get_country_stats():
             .group_by(Customer.country)
             .order_by(desc("sum_of_accounts"))
             ).all()
+
+class TransactionsApiModel:
+    def __init__(self, transaction: Transaction) -> None:
+        self.id = transaction.id
+        self.type = transaction.type
+        self.timestamp = transaction.timestamp
+        self.amount = transaction.amount
+        self.new_balance = transaction.new_balance
+        self.account_id = transaction.account_id
+
+    def to_dict(self):
+        """ Converts api model instance into a dictionary """
+        return {
+            "id": self.id,
+            "type": self.type,
+            "timestamp": self.timestamp,
+            "amount": self.amount,
+            "new_balance": self.new_balance,
+            "account_id": self.account_id
+        }

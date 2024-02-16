@@ -65,11 +65,11 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 class SearchAccountForm(FlaskForm):
-    search_account_number = StringField(
+    search_customer_id = StringField(
         "account number",
         render_kw={
             "size": 20,
-            "placeholder": "account number",
+            "placeholder": "customer id",
             "autocomplete": "off",
             "pattern": r'^\d+$',
             "title": "Only numbers allowed for account number",

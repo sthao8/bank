@@ -15,7 +15,7 @@ def search_account_number():
     form = SearchAccountForm()
 
     if form.validate_on_submit():
-        customer = get_customer_from_account_number(form.search_account_number.data)
+        customer = get_customer_from_account_number(form.search_customer_id.data)
 
         if customer:
             print(customer)
