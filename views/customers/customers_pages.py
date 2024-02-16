@@ -13,7 +13,8 @@ from .services import (
     TransactionsApiModel,
     get_limited_offset_transactions,
     get_count_of_transactions,
-    get_country_or_404
+    get_country_or_404,
+    CustomerApiModel
     )
 from views.forms import RegisterCustomerForm
 
@@ -92,7 +93,7 @@ def account_page(account_id):
     return render_template("customers/account_page.html", account=account)
 
 @customers_blueprint.route("/api/accounts/<int:account_id>/<int:page>")
-def transactions(account_id, page):
+def transactions_api(account_id, page):
     TRANSACTIONS_PER_PAGE = 20
 
     account = get_account_or_404(account_id)
@@ -117,5 +118,10 @@ def transactions(account_id, page):
 
     return jsonify({"transactions": transactions_dict, "has_more": has_more})
 
-# TODO HERE make an api for customer profile page
+@customers_blueprint.route("/api/<int:customer_id>")
+def customer_api(customer_id):
+    customer = get_customer_or_404(customer_id)
 
+    customer_dict = CustomerApiModel(customer).to_dict()
+
+    return jsonify(customer_dict)
