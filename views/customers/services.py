@@ -103,7 +103,7 @@ class CustomerApiModel:
         self.telephone_country_code = customer.country_details.telephone_country_code
         self.telephone = customer.telephone
         self.email = customer.email
-        self.country_code = customer.country_details.name
+        self.country_code = customer.country_details.country_code
         self.country = customer.country_details.name
         self.accounts = [{"account_number":account.id, "balance": account.balance} for account in customer.accounts]
         self.total_balance = sum([account["balance"] for account in self.accounts])
