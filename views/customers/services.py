@@ -105,6 +105,8 @@ class CustomerApiModel:
         self.email = customer.email
         self.country_code = customer.country_details.name
         self.country = customer.country_details.name
+        self.accounts = [{"account number":account.id, "balance": account.balance} for account in customer.accounts]
+        self.total_balance = sum([account["balance"] for account in self.accounts])
 
     def to_dict(self):
         """ Converts api model instance into a dictionary """
@@ -121,5 +123,7 @@ class CustomerApiModel:
             "telephone": self.telephone,
             "email": self.email,
             "country_code": self.country_code,
-            "country": self.country
+            "country": self.country,
+            "accounts": self.accounts,
+            "total balance": self.total_balance
         }
