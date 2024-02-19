@@ -2,8 +2,7 @@ from flask_login import login_user, login_required, logout_user
 from flask import redirect, url_for, flash, render_template, Blueprint
 from flask_security.utils import hash_password, verify_password
 
-
-from .services import get_user_from_email
+from repositories.user_repository import UserRepository
 from views.forms import LoginForm
 
 authentication_blueprint = Blueprint("authentication", __name__)
@@ -13,7 +12,7 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        user = get_user_from_email(form.email.data)
+        user = UserRepository.get_user_from_email(form.email.data)
 
         if user and verify_password(form.password.data, user.password):
             login_user(user)

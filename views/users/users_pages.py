@@ -12,6 +12,7 @@ from .services import (
     update_password,
     update_role,
     get_user)
+from repositories.user_repository import UserRepository
 
 users_blueprint = Blueprint("users", __name__)
 
@@ -21,7 +22,7 @@ users_blueprint = Blueprint("users", __name__)
 def crud_user():
     show_inactive_users = "show_inactive_users" in request.args
 
-    user_roles = get_user_roles()
+    user_roles = UserRepository.get_user_roles()
 
     crud_form = CrudUserForm()
     crud_form.crud_role.choices = user_roles
@@ -29,7 +30,7 @@ def crud_user():
     register_form = RegisterUserForm()
     register_form.register_role.choices = user_roles
 
-    users  = get_all_users()
+    users  = UserRepository.get_all_users()
     if not show_inactive_users:
         users = [user for user in users if user.active]
 
@@ -56,7 +57,7 @@ def user_page(user_id):
 @roles_accepted("admin")
 def register_user():
     form: FlaskForm = RegisterUserForm()
-    form.register_role.choices = get_user_roles()
+    form.register_role.choices = UserRepository.get_user_roles()
 
     if form.validate_on_submit():
         create_and_register_user(form)
@@ -70,7 +71,7 @@ def register_user():
 @roles_accepted("admin")
 def update_user():
     form = CrudUserForm()
-    form.crud_role.choices = get_user_roles()
+    form.crud_role.choices = UserRepository.get_user_roles()
 
     user_id = request.form.get("user_id", None, int)
     user = user_datastore.find_user(id=user_id)

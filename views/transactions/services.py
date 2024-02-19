@@ -1,31 +1,18 @@
-from datetime import datetime
-from models import db, Customer, Account, Transaction
-from sqlalchemy.orm import joinedload
+from repositories.transaction_repository import TransactionRepository
 from business_logic.constants import TransactionTypes
-from utils import format_money
 
-def get_customer_or_404(customer_id):
-    return Customer.query.filter_by(id=customer_id).options(joinedload(Customer.accounts)).one_or_404()
+class TransactionService():
+    def __init__(self, transaction_repository: TransactionRepository) -> None:
+        self.transaction_repository = transaction_repository
 
-def get_account_or_404(account_id: int):
-    return Account.query.filter_by(id=account_id).one_or_404()
+    def process_transaction(self, target_account, amount, transaction_type: TransactionTypes):
+        if amount < 0:
+            raise ValueError("Amount cannot be negative.")
+        if transaction_type == TransactionTypes.WITHDRAW and amount > target_account.balance:
+            raise ValueError("Insufficient funds for withdrawal.")
+        
+        self.transaction_repository.create_transaction(target_account, amount, transaction_type)
 
-def execute_transaction(account, amount, transaction_type):
-    transaction = Transaction()
-    transaction.amount = amount
-    transaction.type = transaction_type
-    transaction.timestamp = datetime.now()
-    transaction.new_balance = account.balance + amount if transaction_type == TransactionTypes.DEPOSIT.value else account.balance - amount
-    transaction.account_id = account.id
-
-    account.balance = transaction.new_balance
-    
-    db.session.add(transaction)
-    db.session.commit()
-
-def update_account_balance(account, transaction):
-    account.balance = transaction.new_balance
-
-def get_account_choices(customer):
-    return [(account.id, f"{account.id}: current balance: {format_money(account.balance)}") for account in customer.accounts]
-
+    def process_transfer(self, from_account, to_account, amount):
+        self.process_transaction(from_account, amount, TransactionTypes.WITHDRAW)
+        self.process_transaction(to_account, amount, TransactionTypes.DEPOSIT)
