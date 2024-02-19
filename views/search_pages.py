@@ -21,7 +21,7 @@ def search_account_number():
             return redirect(url_for(
                 "customers.customer_page",
                 active_page="search_customer", #TODO this is not strictly true
-                customer_id=customer.Customer.id,)
+                customer_id=customer.id,)
             )
         else:
             flash("No results found!")

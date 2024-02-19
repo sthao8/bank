@@ -1,4 +1,4 @@
-from models import Customer, Transaction, db
+from models import Customer, Transaction
 
 class TransactionsApiModel:
     def __init__(self, transaction: Transaction) -> None:
@@ -57,3 +57,4 @@ class CustomerApiModel:
             "accounts": self.accounts,
             "total_balance": self.total_balance
         }
+  

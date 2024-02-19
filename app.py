@@ -13,11 +13,11 @@ from seed import (
     seed_users
     )
 from views.forms import SearchAccountForm
-from views.authentication.authentication_pages import authentication_blueprint
-from views.users.users_pages import users_blueprint
-from views.customers.customers_pages import customers_blueprint
-from views.search.search_pages import search_blueprint
-from views.transactions.transactions_pages import transactions_blueprint
+from views.authentication_pages import authentication_blueprint
+from views.users_pages import users_blueprint
+from views.customers_pages import customers_blueprint
+from views.search_pages import search_blueprint
+from views.transactions_pages import transactions_blueprint
 
 # TODO maybe simplify my prefixed forms
 

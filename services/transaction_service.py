@@ -16,3 +16,9 @@ class TransactionService():
     def process_transfer(self, from_account, to_account, amount):
         self.process_transaction(from_account, amount, TransactionTypes.WITHDRAW)
         self.process_transaction(to_account, amount, TransactionTypes.DEPOSIT)
+
+    def get_count_of_transactions(self, account_id):
+        return self.transaction_repository.get_count_of_transactions(account_id)
+    
+    def get_limited_offset_transactions(self, account_id, transactions_per_page, page):
+        return self.transaction_repository.get_limited_offset_transactions(account_id, transactions_per_page, page)

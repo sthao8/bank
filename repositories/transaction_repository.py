@@ -7,7 +7,7 @@ from business_logic.constants import TransactionTypes
 
 
 class TransactionRepository():
-    def create_transaction(self, account, amount: Decimal, transaction_type):
+    def create_transaction(account, amount: Decimal, transaction_type):
         transaction = Transaction()
         transaction.amount = amount
         transaction.timestamp = datetime.now()

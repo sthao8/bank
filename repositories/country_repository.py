@@ -8,6 +8,20 @@ class CountryRepository():
     def get_all_countries():
         return Country.query.all()
     
+    def get_country_customer(country_name):
+        return db.session.execute(
+                select(
+                Customer, 
+                func.count(Account.id).label("number_of_accounts"),
+                func.sum(Account.balance).label("sum_of_accounts"))
+                .join(Account, Account.customer_id==Customer.id)
+                .join(Country, Country.country_code==Customer.country)
+                .where(Country.name==country_name)
+                .group_by(Customer.id)
+                .order_by(desc("sum_of_accounts"))
+                .limit(10)
+                ).all()
+
     def get_country_stats():
         return db.session.execute(
             select(
