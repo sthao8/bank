@@ -1,3 +1,5 @@
+{% from "_formhelpers.html" import render_field %}
+
 {% extends "base.html" %}
 
 {% block title %}
@@ -7,24 +9,11 @@
 {% block main %}
     <h1>Login</h1>
 
-    <form action="{{ url_for('authentication.login') }}" method="post" novalidate>
+    <form action="{{ url_for('authentication.login') }}" method="post" class="needs-validation" novalidate>
         {{ form.hidden_tag() }}
-        <div>
-            {{ form.email.label}}            
-            {{ form.email(size=20, placeholder="email", autocomplete="off", autofocus=true) }}
-            {% if form.email.errors %}
-                <span>{{ form.email.errors[0] }}</span>
-            {% endif %}
-        </div>
-        <div>
-            {{ form.password.label }}
-            {{ form.password(size=20, placeholder="password", autocomplete="off") }}
-            {% if form.password.errors %}
-                <span>{{ form.password.errors[0] }}</span>
-            {% endif %}
-        </div>
-            {{ form.submit() }}
-        </div>
+        {{ render_field(form.email) }}
+        {{ render_field(form.password) }}
+        {{ render_field(form.submit) }}
     </form>
 
 {% endblock %}

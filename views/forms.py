@@ -53,14 +53,23 @@ class LoginForm(FlaskForm):
             InputRequired(),
             Length(min=5, max=32),
             Email(message="Bad email format")
-        ], 
+        ],
+        render_kw={
+            "autofocus": True,
+            "size": 20,
+            "placeholder": "your_email@mail.com"
+        }
     )
     password = PasswordField(
         "password",
         validators=[
             InputRequired(),
             Length(min=8, max=32, message="Password between 8 and 32 characters")
-        ]
+        ],
+         render_kw={
+            "size": 20,
+            "placeholder": "*******"
+        }
     )
     submit = SubmitField("Login")
 
