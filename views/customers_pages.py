@@ -40,7 +40,7 @@ def index():
 def country_page(country_name):
     country = country_service.get_country_or_404(country_name)
 
-    country_customer = country_service.get_country_customer(country.name)
+    country_customer = country_service.get_top_country_customer(country.name)
     
     return render_template(
         "customers/country_page.html",

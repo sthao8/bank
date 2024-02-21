@@ -1,6 +1,7 @@
 from datetime import datetime
 from business_logic.constants import AccountTypes
-from models import Customer, Account, db
+from models import Customer, Account, db, Country, Transaction
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 class CustomerRepository():
@@ -15,6 +16,17 @@ class CustomerRepository():
     
     def get_customer_from_national_id(national_id):
         return Customer.query.filter_by(national_id=national_id).one_or_none()
+    
+    def get_all_customers_for(country: Country):
+        return Customer.query.filter_by(country=country.country_code).all()
+    
+    def get_customer_from_transaction(transaction: Transaction):
+        return db.session.execute(
+            select(Customer)
+            .join(Account, Account.customer_id==Customer.id)
+            .join(Transaction, Transaction.account_id==Account.id)
+            .where(Transaction.id==transaction.id)
+        ).scalar_one_or_none()
     
     def create_customer_and_new_account(form) -> Customer:
         new_customer = Customer()

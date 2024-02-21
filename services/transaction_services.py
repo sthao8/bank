@@ -31,5 +31,8 @@ class TransactionService():
         sum = self.transaction_repository.get_sum_recent_transactions_of_country(customer, time_period)
         return Decimal(sum) if sum is not None else 0
     
+    def get_summed_transaction_ids(self, customer, time_period):
+        return self.transaction_repository.get_summed_transaction_ids(customer, time_period)
+    
     def get_recent_unchecked_transactions_for(self, customer, from_datetime):
         return self.transaction_repository.get_recent_unchecked_transactions_for(customer, from_datetime)
