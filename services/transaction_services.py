@@ -34,5 +34,5 @@ class TransactionService():
     def get_summed_transaction_ids(self, customer, time_period):
         return self.transaction_repository.get_summed_transaction_ids(customer, time_period)
     
-    def get_recent_unchecked_transactions_for(self, customer, from_datetime):
+    def get_transactions_for(self, customer, from_datetime):
         return self.transaction_repository.get_recent_unchecked_transactions_for(customer, from_datetime)

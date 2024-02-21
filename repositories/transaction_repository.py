@@ -51,14 +51,14 @@ class TransactionRepository():
                    .where(between(Transaction.timestamp, from_date, datetime.now()))
         ).scalars().all()
 
-    def get_recent_unchecked_transactions_for(customer: Customer, from_datetime) -> list[Transaction]:
+    def get_recent_unchecked_transactions_for(customer: Customer, from_date) -> list[Transaction]:
         return db.session.execute(
             select(Transaction)
             .join(Account, Account.id==Transaction.account_id)
             .join(Customer, Customer.id==Account.customer_id)
             .join(Country, Country.country_code==Customer.country)
             .where(Customer.id==customer.id)
-            .where(Transaction.timestamp>=from_datetime)
+            .where(func.date(Transaction.timestamp)==from_date)
             .where(Transaction.checked==False)
             .order_by(desc(Transaction.timestamp))
         ).scalars().all()
