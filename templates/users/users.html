@@ -1,3 +1,5 @@
+{% from "_formhelpers.html" import render_field %}
+
 {% extends "base.html" %}
 
 {% block title %}
@@ -7,13 +9,13 @@
 {% block main %}
 <div>
     <h3>Register User</h3>
-    <form action="{{ url_for('users.register_user') }}" method="post">
+    <form action="{{ url_for('users.register_user') }}" method="post" class="needs-validation" novalidate>
         {{ register_form.hidden_tag() }}
-        {{ register_form.register_email() }}
-        {{ register_form.register_password() }}
-        {{ register_form.register_confirm_password }}
-        {{ register_form.register_role }}
-        {{ register_form.submit() }}
+        {{ render_field(register_form.register_email) }}
+        {{ render_field(register_form.register_password) }}
+        {{ render_field(register_form.register_confirm_password) }}
+        {{ render_field(register_form.register_role) }}
+        {{ render_field(register_form.submit) }}
     </form>
 </div>
 

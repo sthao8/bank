@@ -1,3 +1,5 @@
+{% from "_formhelpers.html" import render_field %}
+
 {% extends "base.html" %}
 
 {% block title %}
@@ -21,19 +23,19 @@
             <tbody>
                 <tr>
                     <td>{{ user.email }}</td>
-                    <form id="updateUserForm" action="{{ url_for('users.update_user') }}" method="post">
+                    <form id="updateUserForm" action="{{ url_for('users.update_user') }}" method="post" class="needs-validation" novalidate>
                         {{ form.hidden_tag() }}
                         <input type="hidden" name="user_id" value="{{ user.id }}">
-                        <td>{{ form.crud_role() }}</td>
-                        <td>{{ form.crud_new_password() }}</td>
-                        <td>{{ form.crud_confirm_password()}}</td>
+                        <td>{{ render_field(form.crud_role) }}</td>
+                        <td>{{ render_field(form.crud_new_password) }}</td>
+                        <td>{{ render_field(form.crud_confirm_password)}}</td>
                         <td>Active</td>
-                        <td>{{ form.submit_update() }}</td>
+                        <td>{{ render_field(form.submit_update) }}</td>
                     </form>
                     <form action="{{ url_for('users.change_user_status') }}" method="post">
                         {{ form.hidden_tag() }}
                         <input type="hidden" name="user_id" value="{{ user.id }}">
-                        <td>{{ form.submit_deactivate() }}</td>
+                        <td>{{ render_field(form.submit_deactivate) }}</td>
                     </form>
                 </tr>
             </tbody>
@@ -56,7 +58,7 @@
                 <form action="{{ url_for('users.change_user_status') }}" method="post">
                     {{ form.hidden_tag() }}
                     <input type="hidden" name="user_id" value="{{ user.id }}">
-                    <td>{{ form.submit_activate() }}</td>
+                    <td>{{ render_field(form.submit_activate) }}</td>
                 </form>
             </tbody>
         </table>

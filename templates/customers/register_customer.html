@@ -1,3 +1,5 @@
+{% from "_formhelpers.html" import render_field %}
+
 {% extends "base.html" %}
 
 {% block title %}
@@ -7,19 +9,19 @@
 {% block main %}
 <div>
     <h1>Register new customer</h1>
-    <form action="{{ url_for('customers.register_customer') }}" method="post">
+    <form action="{{ url_for('customers.register_customer') }}" method="post" class="needs-validation" novalidate>
         {{ form.hidden_tag() }}
-        {{ form.register_first_name() }}
-        {{ form.register_last_name() }}
-        {{ form.register_address() }}
-        {{ form.register_city() }}
-        {{ form.register_postal_code() }}
-        {{ form.register_birthday() }}
-        {{ form.register_national_id() }}
-        {{ form.register_telephone() }}
-        {{ form.register_email() }}
-        {{ form.register_country() }}
-        {{ form.submit() }}
+        {{ render_field(form.register_first_name) }}
+        {{ render_field(form.register_last_name) }}
+        {{ render_field(form.register_address) }}
+        {{ render_field(form.register_city) }}
+        {{ render_field(form.register_postal_code) }}
+        {{ render_field(form.register_birthday) }}
+        {{ render_field(form.register_national_id) }}
+        {{ render_field(form.register_telephone) }}
+        {{ render_field(form.register_email) }}
+        {{ render_field(form.register_country) }}
+        {{ render_field(form.submit) }}
     </form>
 </div>
    

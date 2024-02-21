@@ -1,3 +1,5 @@
+{% from "_formhelpers.html" import render_field %}
+
 {% extends "base.html" %}
 
 {% block title %}
@@ -7,14 +9,14 @@
 {% block main %}
 <div>
     <h3>Withdraw/Deposit</h3>
-    <form action="{{ url_for('transactions.process_transaction') }}" method="post">
+    <form action="{{ url_for('transactions.process_transaction') }}" method="post" class="needs-validation" novalidate>
         {{ form.hidden_tag() }}
-        <input hidden value="{{customer.id}}" name="customer_id">
-        {{ form.trans_accounts() }}
-        {{ form.trans_type() }}
-        {{ form.trans_amount() }}
+        <input type="hidden" value="{{customer.id}}" name="customer_id">
+        {{ render_field(form.trans_accounts) }}
+        {{ render_field(form.trans_type) }}
+        {{ render_field(form.trans_amount) }}
         <input type="text" readonly disabled value="{{ current_date }}">
-        {{ form.submit() }}
+        {{ render_field(form.submit) }}
     </form>
 </div>
 {% endblock %}

@@ -1,11 +1,14 @@
 <!-- _search_form.html to be included at top of search_customer.html and search_results.html -->
+
+{% from "_formhelpers.html" import render_field %}
+
 <div>
     <form action="{{ url_for('search.display_search_results') }}" method="get">
         <div>
-            {{ form.search_first_name() }}
-            {{ form.search_last_name() }}
-            {{ form.search_city() }}
+            {{ render_field(form.search_first_name) }}
+            {{ render_field(form.search_last_name) }}
+            {{ render_field(form.search_city) }}
         </div>
-        {{ form.submit() }}
+        {{ render_field(form.submit) }}
     </form>
 </div>

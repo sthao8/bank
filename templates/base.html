@@ -1,3 +1,5 @@
+{% from "_formhelpers.html" import render_field %}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -16,11 +18,11 @@
             <a href="{{ url_for('search.search_customer') }}" class="{{ 'active' if active_page=='search_customer' }}">Find customer</a>
             <a href="{{ url_for('customers.register_customer') }}" class="{{ 'active' if active_page=='register_customer' }}">Register customer</a>
             <a href="{{ url_for('users.crud_user') }}" class="{{ 'active' if active_page=='crud_user' }}">Manage users</a>
-            <form action="{{ url_for('search.search_account_number') }}" method="post">
+            <form action="{{ url_for('search.search_account_number') }}" method="post" class="needs-validation" novalidate>
                 {{ search_account_form.hidden_tag() }}
-                {{ search_account_form.search_customer_id() }}
+                {{ render_field(search_account_form.search_customer_id) }}
                 <div>
-                    {{ search_account_form.submit() }}
+                    {{ render_field(search_account_form.submit) }}
                 </div>
             </form>
         {% endif %}
@@ -70,7 +72,7 @@
                         
                         // Immediate show errors after submission
                         Array.from(form.elements).forEach(element => {
-                            if (element.type !== "hidden"){
+                            if (element.type !== "hidden" && !element.readOnly){
                                 showErrors(element);
                             }
                         });

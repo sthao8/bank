@@ -75,13 +75,13 @@ class LoginForm(FlaskForm):
 
 class SearchAccountForm(FlaskForm):
     search_customer_id = StringField(
-        "account number",
+        "customer id",
         render_kw={
             "size": 20,
-            "placeholder": "customer id",
+            "placeholder": "1238",
             "autocomplete": "off",
             "pattern": r'^\d+$',
-            "title": "Only numbers allowed for account number",
+            "title": "Only numbers allowed for customer id",
             "required": True,
         },
         validators=[
@@ -99,17 +99,17 @@ class SearchCustomerForm(PrefixedForm):
 
     search_first_name = StringField(
         "first name",
-        render_kw={"placeholder": "first name", "size": 20}, # you can even put css classes here
+        render_kw={"placeholder": "Bob", "size": 20},
     )
 
     search_last_name = StringField(
         "last name",
-        render_kw={"placeholder": "last name", "size": 20}, # you can even put css classes here
+        render_kw={"placeholder": "Robertson", "size": 20},
     )
 
     search_city = StringField(
         "city",
-        render_kw={"placeholder": "city", "size": 20}
+        render_kw={"placeholder": "Stockholm", "size": 20}
     )
 
     submit = SubmitField("Search")
@@ -120,31 +120,31 @@ class RegisterCustomerForm(PrefixedForm):
     register_first_name = StringField(
         "first name",
         validators=[Length(min=1, max=50, message="First name cannot exceed 50 characters."), InputRequired()],
-        render_kw={"placeholder": "first name", "size": 20, "autofocus": True}
+        render_kw={"placeholder": "Bob", "size": 20, "autofocus": True}
     )
 
     register_last_name = StringField(
         "last name",
         validators=[Length(min=1, max=50, message="Last name cannot exceed 50 characters."), InputRequired()],
-        render_kw={"placeholder": "last name", "size": 20}
+        render_kw={"placeholder": "Robertson", "size": 20}
     )
 
     register_address = StringField(
         "address",
         validators=[Length(min=1, max=50, message="Address cannot exceed 50 characters."), InputRequired()],
-        render_kw={"placeholder": "address", "size": 20}
+        render_kw={"placeholder": "89 Viksängsgatan", "size": 20}
     )
 
     register_city = StringField(
         "city",
         validators=[Length(min=1, max=50, message="City cannot exceed 50 characters."), InputRequired()],
-        render_kw={"placeholder": "city", "size": 20}
+        render_kw={"placeholder": "Stockholm", "size": 20}
     )
 
     register_postal_code = StringField(
         "postal code",
         validators=[Length(min=1, max=10, message="Postal code cannot exceed 50 characters."), InputRequired()],
-        render_kw={"placeholder": "postal code", "size": 20}
+        render_kw={"placeholder": "13245", "size": 20}
     )
 
     #TODO you need a custom check here in js to prevent submission
@@ -157,19 +157,19 @@ class RegisterCustomerForm(PrefixedForm):
     register_national_id = StringField(
         "national id",
         validators=[Length(min=1, max=20, message="National ID cannot exceed 50 characters."), InputRequired()],
-        render_kw={"placeholder": "national id"}
+        render_kw={"placeholder": "12341212-1234"}
     )
 
     register_telephone = TelField(
         "telephone",
         validators=[Length(min=1, max=20, message="Telephone number cannot exceed 20 characters."), InputRequired()],
-        render_kw={"placeholder": "telephone"}
+        render_kw={"placeholder": "123-123-22-55"}
     )
 
     register_email = EmailField(
         "email",
         validators=[Length(min=1, max=50, message="Email cannot exceed 50 characters."), InputRequired()],
-        render_kw={"placeholder": "email"}
+        render_kw={"placeholder": "Bob.Robertson@mail.com"}
     )
 
     register_country = SelectField(
@@ -185,19 +185,19 @@ class RegisterUserForm(PrefixedForm):
     register_email = EmailField(
         "email",
         validators=[InputRequired(), Length(min=1, max=50, message="Email cannot exceed 50 characters.")],
-        render_kw={"placeholder": "email", "autocomplete": "new-email"}
+        render_kw={"placeholder": "Bob.Robertson@mail.com", "autocomplete": "new-email"}
     )
 
     register_password = PasswordField(
         "password",
         validators=[InputRequired(), Length(min=8, max=32, message="Password must be between 8 and 32 characters")],
-        render_kw={"placeholder": "password", "autocomplete": "new-password"}
+        render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
     register_confirm_password = PasswordField(
         "conform password",
         validators=[InputRequired(), Length(min=8, max=32, message="Password must be between 8 and 32 characters"), EqualTo("register_password")],
-        render_kw={"placeholder": "confirm password", "autocomplete": "new-password"}
+        render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
     register_role = SelectField(
@@ -213,14 +213,14 @@ class CrudUserForm(PrefixedForm):
     crud_new_password = PasswordField(
         "new password",
         validators=[Optional(strip_whitespace=True), Length(min=8, max=32, message="Password must be between 8 and 32 characters")],
-        render_kw={"placeholder": "new password", "autocomplete": "new-password"}
+        render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
     crud_confirm_password = PasswordField(
         "confirm password",
         validators=[Optional(strip_whitespace=True), Length(min=8, max=32, message="Password must be between 8 and 32 characters"),
                     EqualTo("crud_new_password")],
-        render_kw={"placeholder": "confirm password", "autocomplete": "new-password"}
+        render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
     crud_role = SelectField(
@@ -242,7 +242,7 @@ class TransactionForm(PrefixedForm):
     field_prefix = "trans_"
 
     trans_accounts = SelectField(
-        "account",
+        "accounts",
         validators=[InputRequired()],
         render_kw={"placeholder": "accounts"})
 
@@ -255,7 +255,7 @@ class TransactionForm(PrefixedForm):
         use_locale=False,
         places=2,
         validators=[InputRequired(), NumberRange(min=0.01, message="deposit/withdrawal amount cannot be less than 0.")],
-        render_kw={"placeholder": "amount", "min": 0, "type": "number", "step": "0.01"}
+        render_kw={"placeholder": "123.43", "min": 0, "type": "number", "step": "0.01"}
     )
 
     submit = SubmitField()
@@ -278,7 +278,7 @@ class TransferForm(PrefixedForm):
         places=2,
         use_locale=False,
         validators=[InputRequired(), NumberRange(min=0.01, message="Transfer amount cannot be less than 0.")],
-        render_kw={"placeholder": "amount", "min": 0, "type": "number", "step": "0.01"}
+        render_kw={"placeholder": "123.43", "min": 0, "type": "number", "step": "0.01"}
     )
 
     submit = SubmitField()
