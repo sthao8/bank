@@ -10,9 +10,9 @@ from .services import (
 from views.forms import RegisterCustomerForm
 
 from services.country_services import CountryService, CountryRepository
-from services.transaction_service import TransactionService, TransactionRepository
-from services.customer_service import CustomerService, CustomerRepository
-from services.account_service import AccountService, AccountRepository
+from services.transaction_services import TransactionService, TransactionRepository
+from services.customer_services import CustomerService, CustomerRepository
+from services.account_services import AccountService, AccountRepository
 
 customers_blueprint = Blueprint("customers", __name__)
 
@@ -87,29 +87,21 @@ def account_page(account_id):
     account = account_service.get_account_or_404(account_id)
     return render_template("customers/account_page.html", account=account)
 
-@customers_blueprint.route("/api/accounts/<int:account_id>/<int:page>")
-def transactions_api(account_id, page):
-    TRANSACTIONS_PER_PAGE = 20
-
+@customers_blueprint.route("/api/accounts/<int:account_id>")
+def transactions_api(account_id):
     account = account_service.get_account_or_404(account_id)
 
+    # Make sure offset and limit are not negative
+    offset = max(request.args.get("offset", 0, int), 0)
+    limit = max(request.args.get("limit", 20, int), 1)
+
     total_transactions_amount = transaction_service.get_count_of_transactions(account_id)
-    total_pages = ceil(total_transactions_amount / TRANSACTIONS_PER_PAGE)
 
-    if page < 1 or page > total_pages:
-        abort(404, "Page not found")
+    has_more = offset + limit < total_transactions_amount
 
-    has_more = page < total_pages
-    print(page, total_pages, has_more)
+    account_transactions = transaction_service.get_limited_offset_transactions(account_id, limit, offset)
 
-    account_transactions = transaction_service.get_limited_offset_transactions(account_id, TRANSACTIONS_PER_PAGE, page)
-
-    transactions_list = []
-
-    for transaction in account_transactions:
-        transaction_api_model = TransactionsApiModel(transaction)
-        transactions_list.append(transaction_api_model)
-    transactions_dict = [api_transaction.to_dict() for api_transaction in transactions_list]
+    transactions_dict = [TransactionsApiModel(transaction).to_dict() for transaction in account_transactions]
 
     return jsonify({"transactions": transactions_dict, "has_more": has_more})
 

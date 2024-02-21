@@ -4,16 +4,16 @@ from flask_security import roles_accepted
 
 from models import Account, db
 from views.forms import PrefixedForm, TransactionForm, TransferForm, FlaskForm
-from services.transaction_service import TransactionService
+from services.transaction_services import TransactionService
 from repositories.transaction_repository import TransactionRepository
 from repositories.customer_repository import CustomerRepository
 from repositories.account_repository import AccountRepository
 from business_logic.constants import TransactionTypes
 from utils import format_money
 
-from services.customer_service import CustomerService, CustomerRepository
-from services.account_service import AccountService, AccountRepository
-from services.transaction_service import TransactionService, TransactionRepository
+from services.customer_services import CustomerService, CustomerRepository
+from services.account_services import AccountService, AccountRepository
+from services.transaction_services import TransactionService, TransactionRepository
 
 
 customer_service = CustomerService(CustomerRepository)

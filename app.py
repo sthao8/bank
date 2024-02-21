@@ -19,7 +19,12 @@ from views.customers_pages import customers_blueprint
 from views.search_pages import search_blueprint
 from views.transactions_pages import transactions_blueprint
 
+from console_app import main
+
 # TODO maybe simplify my prefixed forms
+# TODO work on frontend errors
+# TODO console app + mail
+
 
 locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
 
@@ -49,6 +54,7 @@ def context_processor():
     search_account_form = SearchAccountForm()
     return dict(search_account_form=search_account_form)
 
+
 if __name__  == "__main__":
     with app.app_context():
         upgrade()
@@ -56,5 +62,6 @@ if __name__  == "__main__":
         seed_data(db)
         seed_roles(db, user_datastore)
         seed_users(db, user_datastore)
+        main()
     
     app.run(debug=True)

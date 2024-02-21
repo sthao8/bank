@@ -17,15 +17,16 @@
         <tbody>
         </tbody>
     </table>
-    <button id="incrementPageButton">Load more transactions</button>
+    <button id="incrementOffsetButton">Load more transactions</button>
 
 <script>
-    const pageCounter = document.getElementById("incrementPageButton");
-    let page = 1
-    let counter = 1;
+    const offsetCounter = document.getElementById("incrementOffsetButton");
+    let limit = 20;
+    let offset = 0;
+    let resultsCounter = 1;
 
     async function LoadAccountTransactions() {
-        const url = `/api/accounts/{{ account.id }}/${page}`;
+        const url = `/api/accounts/{{ account.id }}?offset=${offset}&limit=${limit}`;
         const response = await fetch(url);
         const data = await response.json();
         const allTransactions = data.transactions;
@@ -33,13 +34,13 @@
         
         // Disable load more button if no more transactions/pages
         if (!data.has_more) {
-            pageCounter.disabled = true;
+            offsetCounter.disabled = true;
         }
 
         allTransactions.forEach(transaction => {
             const row = document.createElement('tr');
             row.innerHTML = `
-            <td>${counter++}</td>
+            <td>${resultsCounter++}</td>
             <td>${transaction.type}</td>
             <td>${transaction.timestamp}</td>
             <td>${transaction.amount}</td>
@@ -49,9 +50,8 @@
         });
     }
 
-    pageCounter.addEventListener("click", function() {
-        page++;
-        console.log(page);
+    offsetCounter.addEventListener("click", function() {
+        offset += limit;
         LoadAccountTransactions();
     });
 

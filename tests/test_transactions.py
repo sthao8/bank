@@ -1,6 +1,5 @@
 from decimal import Decimal
-from views.transactions.services import TransactionService
-from repositories.transaction_repository import TransactionRepository
+from services.transaction_services import TransactionService, TransactionRepository
 from business_logic.constants import TransactionTypes 
 import unittest
 from unittest.mock import Mock

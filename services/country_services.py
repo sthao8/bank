@@ -7,6 +7,12 @@ class CountryService():
 
     def get_country_stats(self):
         return self.country_repository.get_country_stats()
+    
+    def get_all_countries(self) -> Country:
+        return self.country_repository.get_all_countries()
+    
+    def get_all_country_customers(self, country_name):
+        return self.country_repository.get_all_country_customers(country_name)
 
     def calculate_global_stats(self, country_stats):
         return {
@@ -16,14 +22,11 @@ class CountryService():
         }
     
     def get_country_customer(self, country_name):
-        return self.country_repository.get_country_customer(country_name)
+        return self.country_repository.get_top_10_country_customers(country_name)
 
-    def get_country_or_404(self, country):
-        return self.country_repository.get_country_or_404(country)
+    def get_country_or_404(self, country_name):
+        return self.country_repository.get_country_or_404(country_name)
 
-    # def get_all_countries(self):
-    #     return self.country_repository.get_all_countries()
-    
     def get_form_country_choices(self):
         countries = self.country_repository.get_all_countries()
         return [(country.country_code, country.name) for country in countries]

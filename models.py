@@ -64,6 +64,7 @@ class Transaction(db.Model):
     amount = db.Column(db.Numeric(15, 2), unique=False, nullable=False)
     new_balance = db.Column(db.Numeric(15,2), unique=False, nullable=False)
     account_id = db.Column(db.Integer, db.ForeignKey("Accounts.id"), nullable=False)
+    checked = db.Column(db.Boolean, nullable=False, default=False)
 
 roles_users = db.Table(
     'RolesUsers',

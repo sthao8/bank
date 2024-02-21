@@ -6,7 +6,7 @@ from views.forms import CrudUserForm, RegisterUserForm, FlaskForm
 
 from utils import string_to_bool
 from repositories.user_repository import UserRepository
-from services.user_service import UserService
+from services.user_services import UserService
 
 
 user_service = UserService(UserRepository)
