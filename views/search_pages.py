@@ -3,7 +3,7 @@ from flask_security import login_required
 
 from views.forms import SearchAccountForm, SearchCustomerForm
 from .search_results_handler import SearchResultsHandler
-from .services import get_customer_from_account_number
+from repositories.customer_repository import CustomerRepository
 from models import Customer
 
 search_blueprint = Blueprint("search", __name__)
@@ -15,14 +15,13 @@ def search_account_number():
     form = SearchAccountForm()
 
     if form.validate_on_submit():
-        customer = get_customer_from_account_number(form.search_customer_id.data)
+        customer = CustomerRepository.get_customer_or_none(form.search_customer_id.data)
 
         if customer:
-            print(customer)
             return redirect(url_for(
                 "customers.customer_page",
                 active_page="search_customer", #TODO this is not strictly true
-                customer_id=customer.Customer.id,)
+                customer_id=customer.id,)
             )
         else:
             flash("No results found!")

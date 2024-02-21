@@ -17,7 +17,7 @@
         </thead>
         {% for country in country_stats %}
             <tr>
-                <td><a href="{{ url_for('customers.country_page', country=country.name) }}">{{ country.name }}</a></td>
+                <td><a href="{{ url_for('customers.country_page', country_name=country.name) }}">{{ country.name }}</a></td>
                 <td> {{ country.number_of_customers }} </td>
                 <td> {{ country.number_of_accounts }} </td>
                 <td> {{ country.sum_of_accounts | format_money }} </td>            

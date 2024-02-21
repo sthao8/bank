@@ -39,17 +39,12 @@ def seed_countries(db):
             db.session.commit()
 
 def seed_roles(db, user_datastore):
-    existing_roles = [user_role.name for user_role in Role.query.all()]
     seed_roles = [role.value for role in UserRoles]
-
-    for seed_role in seed_roles:
-        if seed_role not in existing_roles:
-            user_datastore.create_role(name=seed_role)
-
+    for role in seed_roles:
+        user_datastore.find_or_create_role(name=role)
     db.session.commit()
 
 def seed_users(db, user_datastore):
-    existing_user_emails = [user.email for user in User.query.all()]
     SEED_USERS = [
         {
             "email": "stefan.holmberg@systementor.se",
@@ -64,7 +59,7 @@ def seed_users(db, user_datastore):
     ]
 
     for seed_user in SEED_USERS:
-        if seed_user["email"] not in existing_user_emails:
+        if not user_datastore.find_user(email=seed_user["email"]):
             user_datastore.create_user(
                 email=seed_user["email"],
                 password=hash_password(seed_user["password"]),

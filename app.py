@@ -1,6 +1,6 @@
 import locale
 from flask import Flask
-from flask_mail import Mail
+from extenstions import mail
 from flask_migrate import Migrate, upgrade
 from flask_security import Security
 
@@ -13,45 +13,50 @@ from seed import (
     seed_users
     )
 from views.forms import SearchAccountForm
-from views.authentication.authentication_pages import authentication_blueprint
-from views.users.users_pages import users_blueprint
-from views.customers.customers_pages import customers_blueprint
-from views.search.search_pages import search_blueprint
-from views.transactions.transactions_pages import transactions_blueprint
+from views.authentication_pages import authentication_blueprint
+from views.users_pages import users_blueprint
+from views.customers_pages import customers_blueprint
+from views.search_pages import search_blueprint
+from views.transactions_pages import transactions_blueprint
 
-# TODO FIX so that in crud users, deactivate/activate + populate each with old role
+
 # TODO maybe simplify my prefixed forms
+# TODO work on frontend errors
 
+def create_app():
+    locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
 
-locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
+    app = Flask(__name__)
+    app.config.from_object('config.Config')
 
-app = Flask(__name__)
-app.config.from_object('config.Config')
+    db.app = app
+    db.init_app(app)
+    migrate = Migrate(app, db)
 
-db.app = app
-db.init_app(app)
-migrate = Migrate(app, db)
+    app.register_blueprint(authentication_blueprint)
+    app.register_blueprint(users_blueprint)
+    app.register_blueprint(customers_blueprint)
+    app.register_blueprint(search_blueprint)
+    app.register_blueprint(transactions_blueprint)
 
-app.register_blueprint(authentication_blueprint)
-app.register_blueprint(users_blueprint)
-app.register_blueprint(customers_blueprint)
-app.register_blueprint(search_blueprint)
-app.register_blueprint(transactions_blueprint)
+    security = Security(app, user_datastore)
 
-mail = Mail(app)
+    app.jinja_env.filters["enumerate"] = enumerate
 
-security = Security(app, user_datastore)
+    mail.init_app(app)
 
-app.jinja_env.filters["enumerate"] = enumerate
+    app.template_filter("format_money")(format_money)
 
-app.template_filter("format_money")(format_money)
+    @app.context_processor
+    def context_processor():
+        search_account_form = SearchAccountForm()
+        return dict(search_account_form=search_account_form)
+    
+    return app
 
-@app.context_processor
-def context_processor():
-    search_account_form = SearchAccountForm()
-    return dict(search_account_form=search_account_form)
 
 if __name__  == "__main__":
+    app = create_app()
     with app.app_context():
         upgrade()
         seed_countries(db)

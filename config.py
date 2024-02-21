@@ -3,6 +3,7 @@ class Config:
     SECRET_KEY = "bankassignmentforpythonprogrammingwebframeworkcourse"
     SECURITY_REGISTERABLE = True
     SECURITY_PASSWORD_SALT = 'supersecretsalt'
+
     MAIL_SERVER = '127.0.0.1'
     MAIL_PORT = 1025
     MAIL_USE_TLS = False
