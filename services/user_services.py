@@ -61,4 +61,4 @@ class UserService():
         if user and verify_password(password, user.password):
             return user
         else:
-            raise ValueError("Invalid password")
+            raise ValueError("Invalid username or password")

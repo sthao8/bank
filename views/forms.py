@@ -48,23 +48,23 @@ class PrefixedForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     email = EmailField(
-        "email",
+        "Email",
         validators=[
             InputRequired(),
             Length(min=5, max=32),
-            Email(message="Bad email format")
+            Email(message="Unrecognized email format.")
         ],
         render_kw={
             "autofocus": True,
             "size": 20,
-            "placeholder": "your_email@mail.com"
+            "placeholder": "youremail@mail.com"
         }
     )
     password = PasswordField(
-        "password",
+        "Password",
         validators=[
             InputRequired(),
-            Length(min=8, max=32, message="Password between 8 and 32 characters")
+            Length(min=8, max=32, message="Password must be between 8 and 32 characters")
         ],
          render_kw={
             "size": 20,
@@ -73,9 +73,13 @@ class LoginForm(FlaskForm):
     )
     submit = SubmitField("Login")
 
+    @property
+    def validation_failed(self):
+        return bool(self.errors)
+
 class SearchAccountForm(FlaskForm):
     search_customer_id = StringField(
-        "customer id",
+        "Customer ID",
         render_kw={
             "size": 20,
             "placeholder": "1238",
@@ -91,6 +95,10 @@ class SearchAccountForm(FlaskForm):
     )
     submit = SubmitField("Search")
 
+    @property
+    def validation_failed(self):
+        return bool(self.errors)
+    
 class SearchCustomerForm(PrefixedForm):
     class Meta:
         csrf = False
@@ -98,133 +106,145 @@ class SearchCustomerForm(PrefixedForm):
     field_prefix = "search_"
 
     search_first_name = StringField(
-        "first name",
+        "First name",
         render_kw={"placeholder": "Bob", "size": 20},
     )
 
     search_last_name = StringField(
-        "last name",
+        "Last name",
         render_kw={"placeholder": "Robertson", "size": 20},
     )
 
     search_city = StringField(
-        "city",
+        "City",
         render_kw={"placeholder": "Stockholm", "size": 20}
     )
 
     submit = SubmitField("Search")
 
+    @property
+    def validation_failed(self):
+        return bool(self.errors)
+
 class RegisterCustomerForm(PrefixedForm):
     field_prefix = "register_"
 
     register_first_name = StringField(
-        "first name",
+        "First name",
         validators=[Length(min=1, max=50, message="First name cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "Bob", "size": 20, "autofocus": True}
     )
 
     register_last_name = StringField(
-        "last name",
+        "Last name",
         validators=[Length(min=1, max=50, message="Last name cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "Robertson", "size": 20}
     )
 
     register_address = StringField(
-        "address",
+        "Address",
         validators=[Length(min=1, max=50, message="Address cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "89 Viksängsgatan", "size": 20}
     )
 
     register_city = StringField(
-        "city",
+        "City",
         validators=[Length(min=1, max=50, message="City cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "Stockholm", "size": 20}
     )
 
     register_postal_code = StringField(
-        "postal code",
+        "Postal code",
         validators=[Length(min=1, max=10, message="Postal code cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "13245", "size": 20}
     )
 
     #TODO you need a custom check here in js to prevent submission
     register_birthday = DateField(
-        "birthday",
+        "Birthday",
         validators=[InputRequired(), Age()],
         render_kw={"placeholder": "birthday"}
     )
 
     register_national_id = StringField(
-        "national id",
+        "National id",
         validators=[Length(min=1, max=20, message="National ID cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "12341212-1234"}
     )
 
     register_telephone = TelField(
-        "telephone",
+        "Telephone",
         validators=[Length(min=1, max=20, message="Telephone number cannot exceed 20 characters."), InputRequired()],
         render_kw={"placeholder": "123-123-22-55"}
     )
 
     register_email = EmailField(
-        "email",
+        "Email",
         validators=[Length(min=1, max=50, message="Email cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "Bob.Robertson@mail.com"}
     )
 
     register_country = SelectField(
-        "country",
+        "Country",
         validate_choice=[InputRequired()]
     )
 
     submit = SubmitField("Register")
 
+    @property
+    def validation_failed(self):
+        return bool(self.errors)
+
 class RegisterUserForm(PrefixedForm):
     field_prefix = "register_"
 
     register_email = EmailField(
-        "email",
+        "Email",
         validators=[InputRequired(), Length(min=1, max=50, message="Email cannot exceed 50 characters.")],
         render_kw={"placeholder": "Bob.Robertson@mail.com", "autocomplete": "new-email"}
     )
 
     register_password = PasswordField(
-        "password",
+        "Password",
         validators=[InputRequired(), Length(min=8, max=32, message="Password must be between 8 and 32 characters")],
         render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
     register_confirm_password = PasswordField(
-        "conform password",
+        "Confirm password",
         validators=[InputRequired(), Length(min=8, max=32, message="Password must be between 8 and 32 characters"), EqualTo("register_password")],
         render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
     register_role = SelectField(
-        "role",
+        "Role",
         validators=[InputRequired()]
     )
 
     submit = SubmitField("Register")
 
+    @property
+    def validation_failed(self):
+        return bool(self.errors)
+
 class CrudUserForm(PrefixedForm):
     field_prefix = "crud_"
 
     crud_new_password = PasswordField(
-        "new password",
+        "New password",
         validators=[Optional(strip_whitespace=True), Length(min=8, max=32, message="Password must be between 8 and 32 characters")],
         render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
     crud_confirm_password = PasswordField(
-        "confirm password",
+        "Confirm password",
         validators=[Optional(strip_whitespace=True), Length(min=8, max=32, message="Password must be between 8 and 32 characters"),
                     EqualTo("crud_new_password")],
         render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
     crud_role = SelectField(
-        "role",
+        "Role",
         validators=[]
     )
 
@@ -237,21 +257,25 @@ class CrudUserForm(PrefixedForm):
 
     submit_activate = SubmitField("Activate")
 
+    @property
+    def validation_failed(self):
+        return bool(self.errors)
+
 
 class TransactionForm(PrefixedForm):
     field_prefix = "trans_"
 
     trans_accounts = SelectField(
-        "accounts",
+        "Account(s)",
         validators=[InputRequired()],
         render_kw={"placeholder": "accounts"})
 
     trans_type = SelectField(
-        "type",
+        "Type",
         validators=[InputRequired()])
 
     trans_amount = DecimalField(
-        "amount",
+        "Amount",
         use_locale=False,
         places=2,
         validators=[InputRequired(), NumberRange(min=0.01, message="deposit/withdrawal amount cannot be less than 0.")],
@@ -259,22 +283,26 @@ class TransactionForm(PrefixedForm):
     )
 
     submit = SubmitField()
+
+    @property
+    def validation_failed(self):
+        return bool(self.errors)
     
 class TransferForm(PrefixedForm):
     field_prefix = "transfer_"
 
     transfer_account_from = SelectField(
-        "account from",
+        "Account from",
         validators=[InputRequired(), CheckThatTwoFieldsDoNotMatch("transfer_account_to", "You have choosen the same account.")]
     )
 
     transfer_account_to = SelectField(
-        "account to",
+        "Account to",
         validators=[InputRequired(), CheckThatTwoFieldsDoNotMatch("transfer_account_from", "You have choosen the same account.")]
     )
 
     transfer_amount = DecimalField(
-        "amount",
+        "Amount",
         places=2,
         use_locale=False,
         validators=[InputRequired(), NumberRange(min=0.01, message="Transfer amount cannot be less than 0.")],
@@ -282,3 +310,7 @@ class TransferForm(PrefixedForm):
     )
 
     submit = SubmitField()
+
+    @property
+    def validation_failed(self):
+        return bool(self.errors)

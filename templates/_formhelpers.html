@@ -2,21 +2,21 @@
 
 {% macro render_field(field) %}
 
-<div class="form-group">
+<div class="form-group pb-3">
     {% if field.widget.input_type != "submit" %}
-        {{ field.label(class="form-control-label") }}
+        {{ field.label(class="form-label") }}
         {{ field(class="form-control" + (" is-invalid" if field.errors else "") + (" is-valid" if not field.errors and field.data else ""), **(field.render_kw or {})) }}
         {% if field.errors %}
             {% for error in field.errors %}
-            <span class="invalid-feedback">
+            <span class="invalid-feedback text-break ">
                 {{error}}
             </span>
             {% endfor %}
         {% else %}
-            <div class="invalid-feedback"></div>
+            <div class="invalid-feedback text-break"></div>
         {% endif %}
     {% else %}
-        {{ field(class="btn btn-light", **(field.render_kw or {})) }}
+        {{ field(class="btn btn-outline-secondary", **(field.render_kw or {})) }}
     {% endif %}
 </div>
 

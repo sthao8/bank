@@ -52,6 +52,10 @@ def create_app():
         search_account_form = SearchAccountForm()
         return dict(search_account_form=search_account_form)
     
+    @app.context_processor
+    def inject_validation_failed():
+        return dict(validation_failed=False)
+        
     return app
 
 
