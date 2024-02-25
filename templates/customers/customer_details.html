@@ -1,0 +1,62 @@
+{% from "_formhelpers.html" import render_field %}
+
+{% extends "base.html" %}
+
+{% block title %}
+    Register customer
+{% endblock %}
+
+{% block main %}
+<div class="container h-100 d-flex flex-column justify-content-center  ">
+    <div class="row justify-content-center">
+        <div class="col-xs-12 col-md-10 col-xl-8 d-flex flex-column align-items-center ">
+            <div class="pb-3 text-start w-100">
+                <h1>Customer details</h1>
+            </div>
+            <form action="{{ url_for('customers.register_customer') if not edit else url_for('customers.process_customer_edits') }}" method="post" class="needs-validation" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="row">
+                    <div class="col">
+                        {{ render_field(form.first_name) }}
+                    </div>
+                    <div class="col">
+                        {{ render_field(form.last_name) }}
+                    </div>
+                </div>
+                <div class="row">
+                    {{ render_field(form.address) }}
+                </div>
+                <div class="row">
+                    <div class="col-8">
+                        {{ render_field(form.city) }}
+                    </div>
+                    <div class="col-4">
+                        {{ render_field(form.postal_code) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        {{ render_field(form.birthday) if not edit else render_field(form.birthday, readonly=True) }}
+                    </div>
+                    <div class="col">
+                        {{ render_field(form.national_id) if not edit else render_field(form.national_id, readonly=True) }}
+                    </div>
+                </div>
+                <div class="row">
+                    {{ render_field(form.telephone) }}
+                </div>
+                <div class="row">
+                    {{ render_field(form.email) }}
+                </div>
+                <div class="row">
+                    {{ render_field(form.country) }}
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-outline-secondary " >{{"Register" if not edit else "Edit customer"}}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+   
+{% endblock %}

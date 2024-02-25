@@ -5,20 +5,58 @@
 {% endblock %}
 
 {% block main %}
-    account number {{ account.id }}
-    <table>
-        <thead>
-            <th></th>
-            <th>type</th>
-            <th>date</th>
-            <th>amount</th>
-            <th>balance</th>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    <button id="incrementOffsetButton">Load more transactions</button>
-
+<div class="container py-3 px-5 d-flex  flex-column  justify-content-center align-items-center">
+    <div class="row py-5 justify-content-center w-100 ">
+        <div class="col-xs-12 col-md-10 col-xl-8 d-flex flex-column align-items-center ">
+            <div class="row text-start">
+                <h3>Account transactions</h3>
+            </div>
+            <div class="row pb-3 w-100 sticky-top">
+                <div class="col">
+                    <div class="row">
+                        <div class="table-responsive ">
+                            <table class="table table-light">
+                                <thead>
+                                    <th>account number</th>
+                                    <th>type</th>
+                                    <th>balance</th>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ account.id }}</td>
+                                        <td>{{ account.account_type }}</td>
+                                        <td>{{ account.balance | format_money }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row w-100">
+                <div class="col">
+                    <div class="table-responsive ">
+                        <table class="table table-light table-bordered ">
+                            <thead>
+                                <th></th>
+                                <th>type</th>
+                                <th>date</th>
+                                <th>amount</th>
+                                <th>balance</th>
+                            </thead>
+                            <tbody id="transactionsTable" class="table-group-divider">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-grid ">
+                        <button class="btn btn-outline-secondary " id="incrementOffsetButton">Load more transactions</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
 <script>
     const offsetCounter = document.getElementById("incrementOffsetButton");
     let limit = 20;
@@ -30,7 +68,7 @@
         const response = await fetch(url);
         const data = await response.json();
         const allTransactions = data.transactions;
-        const transactionTable = document.querySelector("table tbody");
+        const transactionTable = document.querySelector("#transactionsTable");
         
         // Disable load more button if no more transactions/pages
         if (!data.has_more) {

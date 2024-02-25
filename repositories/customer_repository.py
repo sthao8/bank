@@ -3,6 +3,7 @@ from business_logic.constants import AccountTypes
 from models import Customer, Account, db, Country, Transaction
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
+from views.forms import PrefixedForm, FlaskForm
 
 class CustomerRepository():
     def get_customer_or_none(customer_id):
@@ -28,13 +29,27 @@ class CustomerRepository():
             .where(Transaction.id==transaction.id)
         ).scalar_one_or_none()
     
-    def create_customer_and_new_account(form) -> Customer:
+    def get_customer_from_national_id_or_404(national_id):
+        return Customer.query.filter_by(national_id=national_id).one_or_404()
+    
+    def edit_customer(customer, form) -> bool:
+        changes_made = False
+        for field_name, field in form._fields.items():
+            if field_name in form.user_defined_fields:
+                model_col_name = form.get_column_name(field_name)
+                if getattr(customer, model_col_name) != field.data:
+                    setattr(customer, model_col_name, field.data)
+                    changes_made = True
+        if changes_made:
+            db.session.commit()
+        return changes_made
+    
+    def create_customer_and_new_account(form: PrefixedForm) -> Customer:
         new_customer = Customer()
 
         for field_name, field in form._fields.items():
-            if field_name.startswith(form.field_prefix):
-                model_col_name = form.get_column_name(field_name)
-                setattr(new_customer, model_col_name, field.data)
+            if field_name in form.user_defined_fields:
+                setattr(new_customer, field_name, field.data)
 
         new_account = Account()
         new_account.account_type = AccountTypes.CHECKING.value

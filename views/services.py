@@ -1,4 +1,4 @@
-from models import Customer, Transaction
+from models import Customer, Transaction, User
 
 class TransactionsApiModel:
     def __init__(self, transaction: Transaction) -> None:
@@ -35,7 +35,7 @@ class CustomerApiModel:
         self.email = customer.email
         self.country_code = customer.country_details.country_code
         self.country = customer.country_details.name
-        self.accounts = [{"account_number":account.id, "balance": account.balance} for account in customer.accounts]
+        self.accounts = [{"account_number":account.id, "balance": account.balance, "account_type": account.account_type} for account in customer.accounts]
         self.total_balance = sum([account["balance"] for account in self.accounts])
 
     def to_dict(self):
@@ -56,5 +56,22 @@ class CustomerApiModel:
             "country": self.country,
             "accounts": self.accounts,
             "total_balance": self.total_balance
+        }
+  
+  
+class UserApiModel:
+    def __init__(self, user: User) -> None:
+        self.id = user.id
+        self.email = user.email
+        self.is_active = user.active
+        self.role = user.roles[0]
+
+    def to_dict(self):
+        """ Converts api model instance into a dictionary """
+        return {
+            "id": self.id,
+            "email": self.email,
+            "is_active": self.is_active,
+            "role": self.role.name
         }
   

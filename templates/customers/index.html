@@ -5,32 +5,46 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Global Statistics</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>country</th>
-                <th>customers</th>
-                <th>accounts</th>
-                <th>total balance</th>
-            </tr>
-        </thead>
-        {% for country in country_stats %}
-            <tr>
-                <td><a href="{{ url_for('customers.country_page', country_name=country.name) }}">{{ country.name }}</a></td>
-                <td> {{ country.number_of_customers }} </td>
-                <td> {{ country.number_of_accounts }} </td>
-                <td> {{ country.sum_of_accounts | format_money }} </td>            
-            </tr>
-        {% endfor %}
+    <div class="container p-5 ">
 
-        <tr>
-            <td>Total: </td>
-            <td> {{ global_stats["number_of_customers"] }} </td>
-            <td> {{ global_stats["number_of_accounts"] }} </td>
-            <td> {{ global_stats["sum_of_accounts"] | format_money }} </td>
-        </tr>
-        
-    </table>
+        <div class="row justify-content-center pb-3">
+            <div class="col-12 text-center pb-3">
+                <h1>Global Overview</h1>
+            </div>
+        </div>
+
+        <div class="row justify-content-center ">
+            <div class="col-md-12 col-lg-6">
+                <table class="table-light table table-borderless">
+                    <thead>
+                        <tr>
+                            <th scope="col"></th>
+                            <th scope="col">number of customers</th>
+                            <th scope="col">number of accounts</th>
+                            <th scope="col">balance of accounts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for country in country_stats %}
+                        <tr data-href="{{ url_for('customers.country_page', country_name=country.name) }}">
+                            <td scope="row">{{ country.name }}</td>
+                            <td> {{ country.number_of_customers }} </td>
+                            <td> {{ country.number_of_accounts }} </td>
+                            <td> {{ country.sum_of_accounts | format_money }} </td>            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tr class="table-info">
+                        <td>Global: </td>
+                        <td> {{ global_stats["number_of_customers"] }} </td>
+                        <td> {{ global_stats["number_of_accounts"] }} </td>
+                        <td> {{ global_stats["sum_of_accounts"] | format_money }} </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
    
+    <script src="/static/js/click_table_row.js"></script>
+
 {% endblock %}

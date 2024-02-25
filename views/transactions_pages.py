@@ -28,9 +28,9 @@ def transactions():
     customer_id = request.form.get("customer_id", None)
     customer = customer_service.get_customer_or_404(customer_id)
     form: PrefixedForm = TransactionForm()
-    form.trans_type.choices = ["withdraw", "deposit"]
+    form.type.choices = ["withdraw", "deposit"]
     accounts_labels = [(account.id, f"{account.id}: current balance: {format_money(account.balance)}") for account in customer.accounts]
-    form.trans_accounts.choices = accounts_labels
+    form.accounts.choices = accounts_labels
     current_date = date.today()
 
     return render_template("transactions/withdraw_deposit.html", active_page="transaction", form=form, current_date=current_date, customer=customer)
@@ -42,28 +42,26 @@ def process_transaction():
     customer = customer_service.get_customer_or_404(customer_id)
     
     form: PrefixedForm = TransactionForm()
-    form.trans_type.choices = ["withdraw", "deposit"]
-    form.trans_accounts.choices = account_service.get_account_choices(customer)
+    form.type.choices = ["withdraw", "deposit"]
+    form.accounts.choices = account_service.get_account_choices(customer)
 
-    account: Account = account_service.get_account_or_404(int(form.trans_accounts.data))
+    account: Account = account_service.get_account_or_404(int(form.accounts.data))
     
     if form.validate_on_submit():
 
-        amount = form.trans_amount.data
+        amount = form.amount.data
     
-        if form.trans_type.data == "withdraw":
+        if form.type.data == "withdraw":
             transaction_type = TransactionTypes.WITHDRAW
-        elif form.trans_type.data == "deposit":
+        elif form.type.data == "deposit":
             transaction_type = TransactionTypes.DEPOSIT
-
-        print(transaction_type)
 
         try:
             transaction_service.process_transaction(account, amount, transaction_type)
         except ValueError as error:
-            flash(error)
+            flash(f"ERROR: {error}")
         else:
-            flash(f"success! {form.trans_type.data} money in account number {account.id}.")
+            flash(f"Success! {form.type.data} money in account number {account.id}.")
         
         return redirect(url_for("customers.customer_page", customer_id=customer.id))
     else:
@@ -79,8 +77,8 @@ def transfer():
     current_date = date.today()
 
     accounts_choices = account_service.get_account_choices(customer)
-    form.transfer_account_from.choices = accounts_choices
-    form.transfer_account_to.choices = accounts_choices
+    form.account_from.choices = accounts_choices
+    form.account_to.choices = accounts_choices
 
     return render_template("transactions/transfer.html", active_page="transfer", customer=customer, form=form, current_date=current_date)
     
@@ -92,13 +90,13 @@ def process_transfer():
     form: FlaskForm = TransferForm()
 
     accounts_choices = account_service.get_account_choices(customer)
-    form.transfer_account_from.choices = accounts_choices
-    form.transfer_account_to.choices = accounts_choices
+    form.account_from.choices = accounts_choices
+    form.account_to.choices = accounts_choices
 
     if form.validate_on_submit():
-        from_account = account_service.get_account_or_404(form.transfer_account_from.data)
-        to_account = account_service.get_account_or_404(form.transfer_account_to.data)
-        amount = form.transfer_amount.data
+        from_account = account_service.get_account_or_404(form.account_from.data)
+        to_account = account_service.get_account_or_404(form.account_to.data)
+        amount = form.amount.data
 
         try:
             transaction_service.process_transfer(from_account, to_account, amount)

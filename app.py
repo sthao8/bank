@@ -18,10 +18,10 @@ from views.users_pages import users_blueprint
 from views.customers_pages import customers_blueprint
 from views.search_pages import search_blueprint
 from views.transactions_pages import transactions_blueprint
-
+from views.api import api_blueprint
 
 # TODO maybe simplify my prefixed forms
-# TODO work on frontend errors
+# TODO work on frontend errors (WITH FORMS in jinja tag in base)
 
 def create_app():
     locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
@@ -38,6 +38,7 @@ def create_app():
     app.register_blueprint(customers_blueprint)
     app.register_blueprint(search_blueprint)
     app.register_blueprint(transactions_blueprint)
+    app.register_blueprint(api_blueprint)
 
     security = Security(app, user_datastore)
 
@@ -48,10 +49,14 @@ def create_app():
     app.template_filter("format_money")(format_money)
 
     @app.context_processor
-    def context_processor():
+    def inject_search_account_form():
         search_account_form = SearchAccountForm()
         return dict(search_account_form=search_account_form)
     
+    @app.context_processor
+    def inject_validation_failed():
+        return dict(validation_failed=False)
+        
     return app
 
 

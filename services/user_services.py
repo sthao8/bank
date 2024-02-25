@@ -26,7 +26,7 @@ class UserService():
         return self.user_repository.get_user_or_404(user_id)
     
     def create_and_register_user(self, form):
-        email = form.register_email.data
+        email = form.email.data
         user = self.user_repository.get_user_from_email(email)
         if not user:
             return self.user_repository.create_and_register_user(form)
@@ -54,6 +54,9 @@ class UserService():
             self.user_repository.activate_user(user)
             message = "user activated"
         return message
+    
+    def deleted_user(self, user) -> str:
+        return self.user_repository.delete_user(user)
 
     def authenticate_user(self, email, password) -> User:
         user = user_datastore.find_user(email=email)
@@ -61,4 +64,4 @@ class UserService():
         if user and verify_password(password, user.password):
             return user
         else:
-            raise ValueError("Invalid password")
+            raise ValueError("Invalid username or password")

@@ -5,53 +5,121 @@
 {% endblock %}
 
 {% block main %}
-
-    <h1> customer id {{ customer.id }}</h1>
-    <div>
-        <h3>customer details:</h3>
-        <ul>
-            <li>name: {{ customer.first_name }} {{ customer.last_name }} </li>
-            <li>personal id: {{ customer.national_id }} </li>
-            <li>address: {{ customer.address }}, {{ customer.city }} {{ customer.postalcode }} {{ customer.country_details.name }}</li>
-            <li>birthday: {{ customer.birthday }} </li>
-            <li>telephone: {{ customer.country_details.telephone_country_code }}  {{ customer.telephone }} </li>
-        </ul>
+<div class="container px-sm-0 p-5 ">
+    <div class="row justify-content-center ">
+        <div class="col-10">
+            <div class="row">
+                <div class="col-xl-6">
+                    <div>
+                        <h3>Customer number: {{ customer.id }}</h3>
+                        <ul>
+                            <li>Name: {{ customer.first_name }} {{ customer.last_name }} </li>
+                            <li>National id: {{ customer.national_id }} </li>
+                            <li>Address: {{ customer.address }}, {{ customer.city }} {{ customer.postal_code }} {{ customer.country_details.name }}</li>
+                            <li>Birthday: {{ customer.birthday }} </li>
+                            <li>Telephone: {{ customer.country_details.telephone_country_code }}  {{ customer.telephone }} </li>
+                            <li>Email: {{ customer.email }}</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <form action="{{ url_for('customers.edit_customer', customer_id=customer.id) }}" method="get">
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-outline-secondary w-100 ">Edit customer details</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col pt-xs-5 pt-sm-5 pt-md-5 pt-5">
+                    <h3>Accounts:</h3>
+                    <div class="d-grid gap-2 pb-3">
+                        <button type="button" class="btn btn-outline-secondary w-100 " data-bs-toggle="modal" data-bs-target="#transactionModal">Withdraw/Deposit</button>
+                        <button type="button" class="btn btn-outline-secondary w-100 " data-bs-toggle="modal" data-bs-target="#transferModal">Transfer</button>
+                    </div>
+                    <div class="table-responsive ">
+                        <table class="table table-light table-bordered ">
+                            <thead>
+                                <tr>
+                                    <th>Account number</th>
+                                    <th>Type</th>
+                                    <th>Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for account in customer.accounts %}
+                                <tr data-href="{{ url_for('customers.account_page', account_id=account.id) }}">
+                                    <td> {{ account.id }} </a></td>
+                                    <td> {{ account.account_type }} </td>
+                                    <td> {{ account.balance |format_money }} </td>
+                                </tr>
+                                {% endfor %}
+                                <tr>
+                                    <td colspan="2"><b>Total balance: </b></td>
+                                    <td>{{ total_balance |format_money }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div>
-        <h3>Accounts:</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>account number</th>
-                    <th>type</th>
-                    <th>balance</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for account in customer.accounts %}
-                <tr>
-                    <td><a href="{{ url_for('customers.account_page', account_id=account.id) }}"> {{ account.id }} </a></td>
-                    <td> {{ account.account_type }} </td>
-                    <td> {{ account.balance |format_money }} </td>
-                </tr>
-                {% endfor %}
-                <tr>
-                    <td><b>Total balance: </b></td>
-                    <td>{{ total_balance |format_money }}</td>
-                </tr>
-            </tbody>
-        </table>
+<div class="modal fade" tabindex="-1" id="transferModal">
+    <div class="modal-dialog-centered modal-dialog modal-fullscreen-sm-down ">
+        <div class="modal-content">
+            <div class="modal-header text-break ">
+                <h3>Transfer</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row justify-content-center">
+                        <form action="{{ url_for('transactions.process_transfer') }}" method="post" class="needs-validation" novalidate>
+                            {{ transfer_form.hidden_tag() }}
+                            <input type="hidden" value="{{customer.id}}" name="customer_id">
+                            {{ render_field(transfer_form.account_from) }}
+                            {{ render_field(transfer_form.account_to) }}
+                            {{ render_field(transfer_form.amount) }}
+                            <input type="text" readonly disabled value="{{ current_date }}">
+                            {{ render_field(transfer_form.submit) }}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div>
-        <form action="{{ url_for('transactions.transactions') }}" method="post">
-            <input hidden value="{{ customer.id }}" name="customer_id">
-            <button type="submit">Withdraw/Deposit</button>
-        </form>
-        <form action="{{ url_for('transactions.transfer') }}" method="post" >
-            <input hidden value="{{ customer.id }}" name="customer_id">
-            <button type="submit">Transfer</button>
-        </form>
+<div class="modal fade" tabindex="-1" id="transactionModal">
+    <div class="modal-dialog-centered modal-dialog modal-fullscreen-sm-down ">
+        <div class="modal-content">
+            <div class="modal-header text-break ">
+                <h3>Withdraw/Deposit</h3>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row justify-content-center">
+                        <form action="{{ url_for('transactions.process_transaction') }}" method="post" class="needs-validation" novalidate>
+                            {{ trans_form.hidden_tag() }}
+                            <input type="hidden" value="{{customer.id}}" name="customer_id">
+                            {{ render_field(trans_form.accounts) }}
+                            {{ render_field(trans_form.type) }}
+                            {{ render_field(trans_form.amount) }}
+                            <input type="text" readonly disabled value="{{ current_date }}">
+                            {{ render_field(trans_form.submit) }}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
+
+<script src="/static/js/click_table_row.js"></script>
+
+
 {% endblock %}

@@ -21,10 +21,10 @@ def crud_user():
     user_roles = user_service.get_user_roles()
 
     crud_form = CrudUserForm()
-    crud_form.crud_role.choices = user_roles
+    crud_form.role.choices = user_roles
 
     register_form = RegisterUserForm()
-    register_form.register_role.choices = user_roles
+    register_form.role.choices = user_roles
 
     users  = user_service.fetch_users_by_active_status(show_inactive_users)
 
@@ -42,8 +42,8 @@ def user_page(user_id):
     user = user_service.get_user_or_404(user_id)
 
     form = CrudUserForm()
-    form.crud_role.choices = user_service.get_user_roles()
-    form.crud_role.data = user.roles[0]
+    form.role.choices = user_service.get_user_roles()
+    form.role.data = user.roles[0]
 
     return render_template("users/edit_user.html", user=user, form=form)
 
@@ -52,7 +52,7 @@ def user_page(user_id):
 @roles_accepted("admin")
 def register_user():
     form: FlaskForm = RegisterUserForm()
-    form.register_role.choices = user_service.get_user_roles()
+    form.role.choices = user_service.get_user_roles()
 
     if form.validate_on_submit():
         try:
@@ -69,14 +69,14 @@ def register_user():
 @roles_accepted("admin")
 def update_user():
     form = CrudUserForm()
-    form.crud_role.choices = user_service.get_user_roles()
+    form.role.choices = user_service.get_user_roles()
 
     user_id = request.form.get("user_id", None, int)
     user = user_service.get_user_or_404(user_id)
 
     if form.validate_on_submit():
-        new_role = form.crud_role.data
-        new_password = form.crud_new_password.data
+        new_role = form.role.data
+        new_password = form.new_password.data
         
         try:
             if user_service.update_user_if_changes(user, new_password, new_role):
@@ -98,4 +98,15 @@ def change_user_status():
     result = user_service.changed_user_status(user)
     flash(result)
     
-    return redirect(url_for("users.user_page", user_id=user.id))
+    return redirect(url_for("users.crud_user"))
+
+@users_blueprint.route("/delete_user", methods=["POST"])
+@roles_accepted("admin")
+def delete_user():
+    user_id = request.form.get("user_id", None, int)
+    user = user_service.get_user_or_404(user_id)
+
+    user_service.deleted_user(user)
+    flash("User deleted")
+    
+    return redirect(url_for("users.crud_user"))

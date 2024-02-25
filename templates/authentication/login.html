@@ -1,3 +1,5 @@
+{% from "_formhelpers.html" import render_field %}
+
 {% extends "base.html" %}
 
 {% block title %}
@@ -5,26 +7,23 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Login</h1>
+    <div class="d-flex justify-content-center align-items-center min-vh-100">
+        <div class="row ">
+                <div class="bg-light-subtle rounded p-5 ">
+                    <div class="text-center text-secondary text-info ">
+                        <i class="bx bxs-user-circle large_icon"></i>
+                        <h1 class="mb-5">Login</h1> 
+                    </div>
+            
+                    <form action="{{ url_for('authentication.login') }}" method="post" class="needs-validation" novalidate>
+                        {{ form.hidden_tag() }}
+                        {{ render_field(form.email) }}
+                        {{ render_field(form.password) }}
+                        {{ render_field(form.submit) }}
+                    </form>
+                </div>
+        </div>
+    </div>
 
-    <form action="{{ url_for('authentication.login') }}" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <div>
-            {{ form.email.label}}            
-            {{ form.email(size=20, placeholder="email", autocomplete="off", autofocus=true) }}
-            {% if form.email.errors %}
-                <span>{{ form.email.errors[0] }}</span>
-            {% endif %}
-        </div>
-        <div>
-            {{ form.password.label }}
-            {{ form.password(size=20, placeholder="password", autocomplete="off") }}
-            {% if form.password.errors %}
-                <span>{{ form.password.errors[0] }}</span>
-            {% endif %}
-        </div>
-            {{ form.submit() }}
-        </div>
-    </form>
 
 {% endblock %}
