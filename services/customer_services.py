@@ -15,9 +15,15 @@ class CustomerService():
     
     def get_customer_from_transaction(self, transaction):
         return self.customer_repository.get_customer_from_transaction(transaction)
+    
+    def get_customer_from_national_id(self, national_id):
+        return self.customer_repository.get_customer_from_national_id_or_404(national_id)
+    
+    def customer_edited(self, customer, form) -> bool:
+        return self.customer_repository.edit_customer(customer, form)
 
     def create_customer_and_new_account(self, form):
-        national_id = form.register_national_id.data
+        national_id = form.national_id.data
         customer = self.customer_repository.get_customer_from_national_id(national_id)
 
         if customer:

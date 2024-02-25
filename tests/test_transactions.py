@@ -4,7 +4,7 @@ from business_logic.constants import TransactionTypes
 import unittest
 from unittest.mock import Mock
 
-class TransactionsTest(unittest.TestCase):
+class TestTransactions(unittest.TestCase):
     def test_1_Value_error_raised_with_negative_withdraw_amount(self):
         mock_account = Mock()
         mock_account.balance = Decimal(100.00)

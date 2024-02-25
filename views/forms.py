@@ -129,62 +129,64 @@ class SearchCustomerForm(PrefixedForm):
 class RegisterCustomerForm(PrefixedForm):
     field_prefix = "register_"
 
-    register_first_name = StringField(
+    user_defined_fields = ["first_name", "last_name", "address", "city", "postal_code", "birthday", "national_id", "telephone", "email", "country"]
+
+    first_name = StringField(
         "First name",
         validators=[Length(min=1, max=50, message="First name cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "Bob", "size": 20, "autofocus": True}
     )
 
-    register_last_name = StringField(
+    last_name = StringField(
         "Last name",
         validators=[Length(min=1, max=50, message="Last name cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "Robertson", "size": 20}
     )
 
-    register_address = StringField(
+    address = StringField(
         "Address",
         validators=[Length(min=1, max=50, message="Address cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "89 Viksängsgatan", "size": 20}
     )
 
-    register_city = StringField(
+    city = StringField(
         "City",
         validators=[Length(min=1, max=50, message="City cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "Stockholm", "size": 20}
     )
 
-    register_postal_code = StringField(
+    postal_code = StringField(
         "Postal code",
         validators=[Length(min=1, max=10, message="Postal code cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "13245", "size": 20}
     )
 
     #TODO you need a custom check here in js to prevent submission
-    register_birthday = DateField(
+    birthday = DateField(
         "Birthday",
         validators=[InputRequired(), Age()],
         render_kw={"placeholder": "birthday"}
     )
 
-    register_national_id = StringField(
+    national_id = StringField(
         "National id",
         validators=[Length(min=1, max=20, message="National ID cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "12341212-1234"}
     )
 
-    register_telephone = TelField(
+    telephone = TelField(
         "Telephone",
         validators=[Length(min=1, max=20, message="Telephone number cannot exceed 20 characters."), InputRequired()],
         render_kw={"placeholder": "123-123-22-55"}
     )
 
-    register_email = EmailField(
+    email = EmailField(
         "Email",
         validators=[Length(min=1, max=50, message="Email cannot exceed 50 characters."), InputRequired()],
         render_kw={"placeholder": "bob.bobertson@mail.com"}
     )
 
-    register_country = SelectField(
+    country = SelectField(
         "Country",
         validate_choice=[InputRequired()]
     )
@@ -194,29 +196,33 @@ class RegisterCustomerForm(PrefixedForm):
     @property
     def validation_failed(self):
         return bool(self.errors)
+    
+
 
 class RegisterUserForm(PrefixedForm):
     field_prefix = "register_"
 
-    register_email = EmailField(
+    user_defined_fields = ["email", "password", "confirm_password", "role"]
+
+    email = EmailField(
         "Email",
         validators=[InputRequired(), Length(min=1, max=50, message="Email cannot exceed 50 characters.")],
         render_kw={"placeholder": "bob.bobertson@mail.com", "autocomplete": "new-email"}
     )
 
-    register_password = PasswordField(
+    password = PasswordField(
         "Password",
         validators=[InputRequired(), Length(min=8, max=32, message="Password must be between 8 and 32 characters")],
         render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
-    register_confirm_password = PasswordField(
+    confirm_password = PasswordField(
         "Confirm password",
-        validators=[InputRequired(), Length(min=8, max=32, message="Password must be between 8 and 32 characters"), EqualTo("register_password")],
+        validators=[InputRequired(), Length(min=8, max=32, message="Password must be between 8 and 32 characters"), EqualTo("password")],
         render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
-    register_role = SelectField(
+    role = SelectField(
         "Role",
         validators=[InputRequired()]
     )
@@ -230,20 +236,22 @@ class RegisterUserForm(PrefixedForm):
 class CrudUserForm(PrefixedForm):
     field_prefix = "crud_"
 
-    crud_new_password = PasswordField(
+    user_defined_fields = ["new_password", "confirm_password", "role"]
+
+    new_password = PasswordField(
         "New password",
         validators=[Optional(strip_whitespace=True), Length(min=8, max=32, message="Password must be between 8 and 32 characters")],
         render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
-    crud_confirm_password = PasswordField(
+    confirm_password = PasswordField(
         "Confirm password",
         validators=[Optional(strip_whitespace=True), Length(min=8, max=32, message="Password must be between 8 and 32 characters"),
                     EqualTo("crud_new_password")],
         render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 
-    crud_role = SelectField(
+    role = SelectField(
         "Role",
         render_kw={"class": "userRole"}
     )
@@ -265,16 +273,18 @@ class CrudUserForm(PrefixedForm):
 class TransactionForm(PrefixedForm):
     field_prefix = "trans_"
 
-    trans_accounts = SelectField(
+    user_defined_fields = ["accounts", "type", "amount"]
+
+    accounts = SelectField(
         "Account(s)",
         validators=[InputRequired()],
         render_kw={"placeholder": "accounts"})
 
-    trans_type = SelectField(
+    type = SelectField(
         "Type",
         validators=[InputRequired()])
 
-    trans_amount = DecimalField(
+    amount = DecimalField(
         "Amount",
         use_locale=False,
         places=2,
@@ -291,17 +301,19 @@ class TransactionForm(PrefixedForm):
 class TransferForm(PrefixedForm):
     field_prefix = "transfer_"
 
-    transfer_account_from = SelectField(
+    user_defined_fields = ["account_from", "account_to", "amount"]
+
+    account_from = SelectField(
         "Account from",
-        validators=[InputRequired(), CheckThatTwoFieldsDoNotMatch("transfer_account_to", "You have choosen the same account.")]
+        validators=[InputRequired(), CheckThatTwoFieldsDoNotMatch("account_to", "You have choosen the same account.")]
     )
 
-    transfer_account_to = SelectField(
+    account_to = SelectField(
         "Account to",
-        validators=[InputRequired(), CheckThatTwoFieldsDoNotMatch("transfer_account_from", "You have choosen the same account.")]
+        validators=[InputRequired(), CheckThatTwoFieldsDoNotMatch("account_from", "You have choosen the same account.")]
     )
 
-    transfer_amount = DecimalField(
+    amount = DecimalField(
         "Amount",
         places=2,
         use_locale=False,

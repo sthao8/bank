@@ -23,10 +23,10 @@ class UserRepository():
 
     def create_and_register_user(form) -> None:
         user_datastore.create_user(
-                email=form.register_email.data,
-                password=hash_password(form.register_password.data),
+                email=form.email.data,
+                password=hash_password(form.password.data),
                 active=True,
-                roles=[form.register_role.data])
+                roles=[form.role.data])
         db.session.commit()
     
     def update_password(user, new_password):

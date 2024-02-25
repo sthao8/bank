@@ -15,9 +15,12 @@
             {% if current_user.is_authenticated %}
                 <nav class="navbar navbar-expand-lg bg-light-subtle px-5 ">
                     <div class="container-fluid h-100">
-                        <a class="navbar-brand" href="{{ url_for('customers.index') }}">
-                            <img src="/static/images/bank_logo.webp" width="50" height="50"> Blueprint Bank
-                        </a>
+                        <div class="align-items-center  d-flex">
+                            <a class="navbar-brand" href="{{ url_for('customers.index') }}">
+                                <i class="bx bxs-bank bx-lg brand-color"></i> Blueprint Bank
+                            </a>
+                        </div>
+                        
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
                             <span class="navbar-toggler-icon"></span>
                         </button>
@@ -48,7 +51,7 @@
                                         {{ search_account_form.hidden_tag() }}
                                         <div class="input-group ">
                                             {{ search_account_form.search_customer_id(class="form-control", autocomplete=off) }}
-                                            <button class="btn btn-outline-secondary rounded-end-2" type="button">Quick search</button>
+                                            <button class="btn btn-outline-secondary rounded-end-2" type="submit">Quick search</button>
                                         </div>
                                     </form>
                                 </li>
@@ -140,7 +143,7 @@
                         });
                     });
                     
-                    // Reset validation if serverside errors
+                    Reset validation if serverside errors
                     var validationFailed = {{ validation_failed|tojson }};
                     {% if form %}
                         validationFailed = {{ validation_failed|tojson }} || {{ form.validation_failed|tojson }};

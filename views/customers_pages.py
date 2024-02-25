@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, flash, url_for, jsonify, request, abort
 from flask_security import login_required
+from datetime import date
 from math import ceil
 
 from models import db
@@ -7,12 +8,14 @@ from .services import (
     TransactionsApiModel,
     CustomerApiModel
     )
-from views.forms import RegisterCustomerForm
+from views.forms import RegisterCustomerForm, PrefixedForm, TransactionForm, TransferForm, FlaskForm
 
 from services.country_services import CountryService, CountryRepository
 from services.transaction_services import TransactionService, TransactionRepository
 from services.customer_services import CustomerService, CustomerRepository
 from services.account_services import AccountService, AccountRepository
+
+from utils import format_money
 
 customers_blueprint = Blueprint("customers", __name__)
 
@@ -52,9 +55,9 @@ def country_page(country_name):
 @login_required
 def register_customer():
     # TODO: do maybe some more validation stuff here
-
+    #TODO random place, but make sure birthdate is in past
     form = RegisterCustomerForm()
-    form.register_country.choices = country_service.get_form_country_choices()
+    form.country.choices = country_service.get_form_country_choices()
 
     if form.validate_on_submit():
         try:
@@ -66,9 +69,10 @@ def register_customer():
             return redirect(url_for("customers.customer_page", customer_id=new_customer.id))
 
     return render_template(
-        "customers/register_customer.html",
+        "customers/customer_details.html",
         form=form,
-        active_page="register_customer")
+        active_page="register_customer",
+        edit=False)
 
 @customers_blueprint.route("/customer/<customer_id>", methods=["GET"])
 @login_required
@@ -76,10 +80,58 @@ def customer_page(customer_id):
     customer = customer_service.get_customer_or_404(customer_id)
     
     total_balance = sum([account.balance for account in customer.accounts])
+
+    # transaction form
+    trans_form: PrefixedForm = TransactionForm()
+    trans_form.type.choices = ["withdraw", "deposit"]
+    accounts_labels = [(account.id, f"{account.id}: current balance: {format_money(account.balance)}") for account in customer.accounts]
+    trans_form.accounts.choices = accounts_labels
+
+    current_date = date.today()
+
+    #transfer form
+    transfer_form: FlaskForm = TransferForm()
+    accounts_choices = account_service.get_account_choices(customer)
+    transfer_form.account_from.choices = accounts_choices
+    transfer_form.account_to.choices = accounts_choices
+
+
     return render_template(
         "customers/customer_page.html",
         customer=customer,
-        total_balance=total_balance)
+        total_balance=total_balance,
+        trans_form=trans_form,
+        transfer_form=transfer_form,
+        current_date=current_date,
+        )
+
+@customers_blueprint.route("/edit-customer/<int:customer_id>")
+@login_required
+def edit_customer(customer_id):
+    customer = customer_service.get_customer_or_404(customer_id)
+
+    form = RegisterCustomerForm(obj=customer)
+    form.country.choices = country_service.get_form_country_choices()
+
+    return render_template("customers/customer_details.html", customer=customer, form=form, edit=True)
+
+@customers_blueprint.route("/process-customer-edits", methods=["POST"])
+@login_required
+def process_customer_edits():
+    form = RegisterCustomerForm()
+    form.country.choices = country_service.get_form_country_choices()
+    
+    customer = customer_service.get_customer_from_national_id(form.national_id.data)
+
+    if form.validate_on_submit():
+
+        if customer_service.customer_edited(customer, form):
+            flash("Customer details updated!")
+        else:
+            flash("No changes to customer made!")
+    else:
+        flash("error: did not validate")
+    return redirect(url_for("customers.customer_page", customer_id=customer.id))
 
 @customers_blueprint.route("/account/<account_id>", methods=["GET"])
 @login_required

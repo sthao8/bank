@@ -41,12 +41,16 @@ td a, th a {
 
 tr[data-href], th[data-href], tr[data-bs-toggle]:not(.inactive) {
     cursor: pointer;
-    border-left: 5px solid transparent;
+    border-left: thick solid transparent;
 }
 
-tr[data-href]:hover, th[data-href]:hover, tr[data-bs-toggle]:hover {
-    border-left-color:cyan;
-    --bs-table-bg: whitesmoke;
+tr {
+    border-left: thick solid transparent !important;
+}
+
+tr[data-href]:hover, th[data-href]:hover, tr[data-bs-toggle]:hover, tr:hover {
+    border-left-color:cyan !important;
+    --bs-table-bg: whitesmoke !important;
 }
 
 .inactiveRow {

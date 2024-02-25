@@ -26,9 +26,9 @@
                     <form id="updateUserForm" action="{{ url_for('users.update_user') }}" method="post" class="needs-validation" novalidate>
                         {{ form.hidden_tag() }}
                         <input type="hidden" name="user_id" value="{{ user.id }}">
-                        <td>{{ render_field(form.crud_role) }}</td>
-                        <td>{{ render_field(form.crud_new_password) }}</td>
-                        <td>{{ render_field(form.crud_confirm_password)}}</td>
+                        <td>{{ render_field(form.role) }}</td>
+                        <td>{{ render_field(form.new_password) }}</td>
+                        <td>{{ render_field(form.confirm_password)}}</td>
                         <td>Active</td>
                         <td>{{ render_field(form.submit_update) }}</td>
                     </form>

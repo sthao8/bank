@@ -35,7 +35,7 @@ class CustomerApiModel:
         self.email = customer.email
         self.country_code = customer.country_details.country_code
         self.country = customer.country_details.name
-        self.accounts = [{"account_number":account.id, "balance": account.balance} for account in customer.accounts]
+        self.accounts = [{"account_number":account.id, "balance": account.balance, "account_type": account.account_type} for account in customer.accounts]
         self.total_balance = sum([account["balance"] for account in self.accounts])
 
     def to_dict(self):

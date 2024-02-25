@@ -69,7 +69,7 @@
                                             {% endfor %}
                                         </tr>
                                     {% endfor %}
-                                    <tr>
+                                    <tr class="{{ d-none if not customers.has_prev and not customers.has_next }}">
                                         <td colspan="7">
                                             <div class="d-flex justify-content-between">
                                                 {% if customers.has_prev %}
@@ -89,16 +89,6 @@
                                             </div>
                                         </td>
                                     </tr>
-<!--                                     
-                                    <tr>
-                                        
-                                        {#% if customers.has_prev %#}
-                                            <td><a href="{{ url_for('search.display_search_results', page = ( page - 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">previous</a></td>
-                                        {#% endif %#}
-                                        {#% if customers.has_next %#}
-                                            <td><a href="{{ url_for('search.display_search_results', page = ( page + 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">next</a></td>
-                                        {#% endif %#}
-                                    </tr> -->
                                 </tbody>
                             </table>
                         </div>

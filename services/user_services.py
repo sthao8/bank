@@ -26,7 +26,7 @@ class UserService():
         return self.user_repository.get_user_or_404(user_id)
     
     def create_and_register_user(self, form):
-        email = form.register_email.data
+        email = form.email.data
         user = self.user_repository.get_user_from_email(email)
         if not user:
             return self.user_repository.create_and_register_user(form)

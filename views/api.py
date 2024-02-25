@@ -1,5 +1,5 @@
 from .services import UserApiModel, CustomerApiModel, TransactionsApiModel
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, url_for
 from services.user_services import UserService, UserRepository
 from services.customer_services import CustomerService, CustomerRepository
 from services.transaction_services import TransactionService, TransactionRepository
@@ -39,9 +39,13 @@ def transactions_api(account_id):
     total_transactions_amount = transaction_service.get_count_of_transactions(account_id)
 
     has_more = offset + limit < total_transactions_amount
+    if has_more:
+        next_url = f"{url_for('api.transactions_api', account_id=account_id, offset=offset + limit, limit=limit, _external=True)}"
+    else:
+        next_url = None
 
     account_transactions = transaction_service.get_limited_offset_transactions(account_id, limit, offset)
 
     transactions_dict = [TransactionsApiModel(transaction).to_dict() for transaction in account_transactions]
 
-    return jsonify({"transactions": transactions_dict, "has_more": has_more})
+    return jsonify({"transactions": transactions_dict, "has_more": has_more, "next": next_url, "offset": offset, "limit": limit })

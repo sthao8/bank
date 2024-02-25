@@ -12,9 +12,9 @@
     <form action="{{ url_for('transactions.process_transfer') }}" method="post" class="needs-validation" novalidate>
         {{ form.hidden_tag() }}
         <input type="hidden" value="{{customer.id}}" name="customer_id">
-        {{ render_field(form.transfer_account_from) }}
-        {{ render_field(form.transfer_account_to) }}
-        {{ render_field(form.transfer_amount) }}
+        {{ render_field(form.account_from) }}
+        {{ render_field(form.account_to) }}
+        {{ render_field(form.amount) }}
         <input type="text" readonly disabled value="{{ current_date }}">
         {{ render_field(form.submit) }}
     </form>
