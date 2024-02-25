@@ -7,22 +7,54 @@
 {% endblock %}
 
 {% block main %}
-<div>
-    <h1>Register new customer</h1>
-    <form action="{{ url_for('customers.register_customer') }}" method="post" class="needs-validation" novalidate>
-        {{ form.hidden_tag() }}
-        {{ render_field(form.register_first_name) }}
-        {{ render_field(form.register_last_name) }}
-        {{ render_field(form.register_address) }}
-        {{ render_field(form.register_city) }}
-        {{ render_field(form.register_postal_code) }}
-        {{ render_field(form.register_birthday) }}
-        {{ render_field(form.register_national_id) }}
-        {{ render_field(form.register_telephone) }}
-        {{ render_field(form.register_email) }}
-        {{ render_field(form.register_country) }}
-        {{ render_field(form.submit) }}
-    </form>
+<div class="container h-100 d-flex flex-column justify-content-center  ">
+    <div class="row justify-content-center">
+        <div class="col-xs-12 col-md-10 col-xl-8 d-flex flex-column align-items-center ">
+            <div class="pb-3 text-start w-100">
+                <h1>Customer details</h1>
+            </div>
+            <form action="{{ url_for('customers.register_customer') }}" method="post" class="needs-validation" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="row">
+                    <div class="col">
+                        {{ render_field(form.register_first_name) }}
+                    </div>
+                    <div class="col">
+                        {{ render_field(form.register_last_name) }}
+                    </div>
+                </div>
+                <div class="row">
+                    {{ render_field(form.register_address) }}
+                </div>
+                <div class="row">
+                    <div class="col-8">
+                        {{ render_field(form.register_city) }}
+                    </div>
+                    <div class="col-4">
+                        {{ render_field(form.register_postal_code) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        {{ render_field(form.register_birthday) }}
+                    </div>
+                    <div class="col">
+                        {{ render_field(form.register_national_id) }}
+                    </div>
+                </div>
+                <div class="row">
+                    {{ render_field(form.register_telephone) }}
+                </div>
+                <div class="row">
+                    {{ render_field(form.register_email) }}
+                </div>
+                <div class="row">
+                    {{ render_field(form.register_country) }}
+                </div>
+                {{ render_field(form.submit) }}
+            </form>
+        </div>
+    </div>
 </div>
    
 {% endblock %}

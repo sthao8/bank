@@ -54,6 +54,9 @@ class UserService():
             self.user_repository.activate_user(user)
             message = "user activated"
         return message
+    
+    def deleted_user(self, user) -> str:
+        return self.user_repository.delete_user(user)
 
     def authenticate_user(self, email, password) -> User:
         user = user_datastore.find_user(email=email)

@@ -98,4 +98,15 @@ def change_user_status():
     result = user_service.changed_user_status(user)
     flash(result)
     
-    return redirect(url_for("users.user_page", user_id=user.id))
+    return redirect(url_for("users.crud_user"))
+
+@users_blueprint.route("/delete_user", methods=["POST"])
+@roles_accepted("admin")
+def delete_user():
+    user_id = request.form.get("user_id", None, int)
+    user = user_service.get_user_or_404(user_id)
+
+    user_service.deleted_user(user)
+    flash("User deleted")
+    
+    return redirect(url_for("users.crud_user"))

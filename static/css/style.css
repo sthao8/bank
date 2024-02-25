@@ -1,10 +1,83 @@
-.active {
-    color:palevioletred;
+.nav-item {
+    border-bottom: thick solid transparent;
 }
 
-.large_icon {
-    font-size: 100px;
+.nav-item.active {
+    border-bottom-color: cyan;
 }
+
+.navbar {
+    --bs-navbar-padding-y: 0rem !important;
+    height: 75px;
+}
+
+@media (max-width: 992px) {
+    .navbar {
+        height: auto;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+    .nav-item {
+        border-bottom: none;
+        border-left: thick solid transparent;
+    }
+    .nav-item.active {
+        border-left-color: cyan;
+    }
+    .icons {
+        margin-right: 10px;
+    }
+}
+
+/*clickable cells*/
+td a, th a {
+    display: block; /* Fill the cell */
+    width: 100%; /* Optional, depending on your layout */
+    height: 100%; /* Make the link fill the cell */
+    color: inherit; /* Inherit text color from the cell */
+    text-decoration: none; /* Remove underline from link */
+    padding: 10px; /* Match cell padding */
+}
+
+tr[data-href], th[data-href], tr[data-bs-toggle]:not(.inactive) {
+    cursor: pointer;
+    border-left: 5px solid transparent;
+}
+
+tr[data-href]:hover, th[data-href]:hover, tr[data-bs-toggle]:hover {
+    border-left-color:cyan;
+    --bs-table-bg: whitesmoke;
+}
+
+.inactiveRow {
+    border-left: thick solid transparent !important;
+    font-style: italic;
+}
+
+.inactiveRow:hover {
+    border-left-color: cyan !important;
+    --bs-table-bg: whitesmoke;
+}
+
+.sort {
+    cursor: pointer;
+    border-top: thick solid transparent !important;
+}
+
+.sort:hover {
+    border-top-color: cyan !important;
+}
+
+input:focus {
+    outline: 3px solid cyan;
+}
+
+.form-control:focus {
+    outline: 3px solid cyan;
+    box-shadow: 0 0 0 0.2rem rgba(20, 188, 255, 0.25);
+}
+
+
 
 html {
     overflow: auto;
@@ -19,30 +92,58 @@ body {
 
 form {
     min-width: 300px;
-    max-width: 300px;
+    width: 100%;
 }
 
 .brand-color
 {
-    color:royalblue;
+    color:cyan;
 }
 
-.flashed-messages {
+/* .flashed-messages {
     position: fixed;
     top: 0;
-    left: 0; /*nav bar height*/
+    left: 0; nav bar height
     width: 100%;
     z-index: 1050;
+} */
+
+.large_icon {
+    font-size: 100px;
 }
 
-#offcanvasTrigger {
-    position: fixed;
-    left: 15px; /* Distance from left */
-    top: 15px; /* Distance from top */
-    z-index: 1050; /* Ensure it's above most other content */
+.icons {
+    color:grey;
 }
 
-.pushed-content {
-    transform: translateX(400px);
-    transition: transform 0.3s ease-in-out;
+.inline-icon-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    width: auto;
 }
+
+.icon-btn {
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    display: inline;
+}
+
+ a:link, a:visited, .icon-btn {
+    color: grey;
+    text-decoration: none;
+  }
+  
+  a:hover, .icon-btn:hover {
+    color: darkgray;
+    text-decoration: none;
+  }
+  
+  a:active, .icon-btn:active {
+    color: white;
+    text-decoration: none;
+  } 

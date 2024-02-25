@@ -112,7 +112,7 @@ class SearchCustomerForm(PrefixedForm):
 
     search_last_name = StringField(
         "Last name",
-        render_kw={"placeholder": "Robertson", "size": 20},
+        render_kw={"placeholder": "Bobertson", "size": 20},
     )
 
     search_city = StringField(
@@ -181,7 +181,7 @@ class RegisterCustomerForm(PrefixedForm):
     register_email = EmailField(
         "Email",
         validators=[Length(min=1, max=50, message="Email cannot exceed 50 characters."), InputRequired()],
-        render_kw={"placeholder": "Bob.Robertson@mail.com"}
+        render_kw={"placeholder": "bob.bobertson@mail.com"}
     )
 
     register_country = SelectField(
@@ -201,7 +201,7 @@ class RegisterUserForm(PrefixedForm):
     register_email = EmailField(
         "Email",
         validators=[InputRequired(), Length(min=1, max=50, message="Email cannot exceed 50 characters.")],
-        render_kw={"placeholder": "Bob.Robertson@mail.com", "autocomplete": "new-email"}
+        render_kw={"placeholder": "bob.bobertson@mail.com", "autocomplete": "new-email"}
     )
 
     register_password = PasswordField(
@@ -245,7 +245,7 @@ class CrudUserForm(PrefixedForm):
 
     crud_role = SelectField(
         "Role",
-        validators=[]
+        render_kw={"class": "userRole"}
     )
 
     submit_update = SubmitField(

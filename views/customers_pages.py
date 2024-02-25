@@ -86,29 +86,3 @@ def customer_page(customer_id):
 def account_page(account_id):
     account = account_service.get_account_or_404(account_id)
     return render_template("customers/account_page.html", account=account)
-
-@customers_blueprint.route("/api/accounts/<int:account_id>")
-def transactions_api(account_id):
-    account = account_service.get_account_or_404(account_id)
-
-    # Make sure offset and limit are not negative
-    offset = max(request.args.get("offset", 0, int), 0)
-    limit = max(request.args.get("limit", 20, int), 1)
-
-    total_transactions_amount = transaction_service.get_count_of_transactions(account_id)
-
-    has_more = offset + limit < total_transactions_amount
-
-    account_transactions = transaction_service.get_limited_offset_transactions(account_id, limit, offset)
-
-    transactions_dict = [TransactionsApiModel(transaction).to_dict() for transaction in account_transactions]
-
-    return jsonify({"transactions": transactions_dict, "has_more": has_more})
-
-@customers_blueprint.route("/api/<int:customer_id>")
-def customer_api(customer_id):
-    customer = customer_service.get_customer_or_404(customer_id)
-
-    customer_dict = CustomerApiModel(customer).to_dict()
-
-    return jsonify(customer_dict)

@@ -2,11 +2,17 @@
 
 {% from "_formhelpers.html" import render_field %}
 
-<div>
+<div class="container">
     <form action="{{ url_for('search.display_search_results') }}" method="get">
-        <div>
-            {{ render_field(form.search_first_name) }}
-            {{ render_field(form.search_last_name) }}
+        <div class="row">
+            <div class="col">
+                {{ render_field(form.search_first_name) }}
+            </div>
+            <div class="col">
+                {{ render_field(form.search_last_name) }}
+            </div>
+        </div>
+        <div class="row">
             {{ render_field(form.search_city) }}
         </div>
         {{ render_field(form.submit) }}

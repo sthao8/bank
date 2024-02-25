@@ -1,4 +1,5 @@
 from models import User, user_datastore, UserRoles, db
+from sqlalchemy import desc
 from flask_security.utils import verify_password, hash_password
 
 class UserRepository():
@@ -12,7 +13,7 @@ class UserRepository():
         return User.query.filter_by(id=user_id).one_or_404()
 
     def get_all_users():
-        return User.query.all()
+        return User.query.order_by(desc(User.active)).all()
     
     def get_active_users():
         return User.query.filter_by(active=True).all()
@@ -43,4 +44,11 @@ class UserRepository():
     
     def activate_user(user):
         user_datastore.activate_user(user)
+        db.session.commit()
+
+    def delete_user(user):
+        user.email = None
+        user.password = None
+        user.active = False
+        user.roles = []
         db.session.commit()

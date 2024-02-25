@@ -5,74 +5,118 @@
 {% endblock %}
 
 {% block main %}
-    customer search:
-    {% include "search/_search_form.html" %}
-    <div>
-        {% if customers and customers.total > 0 %}
-            <!-- Used to dynamically generate get url params for each href -->
-            {% set query_params = {
-                "sort_order": sort_order,
-                "previous_sort_col": sort_col,
-                "search_first_name": form.search_first_name.data,
-                "search_last_name": form.search_last_name.data,
-                "search_city": form.search_city.data
-            } %}
+    <div class="container p-lg-5">
+        <div class="row justify-content-center align-items-start ">
+            <div class="col-xl-4 col-md-12 p-3 sticky-top bg-secondary-subtle rounded">
+                <div class="row pb-3">
+                    <h1>Advanced Search</h1>
+                </div>
+                <div class="row">
+                    {% include "search/_search_form.html" %}
+                </div>
+            </div>
+            <div class="col-xl-8 col-md-12 py-xl-5 py-lg-3 px-xl-5">
+                {% if customers and customers.total > 0 %}
+                    <!-- Used to dynamically generate get url params for each href -->
+                    {% set query_params = {
+                        "sort_order": sort_order,
+                        "previous_sort_col": sort_col,
+                        "search_first_name": form.search_first_name.data,
+                        "search_last_name": form.search_last_name.data,
+                        "search_city": form.search_city.data
+                    } %}
 
-            <!-- Add any customer details to be added here -->
-            {% set columns = {
-                "id": "id",
-                "national id": "national_id",
-                "first name": "first_name",
-                "last name": "last_name",
-                "address": "address",
-                "city": "city" 
-            } %}
-            
-            Showing page {{ page }} of total {{ customers.pages }} pages
+                    <!-- Add any customer details to be added here -->
+                    {% set columns = {
+                        "id": "id",
+                        "national id": "national_id",
+                        "first name": "first_name",
+                        "last name": "last_name",
+                        "address": "address",
+                        "city": "city" 
+                    } %}
 
-            <table>
-                <thead>
-                    <tr>
-                        <th></th>
-                        {% for label, url_param in columns.items() %}
-                            <th>
-                                <a href="{{ url_for('search.display_search_results', page = page, sort_col = url_param, toggle_order = 'on', **query_params) }}">
-                                    {{ label }}
-                                </a>
-                                {% if sort_col == url_param %}
-                                    <i class="bx {{ 'bx-up-arrow' if sort_order == 'asc' else 'bx-down-arrow' }}"></i>
-                                {% endif %}
-                            </th>
-                        {% endfor %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for customer in customers %}
-                        <tr>
-                            <td>{{ loop.index0 + customers.first }}.</td>
-                            <td><a href="{{ url_for('customers.customer_page', customer_id = customer.id) }}"> {{ customer.id }} </a></td>
-                            {% for label, attribute_name in columns.items() %}
-                                {% if attribute_name != "id" %}
-                                    <td>{{ customer[attribute_name] }}</td>
-                                {% endif %}
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                    <tr>
-                        {% if customers.has_prev %}
-                            <td><a href="{{ url_for('search.display_search_results', page = ( page - 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">previous</a></td>
-                        {% endif %}
-                        {% if customers.has_next %}
-                            <td><a href="{{ url_for('search.display_search_results', page = ( page + 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">next</a></td>
-                        {% endif %}
-                    </tr>
-                </tbody>
-            </table>
-        {% elif form.search_first_name.data or form.search_last_name.data or form.search_city.data %}
-                no results found!
-        {% else %}
-                please enter search terms
-        {% endif %}
+                    <div class="row pt-4">
+                        <div class="table-responsive ">
+                            <table class="caption-top table table-light table-bordered">
+                                <caption><i>Showing page {{ page }} of {{ customers.pages }} page(s)</i></caption>
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        {% for label, url_param in columns.items() %}
+                                            <th class="sort">
+                                                <div class="d-flex align-items-center">
+                                                    <a href="{{ url_for('search.display_search_results', page = page, sort_col = url_param, toggle_order = 'on', **query_params) }}">
+                                                        {{ label }}
+                                                    </a>
+                                                    {% if sort_col == url_param %}
+                                                        <i class="bx {{ 'bx-caret-up-circle' if sort_order == 'asc' else 'bx-caret-down-circle' }}"></i>
+                                                    {% endif %}
+                                                </div>
+                                            </th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody class="table-group-divider ">
+                                    {% for customer in customers %}
+                                        <tr data-href="{{ url_for('customers.customer_page', customer_id = customer.id) }}">
+                                            <td>{{ loop.index0 + customers.first }}.</td>
+                                            <td>{{ customer.id }}</td>
+                                            {% for label, attribute_name in columns.items() %}
+                                                {% if attribute_name != "id" %}
+                                                    <td>{{ customer[attribute_name] }}</td>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="d-flex justify-content-between">
+                                                {% if customers.has_prev %}
+                                                    <div class="d-flex justify-content-start ">
+                                                        <a href="{{ url_for('search.display_search_results', page = ( page - 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}"><i class="bx bx-left-arrow"></i>previous</a>
+                                                    </div>
+                                                {% else %}
+                                                    <span></span>
+                                                {% endif %}
+                                                {% if customers.has_next %}
+                                                    <div class="d-flex justify-content-end">
+                                                        <a href="{{ url_for('search.display_search_results', page = ( page + 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">next<i class="bx bx-right-arrow"></i></a>
+                                                    </div>
+                                                {% else %}
+                                                    <span></span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+<!--                                     
+                                    <tr>
+                                        
+                                        {#% if customers.has_prev %#}
+                                            <td><a href="{{ url_for('search.display_search_results', page = ( page - 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">previous</a></td>
+                                        {#% endif %#}
+                                        {#% if customers.has_next %#}
+                                            <td><a href="{{ url_for('search.display_search_results', page = ( page + 1 ), sort_col = sort_col, toggle_order = '', **query_params ) }}">next</a></td>
+                                        {#% endif %#}
+                                    </tr> -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% elif form.search_first_name.data or form.search_last_name.data or form.search_city.data %}
+                        <div class="row">
+                            no results found!
+                        </div>
+                    {% else %}
+                        <div class="row">
+                            please enter search terms
+                        </div>   
+                    {% endif %}
+            </div>
+        </div>
     </div>
+
+        
+    <script src="/static/js/click_table_row.js"></script>
 
 {% endblock %}

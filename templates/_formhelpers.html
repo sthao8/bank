@@ -1,20 +1,28 @@
 <!-- TODO: this maybe unecessary since we disable submit until frontend validation is processed -->
 
-{% macro render_field(field) %}
+{% macro render_field(
+    field,
+    input_group=False,
+    input_group_text=None,
+    no_label=False,
+    padding="mb-3") %}
 
-<div class="form-group pb-3">
-    {% if field.widget.input_type != "submit" %}
-        {{ field.label(class="form-label") }}
-        {{ field(class="form-control" + (" is-invalid" if field.errors else "") + (" is-valid" if not field.errors and field.data else ""), **(field.render_kw or {})) }}
-        {% if field.errors %}
-            {% for error in field.errors %}
-            <span class="invalid-feedback text-break ">
-                {{error}}
-            </span>
-            {% endfor %}
-        {% else %}
-            <div class="invalid-feedback text-break"></div>
+<div class="{{ padding + (' input-group' if input_group else '') + (' d-grid' if field.type == 'SubmitField' else '')}}">
+    {% if field.type != "SubmitField" %}
+        {% if not (no_label or input_group) %}
+            {{ field.label(class="form-label") }}
         {% endif %}
+        {% if input_group and input_group_text %}
+            <span class="input-group-text">{{input_group_text}}</span>
+        {% endif %}
+        {{ field(class=("form-select" if field.type == "SelectField" else "form-control")+(" is-invalid" if field.errors else "") + (" is-valid" if not field.errors and field.data else ""), **(field.render_kw or {})) }}
+        <div class="invalid-feedback text-break form-text">
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    {{error}}
+                {% endfor %}
+            {% endif %}
+        </div>
     {% else %}
         {{ field(class="btn btn-outline-secondary", **(field.render_kw or {})) }}
     {% endif %}

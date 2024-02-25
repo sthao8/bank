@@ -11,14 +11,14 @@
         <div class="row ">
                 <div class="bg-light-subtle rounded p-5 ">
                     <div class="text-center text-secondary text-info ">
-                        <i class="bx bx-user-circle large_icon"></i>
+                        <i class="bx bxs-user-circle large_icon"></i>
                         <h1 class="mb-5">Login</h1> 
                     </div>
             
                     <form action="{{ url_for('authentication.login') }}" method="post" class="needs-validation" novalidate>
                         {{ form.hidden_tag() }}
-                            {{ render_field(form.email) }}
-                            {{ render_field(form.password) }}
+                        {{ render_field(form.email) }}
+                        {{ render_field(form.password) }}
                         {{ render_field(form.submit) }}
                     </form>
                 </div>

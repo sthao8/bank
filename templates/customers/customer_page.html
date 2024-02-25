@@ -5,53 +5,59 @@
 {% endblock %}
 
 {% block main %}
+<div class="container p-5">
+    <div class="row gx-5">
+        <div class="col-xl-4">
+            <div>
+                <h3>Customer details:</h3>
+                <ul>
+                    <li>Name: {{ customer.first_name }} {{ customer.last_name }} </li>
+                    <li>National id: {{ customer.national_id }} </li>
+                    <li>Address: {{ customer.address }}, {{ customer.city }} {{ customer.postalcode }} {{ customer.country_details.name }}</li>
+                    <li>Birthday: {{ customer.birthday }} </li>
+                    <li>Telephone: {{ customer.country_details.telephone_country_code }}  {{ customer.telephone }} </li>
+                </ul>
+            </div>
+            <div class="d-grid gap-2">
+                <form action="{{ url_for('transactions.transactions') }}" method="post">
+                    <input hidden value="{{ customer.id }}" name="customer_id">
+                    <button type="submit" class="btn btn-outline-secondary w-100 ">Withdraw/Deposit</button>
+                </form>
+                <form action="{{ url_for('transactions.transfer') }}" method="post" >
+                    <input hidden value="{{ customer.id }}" name="customer_id">
+                    <button type="submit" class="btn btn-outline-secondary w-100 ">Transfer</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-xl-8 pt-xs-5 pt-sm-5 pt-md-5 pt-lg-5 pt-xl-0">
+            <h3>Accounts:</h3>
+            <div class="table-responsive ">
+                <table class="table table-light table-bordered ">
+                    <thead>
+                        <tr>
+                            <th>Account number</th>
+                            <th>Type</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in customer.accounts %}
+                        <tr data-href="{{ url_for('customers.account_page', account_id=account.id) }}">
+                            <td> {{ account.id }} </a></td>
+                            <td> {{ account.account_type }} </td>
+                            <td> {{ account.balance |format_money }} </td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td colspan="2"><b>Total balance: </b></td>
+                            <td>{{ total_balance |format_money }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-    <h1> customer id {{ customer.id }}</h1>
-    <div>
-        <h3>customer details:</h3>
-        <ul>
-            <li>name: {{ customer.first_name }} {{ customer.last_name }} </li>
-            <li>personal id: {{ customer.national_id }} </li>
-            <li>address: {{ customer.address }}, {{ customer.city }} {{ customer.postalcode }} {{ customer.country_details.name }}</li>
-            <li>birthday: {{ customer.birthday }} </li>
-            <li>telephone: {{ customer.country_details.telephone_country_code }}  {{ customer.telephone }} </li>
-        </ul>
-    </div>
-
-    <div>
-        <h3>Accounts:</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>account number</th>
-                    <th>type</th>
-                    <th>balance</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for account in customer.accounts %}
-                <tr>
-                    <td><a href="{{ url_for('customers.account_page', account_id=account.id) }}"> {{ account.id }} </a></td>
-                    <td> {{ account.account_type }} </td>
-                    <td> {{ account.balance |format_money }} </td>
-                </tr>
-                {% endfor %}
-                <tr>
-                    <td><b>Total balance: </b></td>
-                    <td>{{ total_balance |format_money }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div>
-        <form action="{{ url_for('transactions.transactions') }}" method="post">
-            <input hidden value="{{ customer.id }}" name="customer_id">
-            <button type="submit">Withdraw/Deposit</button>
-        </form>
-        <form action="{{ url_for('transactions.transfer') }}" method="post" >
-            <input hidden value="{{ customer.id }}" name="customer_id">
-            <button type="submit">Transfer</button>
-        </form>
-    </div>
+    
+</div>
+    
 {% endblock %}

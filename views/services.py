@@ -1,4 +1,4 @@
-from models import Customer, Transaction
+from models import Customer, Transaction, User
 
 class TransactionsApiModel:
     def __init__(self, transaction: Transaction) -> None:
@@ -56,5 +56,22 @@ class CustomerApiModel:
             "country": self.country,
             "accounts": self.accounts,
             "total_balance": self.total_balance
+        }
+  
+  
+class UserApiModel:
+    def __init__(self, user: User) -> None:
+        self.id = user.id
+        self.email = user.email
+        self.is_active = user.active
+        self.role = user.roles[0]
+
+    def to_dict(self):
+        """ Converts api model instance into a dictionary """
+        return {
+            "id": self.id,
+            "email": self.email,
+            "is_active": self.is_active,
+            "role": self.role.name
         }
   
