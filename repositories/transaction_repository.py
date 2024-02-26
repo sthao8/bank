@@ -59,6 +59,5 @@ class TransactionRepository():
             .join(Country, Country.country_code==Customer.country)
             .where(Customer.id==customer.id)
             .where(func.date(Transaction.timestamp)==from_date)
-            .where(Transaction.checked==False)
             .order_by(desc(Transaction.timestamp))
         ).scalars().all()

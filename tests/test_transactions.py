@@ -4,6 +4,7 @@ from business_logic.constants import TransactionTypes
 import unittest
 from unittest.mock import Mock
 from app import create_app
+from models import User
 
 class TestTransactions(unittest.TestCase):
     def test_1_Value_error_raised_with_negative_withdraw_amount(self):
@@ -52,7 +53,6 @@ class TestTransactions(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             service.process_transfer(mock_account_1, mock_account_2, amount)
-
 
 if __name__ == "__main__":
     app = create_app()
