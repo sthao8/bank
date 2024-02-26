@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    customer profile
+    Customer profile
 {% endblock %}
 
 {% block main %}
@@ -77,13 +77,14 @@
             <div class="modal-body">
                 <div class="container-fluid">
                     <div class="row justify-content-center">
-                        <form action="{{ url_for('transactions.process_transfer') }}" method="post" class="needs-validation" novalidate>
+                        <form action="{{ url_for('transactions.process_transfer') }}" method="post" class="needs-validation" id="transferForm" novalidate>
                             {{ transfer_form.hidden_tag() }}
                             <input type="hidden" value="{{customer.id}}" name="customer_id">
                             {{ render_field(transfer_form.account_from) }}
                             {{ render_field(transfer_form.account_to) }}
                             {{ render_field(transfer_form.amount) }}
-                            <input type="text" readonly disabled value="{{ current_date }}">
+                            <label for="date2" class="pb-2">Transaction date</label>
+                            <input type="text" id="date2" class="w-100 mb-3 form-control " readonly disabled value="{{ current_date }}">
                             {{ render_field(transfer_form.submit) }}
                         </form>
                     </div>
@@ -104,13 +105,14 @@
                 <div class="container-fluid">
                     <div class="row justify-content-center">
                         <form action="{{ url_for('transactions.process_transaction') }}" method="post" class="needs-validation" novalidate>
-                            {{ trans_form.hidden_tag() }}
+                            {{ form.hidden_tag() }}
                             <input type="hidden" value="{{customer.id}}" name="customer_id">
-                            {{ render_field(trans_form.accounts) }}
-                            {{ render_field(trans_form.type) }}
-                            {{ render_field(trans_form.amount) }}
-                            <input type="text" readonly disabled value="{{ current_date }}">
-                            {{ render_field(trans_form.submit) }}
+                            {{ render_field(form.accounts) }}
+                            {{ render_field(form.type) }}
+                            {{ render_field(form.amount) }}
+                            <label for="date1" class="pb-2">Transaction date</label>
+                            <input type="text" id="date1" class="form-control w-100 mb-3" readonly disabled value="{{ current_date }}">
+                            {{ render_field(form.submit) }}
                         </form>
                     </div>
                 </div>
@@ -122,4 +124,55 @@
 <script src="/static/js/click_table_row.js"></script>
 
 
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function() {
+        'use strict';
+
+        const fromAccount = document.querySelector("#account_from");
+        const toAccount = document.querySelector("#account_to");
+        const transferForm = document.querySelector("#transferForm");
+        const toFeedbackElement = toAccount.nextElementSibling; // Ensure you define or correctly select this
+        const fromFeedbackElement = toAccount.nextElementSibling; // Ensure you define or correctly select this
+
+        function validateAccountSelected() {
+            const errorMessage = "You have chosen the same account.";
+            if (fromAccount && toAccount && feedbackElement) {
+                if (fromAccount.value === toAccount.value) {
+                    fromAccount.setCustomValidity(errorMessage);
+                    fromFeedbackElement.textContent = errorMessage;
+                    fromFeedbackElement.style.display = "block";
+                    fromAccount.classList.add("is-invalid");
+                    toAccount.setCustomValidity(errorMessage);
+                    toFeedbackElement.textContent = errorMessage;
+                    toFeedbackElement.style.display = "block";
+                    toAccount.classList.add("is-invalid");
+                } else {
+                    toAccount.setCustomValidity(""); // Clear custom error
+                    fromAccount.setCustomValidity("");
+                    toFeedbackElement.style.display = 'none'; // Hide the feedback element
+                    fromFeedbackElement.style.display = 'none'; // Hide the feedback element
+                    fromAccount.classList.remove('is-invalid'); // Optionally clear the invalid class
+                    toAccount.classList.remove('is-invalid');
+                }
+            }
+        }
+
+        transferForm.addEventListener("submit", event => {
+            validateAccountSelected();
+            fromAccount.addEventListener("on_change", event => {
+                validateAccountSelected();
+            });
+
+            toAccount.addEventListener("on_change", event => {
+                validateAccountSelected();
+            });
+        });
+    })();
+
+</script>
 {% endblock %}

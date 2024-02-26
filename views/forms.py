@@ -310,7 +310,7 @@ class TransferForm(PrefixedForm):
 
     account_to = SelectField(
         "Account to",
-        validators=[InputRequired(), CheckThatTwoFieldsDoNotMatch("account_from", "You have choosen the same account.")]
+        validators=[InputRequired()]
     )
 
     amount = DecimalField(

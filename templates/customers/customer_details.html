@@ -3,7 +3,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Register customer
+    {{ "Register customer" if not edit else "Edit customer" }}
 {% endblock %}
 
 {% block main %}

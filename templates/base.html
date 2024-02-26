@@ -35,10 +35,12 @@
                                     <i class="bx bx-search bx-xs icons"></i>
                                     <a href="{{ url_for('search.search_customer') }}" class="nav-link">Advanced Search</a>
                                 </li>
+                                {% if "cashier" in current_user.roles %}
                                 <li class="nav-item d-flex align-items-center px-1 {{ 'active' if active_page=='register_customer' }}">
                                     <i class="bx bx-smile bx-xs icons"></i>
                                     <a href="{{ url_for('customers.register_customer') }}" class="nav-link">Register customer</a>
                                 </li>
+                                {% endif %}
                                 {% if "admin" in current_user.roles %}
                                 <li class="nav-item d-flex align-items-center px-1 {{ 'active' if active_page=='crud_user' }}">
                                     <i class="bx bx-user-pin bx-xs icons"></i>
@@ -91,6 +93,7 @@
                 // Adapted from Bootstrap 5.3 documentation
                 // Fetch all the forms we want to apply custom Bootstrap validation styles to
                 const forms = document.querySelectorAll('.needs-validation');
+                console.log(forms);
 
                 if (forms.length === 0) {
                     return;
@@ -143,7 +146,7 @@
                         });
                     });
                     
-                    Reset validation if serverside errors
+                    //Reset validation if serverside errors
                     var validationFailed = {{ validation_failed|tojson }};
                     {% if form %}
                         validationFailed = {{ validation_failed|tojson }} || {{ form.validation_failed|tojson }};
@@ -164,6 +167,7 @@
                 });
             })()
         </script>
+        {% block extra_js %}{% endblock %}
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
         <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
     </body>

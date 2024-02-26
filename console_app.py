@@ -15,7 +15,7 @@ country_service = CountryService(CountryRepository)
 customer_service = CustomerService(CustomerRepository)
 transaction_service = TransactionService(TransactionRepository)
 
-TIME_PERIOD = timedelta(72)
+TIME_PERIOD = timedelta(hours=72)
 
 def audit_transactions(scheduler=None):
     countries:list[Country] = country_service.get_all_countries()
@@ -38,11 +38,17 @@ def audit_transactions(scheduler=None):
 
             db.session.commit()
 
+        recipient = f"{country.name}@testbanken.se"
+
         if suspicious_customers or suspicious_transactions:
-            recipient = f"{country.name}@testbanken.se"
-            msg = Message("suspicious transactions found at " + datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), sender="bank@bank.com", recipients=[recipient])
+            msg = Message("Suspicious transactions found at " + datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), sender="bank@bank.com", recipients=[recipient])
             
             msg.body = compose_message(suspicious_transactions, suspicious_customers)
+            mail.send(msg)
+        else:
+            msg = Message("No suspicious transactions found at " + datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), sender="bank@bank.com", recipients=[recipient])
+            
+            msg.body = "No transactions found"
             mail.send(msg)
 
     schedule_audit(scheduler)

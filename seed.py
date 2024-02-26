@@ -68,8 +68,8 @@ def seed_users(db, user_datastore):
                 )
     db.session.commit()
 
-def seed_data(db):
-    AVG_SALARY = 3500000
+def seed_data(db: SQLAlchemy):
+    MAX_TRANSACTION_AMOUNT = 3000000
     SEED_AMOUNT_CUSTOMERS = 5000
 
     existing_national_ids = [customer.national_id for customer in Customer.query.all()]
@@ -78,7 +78,7 @@ def seed_data(db):
     while amount_users < SEED_AMOUNT_CUSTOMERS:
         # generate customer details based on random supported locale
         random_locale = random.choice(BusinessConstants.SUPPORTED_LOCALES)
-        fake = Faker(random_locale)
+        fake: Faker = Faker(random_locale)
 
         customer = Customer()
 
@@ -131,16 +131,16 @@ def seed_data(db):
             account.transactions.append(initial_deposit)
             db.session.add(initial_deposit)
 
-            previous_transaction_date = initial_deposit.timestamp
+            previous_transaction_datetime = initial_deposit.timestamp
 
             # generate between 0 and 30 random transactions per account
             for _ in range(random.randint(0,30)):
                 transaction = Transaction()
 
-                transaction.timestamp = fake.date_time_between(start_date=previous_transaction_date)
-                transaction.amount = Decimal(random.randint(1, AVG_SALARY) / 100)
+                transaction.timestamp = fake.date_time_between(start_date=previous_transaction_datetime)
+                transaction.amount = Decimal(random.randint(1, MAX_TRANSACTION_AMOUNT) / 100)
 
-                previous_transaction_date = transaction.timestamp
+                previous_transaction_datetime = transaction.timestamp
 
                 # if transaction amount would drop balance below 0, make sure it's a debit
                 if account.balance - transaction.amount < 0:
@@ -157,6 +157,10 @@ def seed_data(db):
                 account.transactions.append(transaction)
                 db.session.add(transaction)
 
+                # Don't seed more than one transaction with today's date
+                # if previous_transaction_datetime.date == date.today():
+                #     break
+
             customer.accounts.append(account)
             db.session.add(account)
 
@@ -164,3 +168,97 @@ def seed_data(db):
         db.session.commit()
 
         amount_users += 1
+
+# def seed_audit_data(db: SQLAlchemy):
+
+#     existing_national_ids = [customer.national_id for customer in Customer.query.all()]
+
+#     amount_users =  Customer.query.count()
+#     # generate customer details based on random supported locale
+#     random_locale = random.choice(BusinessConstants.SUPPORTED_LOCALES)
+#     fake: Faker = Faker(random_locale)
+
+#     customer = Customer()
+
+#     customer.first_name = fake.first_name()
+#     customer.last_name = fake.last_name()
+#     customer.address = fake.street_address()
+#     customer.postal_code = fake.postcode()
+#     customer.city = fake.city()
+#     customer.country = fake.current_country_code()
+#     # ensure right age of customer generated
+#     customer.birthday = fake.date_of_birth(
+#         minimum_age=BusinessConstants.MINIMUM_AGE,
+#         maximum_age=BusinessConstants.MAXIMUM_AGE)
+#     # ensure unique national ids are generated
+#     while True:
+#         customer.national_id = fake.ssn().replace("-", "")
+#         if customer.national_id not in existing_national_ids:
+#             existing_national_ids.append(customer.national_id)
+#             break
+#     customer.telephone = fake.phone_number()
+#     customer.email = fake.email()
+
+#     account = Account()
+
+#     account.account_type = random.choice(list(AccountTypes)).value
+
+#     # create random account open date between today and min age customer can open bank account
+#     AVG_WEEKS_PER_YEAR = 52.1775
+#     WEEKS_IN_MINMUM_AGE = int(BusinessConstants.MINIMUM_AGE * AVG_WEEKS_PER_YEAR)
+#     min_account_open_date = customer.birthday + timedelta(weeks=WEEKS_IN_MINMUM_AGE)
+
+#     if min_account_open_date < BusinessConstants.BANK_ESTABLISHED_DATE:
+#         min_account_open_date = BusinessConstants.BANK_ESTABLISHED_DATE
+
+#     account.created = fake.date_between(start_date=min_account_open_date)
+#     account.balance = 0 #is this ok?? is not set by a transaction
+
+#     # start every new account with a deposit
+#     initial_deposit = Transaction()
+#     initial_deposit.timestamp = fake.date_time_between(
+#         start_date=account.created,
+#         end_date=account.created + timedelta(days=1))
+#     initial_deposit.amount = Decimal(random.randint(10000, 100000) / 100)
+#     initial_deposit.type = TransactionTypes.DEPOSIT.value
+#     account.balance = initial_deposit.amount
+
+#     initial_deposit.new_balance = account.balance
+#     account.transactions.append(initial_deposit)
+#     db.session.add(initial_deposit)
+
+#     previous_transaction_datetime = initial_deposit.timestamp
+
+#     # generate between 0 and 30 random transactions per account
+#     for _ in range(random.randint(0,30)):
+#         transaction = Transaction()
+
+#         transaction.timestamp = fake.date_time_between(start_date=previous_transaction_datetime)
+#         transaction.amount = Decimal(random.randint(1, MAX_TRANSACTION_AMOUNT) / 100)
+
+#         previous_transaction_datetime = transaction.timestamp
+
+#         # if transaction amount would drop balance below 0, make sure it's a debit
+#         if account.balance - transaction.amount < 0:
+#             transaction.type = TransactionTypes.DEPOSIT.value
+#         else:
+#             transaction.type = random.choice(list(TransactionTypes)).value
+
+#         if transaction.type == TransactionTypes.DEPOSIT.value:
+#             account.balance = account.balance + transaction.amount
+#         else:
+#             account.balance = account.balance - transaction.amount
+
+#         transaction.new_balance = account.balance
+#         account.transactions.append(transaction)
+#         db.session.add(transaction)
+
+#         # Don't seed more than one transaction with today's date
+#         # if previous_transaction_datetime.date == date.today():
+#         #     break
+
+#     customer.accounts.append(account)
+#     db.session.add(account)
+
+#     db.session.add(customer)
+#     db.session.commit()
