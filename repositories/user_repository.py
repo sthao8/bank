@@ -1,5 +1,6 @@
-from models import User, user_datastore, UserRoles, db
+from models import User, user_datastore, db
 from sqlalchemy import desc
+from business_logic.constants import UserRoles
 from flask_security.utils import verify_password, hash_password
 
 class UserRepository():

@@ -8,8 +8,8 @@ class TelephoneCountryCodes(Enum):
     sv_SE = "+46"   # Sweden
 
 class TransactionTypes(Enum):
-    DEPOSIT = "Debit"
-    WITHDRAW = "Credit"
+    DEPOSIT = "deposit"
+    WITHDRAW = "withdraw"
 
 class BusinessConstants:
     SUPPORTED_LOCALES = [supported_country_locale.name for supported_country_locale in TelephoneCountryCodes]
@@ -22,7 +22,6 @@ class AccountTypes(Enum):
     CHECKING = "Checking"
     SAVINGS = "Savings"
 
-#TODO move this somewhere else i guess
 class UserRoles(Enum):
     ADMIN = "admin"
     CASHIER = "cashier"
