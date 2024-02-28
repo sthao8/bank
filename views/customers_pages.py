@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, redirect, flash, url_for, jsonify, request, abort
-from flask_security import login_required
+from flask_security import login_required, roles_accepted, roles_required
 from datetime import date
 from math import ceil
 
 from models import db
-from .services import (
+from .api_models import (
     TransactionsApiModel,
     CustomerApiModel
     )
@@ -43,7 +43,7 @@ def index():
 def country_page(country_name):
     country = country_service.get_country_or_404(country_name)
 
-    country_customer = country_service.get_top_country_customer(country.name)
+    country_customer = country_service.get_top_10_country_customer(country.name)
     
     return render_template(
         "customers/country_page.html",
@@ -52,7 +52,7 @@ def country_page(country_name):
         country_customers=country_customer)
     
 @customers_blueprint.route("/register_customer", methods=["GET", "POST"])
-@login_required
+@roles_accepted("cashier")
 def register_customer():
     # TODO: do maybe some more validation stuff here
     #TODO random place, but make sure birthdate is in past
@@ -100,13 +100,13 @@ def customer_page(customer_id):
         "customers/customer_page.html",
         customer=customer,
         total_balance=total_balance,
-        trans_form=trans_form,
+        form=trans_form,
         transfer_form=transfer_form,
         current_date=current_date,
         )
 
 @customers_blueprint.route("/edit-customer/<int:customer_id>")
-@login_required
+@roles_accepted("cashier")
 def edit_customer(customer_id):
     customer = customer_service.get_customer_or_404(customer_id)
 
@@ -116,7 +116,7 @@ def edit_customer(customer_id):
     return render_template("customers/customer_details.html", customer=customer, form=form, edit=True)
 
 @customers_blueprint.route("/process-customer-edits", methods=["POST"])
-@login_required
+@roles_accepted("cashier")
 def process_customer_edits():
     form = RegisterCustomerForm()
     form.country.choices = country_service.get_form_country_choices()
@@ -134,7 +134,7 @@ def process_customer_edits():
     return redirect(url_for("customers.customer_page", customer_id=customer.id))
 
 @customers_blueprint.route("/account/<account_id>", methods=["GET"])
-@login_required
+@roles_accepted("cashier")
 def account_page(account_id):
     account = account_service.get_account_or_404(account_id)
     return render_template("customers/account_page.html", account=account)

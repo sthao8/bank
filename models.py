@@ -1,20 +1,6 @@
-import random
-from datetime import datetime, date
-from datetime import timedelta
-from decimal import Decimal
-from faker import Faker
 from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore
 from flask_security.utils import hash_password
 from flask_sqlalchemy import SQLAlchemy
-
-from business_logic.constants import (
-    TelephoneCountryCodes,
-    TransactionTypes,
-    BusinessConstants,
-    AccountTypes,
-    UserRoles
-    )
-
 
 db = SQLAlchemy()
 
@@ -64,7 +50,6 @@ class Transaction(db.Model):
     amount = db.Column(db.Numeric(15, 2), unique=False, nullable=False)
     new_balance = db.Column(db.Numeric(15,2), unique=False, nullable=False)
     account_id = db.Column(db.Integer, db.ForeignKey("Accounts.id"), nullable=False)
-    checked = db.Column(db.Boolean, nullable=False, default=False)
 
 roles_users = db.Table(
     'RolesUsers',

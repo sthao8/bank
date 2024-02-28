@@ -5,30 +5,38 @@
 {% endblock %}
 
 {% block main %}
-<div class="container p-lg-5">
-
-    <h1>{{ country }} Top 10 Customers</h1>    
-    <div>
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>customer</th>
-                    <th>accounts</th>
-                    <th>total balance</th>
-                </tr>
-            </thead>
-            {% for customer in country_customers %}
-            <tr>
-                <td> {{ loop.index }}. </td>
-                <td><a href="{{ url_for('customers.customer_page', customer_id=customer.Customer.id) }}"> {{ customer.Customer.first_name }} {{ customer.Customer.last_name }} </a></td>
-                <td> {{ customer.number_of_accounts }} </td>
-                <td> {{ customer.sum_of_accounts | format_money }} </td>
-            </tr>
-            {% endfor %}
-        </table>
+<div class="container px-md-5 py-5 h-100 flex-column  justify-content-center ">
+    <div class="row justify-content-center ">
+        <div class="col-xs-12 col-md-10 col-xl-8 d-flex flex-column align-items-center ">
+            <div class=" row pb-3 text-start w-100">
+                <h1>{{ country }} Top 10 Customers</h1>    
+            </div>
+            <div class="row w-100">
+                <div class="table-responsive ">
+                    <table class="table table-bordered  table-light">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>customer</th>
+                                <th>accounts</th>
+                                <th>total balance</th>
+                            </tr>
+                        </thead class="table-group-divider ">
+                        {% for customer in country_customers %}
+                        <tr data-href="{{ url_for('customers.customer_page', customer_id=customer.Customer.id) }}">
+                            <td> {{ loop.index }}. </td>
+                            <td>{{ customer.Customer.first_name }} {{ customer.Customer.last_name }}</td>
+                            <td> {{ customer.number_of_accounts }} </td>
+                            <td> {{ customer.sum_of_accounts | format_money }} </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
     
+<script src="/static/js/click_table_row.js"></script>
 
 {% endblock %}

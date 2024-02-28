@@ -93,6 +93,8 @@ def process_transfer():
     form.account_from.choices = accounts_choices
     form.account_to.choices = accounts_choices
 
+    validation_failed = False
+
     if form.validate_on_submit():
         from_account = account_service.get_account_or_404(form.account_from.data)
         to_account = account_service.get_account_or_404(form.account_to.data)
@@ -101,9 +103,12 @@ def process_transfer():
         try:
             transaction_service.process_transfer(from_account, to_account, amount)
         except ValueError as error:
+            validation_failed = True
             flash(f"ERROR: {error}")
         else:
             flash(f"Success! Transferred {amount} from account no. {from_account} to account no. {to_account}!")
     else:
-        flash("Did not pass validation")
-    return redirect(url_for("customers.customer_page", customer_id=customer.id))
+        errors = [error for errors_list in form.errors.values() for error in errors_list]
+        error_message = ", ".join(errors)
+        flash(f"ERROR: {error_message}")
+    return redirect(url_for("customers.customer_page", customer_id=customer.id, validation_failed=validation_failed))

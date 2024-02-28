@@ -1,5 +1,6 @@
-from models import User, user_datastore, UserRoles, db
+from models import User, user_datastore, db
 from sqlalchemy import desc
+from business_logic.constants import UserRoles
 from flask_security.utils import verify_password, hash_password
 
 class UserRepository():
@@ -34,7 +35,7 @@ class UserRepository():
         db.session.commit()
     
     def update_role(user, new_role):
-        user_datastore.remove_role_from_user(user, user.roles[0])
+        user_datastore.remove_role_from_user(user, user.role)
         user_datastore.add_role_to_user(user, new_role)
         db.session.commit()
 

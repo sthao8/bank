@@ -1,6 +1,6 @@
 import locale
 from flask import Flask
-from extenstions import mail
+from extensions import mail
 from flask_migrate import Migrate, upgrade
 from flask_security import Security
 
@@ -20,7 +20,6 @@ from views.search_pages import search_blueprint
 from views.transactions_pages import transactions_blueprint
 from views.api import api_blueprint
 
-# TODO maybe simplify my prefixed forms
 # TODO work on frontend errors (WITH FORMS in jinja tag in base)
 
 def create_app():

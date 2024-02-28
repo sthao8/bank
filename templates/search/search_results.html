@@ -69,7 +69,7 @@
                                             {% endfor %}
                                         </tr>
                                     {% endfor %}
-                                    <tr class="{{ d-none if not customers.has_prev and not customers.has_next }}">
+                                    <tr class="{{ 'd-none' if not customers.has_prev and not customers.has_next else ''}}">
                                         <td colspan="7">
                                             <div class="d-flex justify-content-between">
                                                 {% if customers.has_prev %}
@@ -105,7 +105,6 @@
             </div>
         </div>
     </div>
-
         
     <script src="/static/js/click_table_row.js"></script>
 

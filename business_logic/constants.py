@@ -3,13 +3,15 @@ from enum import Enum
 
 
 class TelephoneCountryCodes(Enum):
+    """Add a country code (as supported by Faker) and country phone code here
+    to be able to seed data for that country"""
     fi_FI = "+358"  # Finland
     no_NO = "+47"   # Norway
     sv_SE = "+46"   # Sweden
 
 class TransactionTypes(Enum):
-    DEPOSIT = "Debit"
-    WITHDRAW = "Credit"
+    DEPOSIT = "deposit"
+    WITHDRAW = "withdraw"
 
 class BusinessConstants:
     SUPPORTED_LOCALES = [supported_country_locale.name for supported_country_locale in TelephoneCountryCodes]
@@ -22,7 +24,6 @@ class AccountTypes(Enum):
     CHECKING = "Checking"
     SAVINGS = "Savings"
 
-#TODO move this somewhere else i guess
 class UserRoles(Enum):
     ADMIN = "admin"
     CASHIER = "cashier"

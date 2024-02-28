@@ -1,4 +1,4 @@
-from .services import UserApiModel, CustomerApiModel, TransactionsApiModel
+from .api_models import UserApiModel, CustomerApiModel, TransactionsApiModel
 from flask import Blueprint, jsonify, request, url_for
 from services.user_services import UserService, UserRepository
 from services.customer_services import CustomerService, CustomerRepository
