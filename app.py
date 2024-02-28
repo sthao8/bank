@@ -1,6 +1,6 @@
 import locale
 from flask import Flask
-from extenstions import mail
+from extensions import mail
 from flask_migrate import Migrate, upgrade
 from flask_security import Security
 

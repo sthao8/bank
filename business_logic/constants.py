@@ -3,6 +3,8 @@ from enum import Enum
 
 
 class TelephoneCountryCodes(Enum):
+    """Add a country code (as supported by Faker) and country phone code here
+    to be able to seed data for that country"""
     fi_FI = "+358"  # Finland
     no_NO = "+47"   # Norway
     sv_SE = "+46"   # Sweden

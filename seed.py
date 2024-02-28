@@ -25,6 +25,21 @@ from models import (
     Country
 )
 
+SEED_USERS = [
+        {
+            "email": "stefan.holmberg@systementor.se",
+            "password": "Hejsan123#",
+            "role": UserRoles.ADMIN.value
+        },
+        {
+            "email": "stefan.holmberg@nackademin.se",
+            "password": "Hejsan123#",
+            "role": UserRoles.CASHIER.value
+        }
+    ]
+MAX_TRANSACTION_AMOUNT = 3000000
+SEED_AMOUNT_CUSTOMERS = 50
+
 def seed_countries(db):
     existing_telephone_country_codes = [country.telephone_country_code for country in Country.query.all()]
 
@@ -44,23 +59,10 @@ def seed_roles(db, user_datastore):
         user_datastore.find_or_create_role(name=role)
     db.session.commit()
 
-def seed_users(db, user_datastore):
-    SEED_USERS = [
-        {
-            "email": "stefan.holmberg@systementor.se",
-            "password": "Hejsan123#",
-            "role": "admin"
-        },
-        {
-            "email": "stefan.holmberg@nackademin.se",
-            "password": "Hejsan123#",
-            "role": "cashier"
-        }
-    ]
-
+def seed_users(db, user_datastore: SQLAlchemyUserDatastore):
     for seed_user in SEED_USERS:
         if not user_datastore.find_user(email=seed_user["email"]):
-            user_datastore.create_user(
+            user= user_datastore.create_user(
                 email=seed_user["email"],
                 password=hash_password(seed_user["password"]),
                 roles=[seed_user["role"]],
@@ -69,12 +71,13 @@ def seed_users(db, user_datastore):
     db.session.commit()
 
 def seed_data(db: SQLAlchemy):
-    MAX_TRANSACTION_AMOUNT = 3000000
-    SEED_AMOUNT_CUSTOMERS = 50
+    AVG_WEEKS_PER_YEAR = 52.1775
+    WEEKS_IN_MINMUM_AGE = int(BusinessConstants.MINIMUM_AGE * AVG_WEEKS_PER_YEAR)
 
     existing_national_ids = [customer.national_id for customer in Customer.query.all()]
 
     amount_users =  Customer.query.count()
+
     while amount_users < SEED_AMOUNT_CUSTOMERS:
         # generate customer details based on random supported locale
         random_locale = random.choice(BusinessConstants.SUPPORTED_LOCALES)
@@ -107,12 +110,8 @@ def seed_data(db: SQLAlchemy):
 
             account.account_type = random.choice(list(AccountTypes)).value
 
-            # create random account open date between today and min age customer can open bank account
-            AVG_WEEKS_PER_YEAR = 52.1775
-            WEEKS_IN_MINMUM_AGE = int(BusinessConstants.MINIMUM_AGE * AVG_WEEKS_PER_YEAR)
-            min_account_open_date = customer.birthday + timedelta(weeks=WEEKS_IN_MINMUM_AGE)
-
             # if min account open date would fall before bank established, set that as min
+            min_account_open_date = customer.birthday + timedelta(weeks=WEEKS_IN_MINMUM_AGE)
             if min_account_open_date < BusinessConstants.BANK_ESTABLISHED_DATE:
                 min_account_open_date = BusinessConstants.BANK_ESTABLISHED_DATE
 
@@ -143,7 +142,7 @@ def seed_data(db: SQLAlchemy):
 
                 previous_transaction_datetime = transaction.timestamp
 
-                # if transaction amount would drop balance below 0, make sure it's a debit
+                # if transaction amount would drop balance below 0, make sure it's a deposit
                 if account.balance - transaction.amount < 0:
                     transaction.type = TransactionTypes.DEPOSIT.value
                 else:
@@ -158,7 +157,7 @@ def seed_data(db: SQLAlchemy):
                 account.transactions.append(transaction)
                 db.session.add(transaction)
 
-                #Don't seed more than one transaction with today's date
+                # Don't seed more than one transaction with today's date
                 if previous_transaction_datetime.date() == date.today():
                     break
 

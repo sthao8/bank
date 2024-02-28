@@ -4,7 +4,7 @@ from datetime import date
 from math import ceil
 
 from models import db
-from .services import (
+from .api_models import (
     TransactionsApiModel,
     CustomerApiModel
     )
