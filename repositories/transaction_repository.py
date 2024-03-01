@@ -1,8 +1,7 @@
 from decimal import Decimal
-from datetime import datetime, timedelta
+from datetime import datetime
 from models import db, Customer, Account, Transaction, Country
 from sqlalchemy import select, func, desc, between
-from sqlalchemy.orm import joinedload
 from constants.constants import TransactionTypes
 
 
@@ -26,9 +25,7 @@ class TransactionRepository():
     def get_count_of_transactions(self, account_id):
         return Transaction.query.filter_by(account_id=account_id).count()
     
-    def get_sum_recent_transactions_of_country(self, customer: Customer, time_period: timedelta):
-        from_date = datetime.now() - time_period
-        
+    def get_sum_recent_transactions_of_country(self, customer: Customer, from_date: datetime):
         return db.session.execute(
             select(func.sum(Transaction.amount)
                    ).join(Account, Account.id==Transaction.account_id)
@@ -39,9 +36,7 @@ class TransactionRepository():
                    .where(between(Transaction.timestamp, from_date, datetime.now()))
         ).scalar()
 
-    def get_summed_transaction_ids(self, customer: Customer, time_period: timedelta):
-        from_date = datetime.now() - time_period
-        
+    def get_summed_transaction_ids(self, customer: Customer, from_date: datetime):
         return db.session.execute(
             select(Transaction.id
                    ).join(Account, Account.id==Transaction.account_id)

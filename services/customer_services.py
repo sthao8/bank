@@ -1,9 +1,12 @@
 from repositories.customer_repository import CustomerRepository
+from services.account_services import AccountService
 from models import Customer
+from constants.errors_messages import ErrorMessages
 
 class CustomerService():
-    def __init__(self, customer_repository: CustomerRepository) -> None:
+    def __init__(self, customer_repository: CustomerRepository, account_service: AccountService) -> None:
         self.customer_repository = customer_repository
+        self.account_service = account_service
 
     def get_customer_or_none(self, customer_id):
         return self.customer_repository.get_customer_or_none(customer_id)
@@ -18,7 +21,7 @@ class CustomerService():
         return self.customer_repository.get_customer_from_transaction(transaction)
     
     def get_customer_from_national_id(self, national_id):
-        return self.customer_repository.get_customer_from_national_id_or_404(national_id)
+        return self.customer_repository.get_customer_from_national_id(national_id)
     
     def customer_edited(self, customer: Customer, customer_details: dict) -> bool:
         """Compares new customer_details to customer. If changes, edits the model."""
@@ -28,12 +31,16 @@ class CustomerService():
                 return True
         return False
 
-
-    def create_customer_and_new_account(self, form):
-        national_id = form.national_id.data
+    def create_customer_and_new_account(self, customer_details: dict) -> Customer:
+        """Checks that national ID is unique before creating customer and account"""
+        national_id = customer_details["national_id"]
         customer = self.customer_repository.get_customer_from_national_id(national_id)
 
         if customer:
-            raise ValueError(f"Account with national id {national_id} already exists")
+            raise ValueError(ErrorMessages.NATIONAL_ID_EXISTS.value)
         else:
-            return self.customer_repository.create_customer_and_new_account(form)
+            new_customer = self.customer_repository.create_customer(customer_details)
+            print(new_customer.id)
+            self.account_service.create_account_for_customer(new_customer.id)
+
+        return new_customer

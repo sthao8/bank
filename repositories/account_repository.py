@@ -1,4 +1,4 @@
-from models import Account
+from models import Account, db
 from utils import format_money
 
 
@@ -11,4 +11,16 @@ class AccountRepository():
             return query.one_or_none()
 
     def get_account_choices(self, customer):
-        return [(account.id, f"{account.id}: current balance: {format_money(account.balance)}") for account in customer.accounts]
+        return [
+            (account.id, f"{account.id}: current balance: {format_money(account.balance)}")
+            for account in customer.accounts
+            ]
+    
+    def create_account_for_customer(self, account_information: dict):
+        new_account = Account()
+        for attribute_name, value in account_information.items():
+            setattr(new_account, attribute_name, value)
+
+        db.session.add(new_account)
+        db.session.commit()
+

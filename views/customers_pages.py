@@ -22,11 +22,11 @@ customers_blueprint = Blueprint("customers", __name__)
 country_repo = CountryRepository()
 country_service = CountryService(country_repo)
 
-customer_repo = CustomerRepository()
-customer_service = CustomerService(customer_repo)
-
 account_repo = AccountRepository()
 account_service = AccountService(account_repo)
+
+customer_repo = CustomerRepository()
+customer_service = CustomerService(customer_repo, account_service)
 
 transaction_repo = TransactionRepository()
 transaction_service = TransactionService(transaction_repo, account_service)
@@ -67,8 +67,13 @@ def register_customer():
     form.country.choices = country_service.get_form_country_choices()
 
     if form.validate_on_submit():
+        customer_details = {
+            fieldname: field.data for fieldname, field in form._fields.items()
+            if fieldname in form.user_defined_fields
+            }
+        
         try:
-            new_customer = customer_service.create_customer_and_new_account(form)
+            new_customer = customer_service.create_customer_and_new_account(customer_details)
         except ValueError as error:
             flash(f"ERROR: {error}")
         else:
@@ -112,15 +117,17 @@ def process_customer_edits():
     
     customer = customer_service.get_customer_from_national_id(form.national_id.data)
 
-    if form.validate_on_submit():
-        customer_details = {fieldname: field.data for fieldname, field in form._fields.items() if fieldname in form.user_defined_fields}
+    if form.validate_on_submit() and customer:
+        customer_details = {
+            fieldname: field.data for fieldname, field in form._fields.items()
+            if fieldname in form.user_defined_fields}
 
         if customer_service.customer_edited(customer, customer_details):
             flash("Customer details updated!")
         else:
             flash("No changes to customer made!")
     else:
-        flash("error: did not validate")
+        flash("Errors updating customer.")
     return redirect(url_for("customers.customer_page", customer_id=customer.id))
 
 @customers_blueprint.route("/account/<account_id>", methods=["GET"])

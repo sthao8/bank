@@ -16,11 +16,11 @@ from services.account_services import AccountService, AccountRepository
 from services.transaction_services import TransactionService, TransactionRepository
 
 
-customer_repo = CustomerRepository()
-customer_service = CustomerService(customer_repo)
-
 account_repo = AccountRepository()
 account_service = AccountService(account_repo)
+
+customer_repo = CustomerRepository()
+customer_service = CustomerService(customer_repo, account_service)
 
 transaction_repo = TransactionRepository()
 transaction_service = TransactionService(transaction_repo, account_service)

@@ -4,11 +4,14 @@ from flask_security import login_required
 from views.forms import SearchAccountForm, SearchCustomerForm
 from .search_results_handler import SearchResultsHandler
 from services.customer_services import CustomerService, CustomerRepository
+from services.account_services import AccountService, AccountRepository
 from models import Customer
 
+account_repo = AccountRepository()
+account_service = AccountService(account_repo)
 
 customer_repo = CustomerRepository()
-customer_service = CustomerService(customer_repo)
+customer_service = CustomerService(customer_repo, account_service)
 
 search_blueprint = Blueprint("search", __name__)
 

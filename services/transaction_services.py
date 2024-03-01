@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import datetime, timedelta
 from repositories.transaction_repository import TransactionRepository
 from models import Account, Customer
 from services.account_services import AccountService
@@ -56,12 +57,14 @@ class TransactionService():
     def get_limited_offset_transactions(self, account_id: int, limit: int, offset: int):
         return self.transaction_repository.get_limited_offset_transactions(account_id, limit, offset)
     
-    def get_sum_recent_transactions_of(self, customer: Customer, time_period):
-        sum = self.transaction_repository.get_sum_recent_transactions_of_country(customer, time_period)
+    def get_sum_recent_transactions_of(self, customer: Customer, time_period: timedelta):
+        from_date = datetime.now() - time_period
+        sum = self.transaction_repository.get_sum_recent_transactions_of_country(customer, from_date)
         return Decimal(sum) if sum is not None else 0
     
-    def get_summed_transaction_ids(self, customer, time_period):
-        return self.transaction_repository.get_summed_transaction_ids(customer, time_period)
+    def get_summed_transaction_ids(self, customer, time_period: timedelta):
+        from_date = datetime.now() - time_period
+        return self.transaction_repository.get_summed_transaction_ids(customer, from_date)
     
     def get_transactions_for(self, customer, from_datetime):
         return self.transaction_repository.get_recent_unchecked_transactions_for(customer, from_datetime)

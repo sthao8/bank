@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import datetime
 from typing import Any
 from flask_wtf import FlaskForm
 from wtforms import (
@@ -113,55 +113,70 @@ class SearchCustomerForm(FlaskForm):
         return bool(self.errors)
 
 class RegisterCustomerForm(FlaskForm):
-    user_defined_fields = ["first_name", "last_name", "address", "city", "postal_code", "birthday", "national_id", "telephone", "email", "country"]
+    user_defined_fields = [
+        "first_name",
+        "last_name",
+        "address",
+        "city",
+        "postal_code",
+        "birthday",
+        "national_id",
+        "telephone",
+        "email",
+        "country"]
 
     first_name = StringField(
         "First name",
-        validators=[Length(min=1, max=50, message="First name cannot exceed 50 characters."), InputRequired()],
+        validators=[Length(min=1, max=50, message="First name cannot exceed 50 characters."),
+                    InputRequired()],
         render_kw={"placeholder": "Bob", "size": 20, "autofocus": True}
     )
 
     last_name = StringField(
         "Last name",
-        validators=[Length(min=1, max=50, message="Last name cannot exceed 50 characters."), InputRequired()],
+        validators=[Length(min=1, max=50, message="Last name cannot exceed 50 characters."),
+                    InputRequired()],
         render_kw={"placeholder": "Robertson", "size": 20}
     )
 
     address = StringField(
         "Address",
-        validators=[Length(min=1, max=50, message="Address cannot exceed 50 characters."), InputRequired()],
+        validators=[Length(min=1, max=50, message="Address cannot exceed 50 characters."),
+                    InputRequired()],
         render_kw={"placeholder": "89 Viksängsgatan", "size": 20}
     )
 
     city = StringField(
         "City",
-        validators=[Length(min=1, max=50, message="City cannot exceed 50 characters."), InputRequired()],
+        validators=[Length(min=1, max=50, message="City cannot exceed 50 characters."),
+                    InputRequired()],
         render_kw={"placeholder": "Stockholm", "size": 20}
     )
 
     postal_code = StringField(
         "Postal code",
-        validators=[Length(min=1, max=10, message="Postal code cannot exceed 50 characters."), InputRequired()],
+        validators=[Length(min=1, max=10, message="Postal code cannot exceed 50 characters."),
+                    InputRequired()],
         render_kw={"placeholder": "13245", "size": 20}
     )
 
-    #TODO you need a custom check here in js to prevent submission
     birthday = DateField(
         "Birthday",
         validators=[InputRequired(), Age()],
-        render_kw={"placeholder": "birthday"}
+        render_kw={"placeholder": "YYYY-MM-DD",
+                   "max": datetime.now().date().isoformat()}
     )
 
     national_id = StringField(
         "National id",
         validators=[Length(min=1, max=20, message="National ID cannot exceed 50 characters."), InputRequired()],
-        render_kw={"placeholder": "12341212-1234"}
+        render_kw={"placeholder": "123412121234"}
     )
 
     telephone = TelField(
         "Telephone",
         validators=[Length(min=1, max=20, message="Telephone number cannot exceed 20 characters."), InputRequired()],
-        render_kw={"placeholder": "123-123-22-55"}
+        render_kw={"placeholder": "123123 022 55"}
     )
 
     email = EmailField(
