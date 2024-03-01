@@ -1,4 +1,5 @@
 from repositories.customer_repository import CustomerRepository
+from models import Customer
 
 class CustomerService():
     def __init__(self, customer_repository: CustomerRepository) -> None:
@@ -19,8 +20,14 @@ class CustomerService():
     def get_customer_from_national_id(self, national_id):
         return self.customer_repository.get_customer_from_national_id_or_404(national_id)
     
-    def customer_edited(self, customer, form) -> bool:
-        return self.customer_repository.edit_customer(customer, form)
+    def customer_edited(self, customer: Customer, customer_details: dict) -> bool:
+        """Compares new customer_details to customer. If changes, edits the model."""
+        for attribute_name, value in customer_details.items():
+            if getattr(customer, attribute_name) != value: # if there is a difference
+                self.customer_repository.edit_customer(customer, customer_details)
+                return True
+        return False
+
 
     def create_customer_and_new_account(self, form):
         national_id = form.national_id.data

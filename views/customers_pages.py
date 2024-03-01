@@ -113,8 +113,9 @@ def process_customer_edits():
     customer = customer_service.get_customer_from_national_id(form.national_id.data)
 
     if form.validate_on_submit():
+        customer_details = {fieldname: field.data for fieldname, field in form._fields.items() if fieldname in form.user_defined_fields}
 
-        if customer_service.customer_edited(customer, form):
+        if customer_service.customer_edited(customer, customer_details):
             flash("Customer details updated!")
         else:
             flash("No changes to customer made!")

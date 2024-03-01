@@ -32,17 +32,9 @@ class CustomerRepository():
     def get_customer_from_national_id_or_404(self, national_id):
         return Customer.query.filter_by(national_id=national_id).one_or_404()
     
-    def edit_customer(self, customer, form) -> bool:
-        changes_made = False
-        for field_name, field in form._fields.items():
-            if field_name in form.user_defined_fields:
-                model_col_name = form.get_column_name(field_name)
-                if getattr(customer, model_col_name) != field.data:
-                    setattr(customer, model_col_name, field.data)
-                    changes_made = True
-        if changes_made:
-            db.session.commit()
-        return changes_made
+    def edit_customer(self, customer, customer_details: dict):
+        for attribute_name, value in customer_details.items():
+            setattr(customer, attribute_name, value)
     
     def create_customer_and_new_account(self, form: FlaskForm) -> Customer:
         new_customer = Customer()
