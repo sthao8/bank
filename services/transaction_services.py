@@ -1,33 +1,62 @@
 from decimal import Decimal
 from repositories.transaction_repository import TransactionRepository
-from business_logic.constants import TransactionTypes
+from models import Account, Customer
+from services.account_services import AccountService
+from constants.constants import TransactionTypes
+from constants.errors_messages import ErrorMessages
 
 class TransactionService():
-    def __init__(self, transaction_repository: TransactionRepository) -> None:
+    def __init__(self, transaction_repository: TransactionRepository, account_service: AccountService) -> None:
         self.transaction_repository = transaction_repository
+        self.account_service = account_service
 
-    def process_transaction(self, target_account, amount, transaction_type: TransactionTypes):
+    def _calculate_new_balance(self, account, amount: Decimal, transaction_type: TransactionTypes):
+        """Calculates new balance depending on transaction type"""
+        if transaction_type == TransactionTypes.DEPOSIT:
+            return account.balance + amount
+        elif transaction_type == TransactionTypes.WITHDRAW:
+            return account.balance - amount
+
+    def initiate_transaction_process(self, account_id: int, amount: Decimal, transaction_type_name: str, to_account_id: int=None):
+        """Determines where to send transaction depending on transaction type"""
+        from_account = self.account_service.get_account_from_id(account_id, raise_404=False)
+        if not from_account:
+            raise ValueError(ErrorMessages.UNKNOWN_ACCOUNT.value)
+
+        if transaction_type_name == "transfer":
+            to_account = self.account_service.get_account_from_id(to_account_id, raise_404=False)
+            if not to_account:
+                raise ValueError(ErrorMessages.UNKNOWN_ACCOUNT.value)
+            self.process_transfer(from_account, to_account, amount)
+        else:
+            transaction_type = TransactionTypes.get_type_by_value(transaction_type_name)
+            new_balance = self._calculate_new_balance(from_account, amount, transaction_type)
+            self.process_transaction(from_account, amount, transaction_type, new_balance)
+
+    def process_transaction(self, target_account: Account, amount: Decimal, transaction_type: TransactionTypes, new_balance):
+        """Checks amount for negatives and against account balance, finally executing transaction"""
         if amount < 0:
-            raise ValueError("Amount cannot be negative.")
+            raise ValueError(ErrorMessages.NEGATIVE_AMOUNT.value)
         if transaction_type == TransactionTypes.WITHDRAW:
             if amount > target_account.balance:
-                raise ValueError("Insufficient funds for withdrawal.")
-            else:
-                amount = -amount
-        
-        self.transaction_repository.execute_transaction(target_account, amount, transaction_type)
+                raise ValueError(ErrorMessages.INSUFFICIENT_FUNDS.value)        
+        self.transaction_repository.execute_transaction(target_account, amount, transaction_type, new_balance)
 
-    def process_transfer(self, from_account, to_account, amount):
-        self.process_transaction(from_account, amount, TransactionTypes.WITHDRAW)
-        self.process_transaction(to_account, amount, TransactionTypes.DEPOSIT)
+    def process_transfer(self, from_account: Account, to_account: Account, amount: Decimal):
+        """Initiates two transactions, withdraw from from_account and deposit into to_account"""
+        new_withdraw_balance = self._calculate_new_balance(from_account, amount, TransactionTypes.WITHDRAW)
+        self.process_transaction(from_account, amount, TransactionTypes.WITHDRAW, new_withdraw_balance)
+
+        new_deposit_balance = self._calculate_new_balance(to_account, amount, TransactionTypes.DEPOSIT)
+        self.process_transaction(to_account, amount, TransactionTypes.DEPOSIT, new_deposit_balance)
 
     def get_count_of_transactions(self, account_id):
         return self.transaction_repository.get_count_of_transactions(account_id)
     
-    def get_limited_offset_transactions(self, account_id, limit, offset):
+    def get_limited_offset_transactions(self, account_id: int, limit: int, offset: int):
         return self.transaction_repository.get_limited_offset_transactions(account_id, limit, offset)
     
-    def get_sum_recent_transactions_of(self, customer, time_period):
+    def get_sum_recent_transactions_of(self, customer: Customer, time_period):
         sum = self.transaction_repository.get_sum_recent_transactions_of_country(customer, time_period)
         return Decimal(sum) if sum is not None else 0
     

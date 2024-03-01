@@ -10,10 +10,19 @@ from models import Country, Transaction, db
 from services.country_services import CountryService, CountryRepository
 from services.customer_services import CustomerService, CustomerRepository
 from services.transaction_services import TransactionService, TransactionRepository
+from services.account_services import AccountService, AccountRepository
 
-country_service = CountryService(CountryRepository)
-customer_service = CustomerService(CustomerRepository)
-transaction_service = TransactionService(TransactionRepository)
+country_repo = CountryRepository()
+country_service = CountryService(country_repo)
+
+customer_repo = CustomerRepository()
+customer_service = CustomerService(customer_repo)
+
+account_repo = AccountRepository()
+account_service = AccountService(account_repo)
+
+transaction_repo = TransactionRepository()
+transaction_service = TransactionService(transaction_repo, account_service)
 
 TIME_PERIOD = timedelta(hours=72)
 
@@ -71,7 +80,7 @@ def recent_transactions_exceeds_limit(customer):
 
 def compose_message(flagged_transactions, customers):
     message_1_data = []
-    # TODO must change this now since transactions is a list of dicts (customer_id: list of flagged transactions) so we don't repeat
+    # TODO make this function more general
     if flagged_transactions:
         for flagged_transaction in flagged_transactions:
             for customer_id, list_of_transactions in flagged_transaction.items():

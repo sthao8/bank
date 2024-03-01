@@ -9,7 +9,8 @@ from repositories.user_repository import UserRepository
 from services.user_services import UserService
 
 
-user_service = UserService(UserRepository)
+user_repo = UserRepository()
+user_service = UserService(user_repo)
 
 users_blueprint = Blueprint("users", __name__)
 

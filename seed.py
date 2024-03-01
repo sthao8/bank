@@ -1,13 +1,13 @@
 import random
-from datetime import datetime, date
+from datetime import date
 from datetime import timedelta
 from decimal import Decimal
 from faker import Faker
-from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore
+from flask_security import SQLAlchemyUserDatastore
 from flask_security.utils import hash_password
 from flask_sqlalchemy import SQLAlchemy
 
-from business_logic.constants import (
+from constants.constants import (
     TelephoneCountryCodes,
     TransactionTypes,
     BusinessConstants,
@@ -37,8 +37,9 @@ SEED_USERS = [
             "role": UserRoles.CASHIER.value
         }
     ]
+
 MAX_TRANSACTION_AMOUNT = 3000000
-SEED_AMOUNT_CUSTOMERS = 50
+SEED_AMOUNT_CUSTOMERS = 5000
 
 def seed_countries(db):
     existing_telephone_country_codes = [country.telephone_country_code for country in Country.query.all()]
@@ -62,7 +63,7 @@ def seed_roles(db, user_datastore):
 def seed_users(db, user_datastore: SQLAlchemyUserDatastore):
     for seed_user in SEED_USERS:
         if not user_datastore.find_user(email=seed_user["email"]):
-            user= user_datastore.create_user(
+            user = user_datastore.create_user(
                 email=seed_user["email"],
                 password=hash_password(seed_user["password"]),
                 roles=[seed_user["role"]],
@@ -76,9 +77,9 @@ def seed_data(db: SQLAlchemy):
 
     existing_national_ids = [customer.national_id for customer in Customer.query.all()]
 
-    amount_users =  Customer.query.count()
+    count_users =  Customer.query.count()
 
-    while amount_users < SEED_AMOUNT_CUSTOMERS:
+    while count_users < SEED_AMOUNT_CUSTOMERS:
         # generate customer details based on random supported locale
         random_locale = random.choice(BusinessConstants.SUPPORTED_LOCALES)
         fake: Faker = Faker(random_locale)
@@ -97,6 +98,7 @@ def seed_data(db: SQLAlchemy):
             maximum_age=BusinessConstants.MAXIMUM_AGE)
         # ensure unique national ids are generated
         while True:
+            # strip the dashes to get uniform/comparable numbers
             customer.national_id = fake.ssn().replace("-", "")
             if customer.national_id not in existing_national_ids:
                 existing_national_ids.append(customer.national_id)
@@ -167,4 +169,4 @@ def seed_data(db: SQLAlchemy):
         db.session.add(customer)
         db.session.commit()
 
-        amount_users += 1
+        count_users += 1

@@ -1,27 +1,27 @@
 from datetime import datetime
-from business_logic.constants import AccountTypes
+from constants.constants import AccountTypes
 from models import Customer, Account, db, Country, Transaction
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
-from views.forms import PrefixedForm, FlaskForm
+from views.forms import FlaskForm
 
 class CustomerRepository():
-    def get_customer_or_none(customer_id):
+    def get_customer_or_none(self, customer_id):
         return Customer.query.filter_by(id=customer_id).one_or_none() 
 
-    def get_customer_joined_accounts_country_or_404(customer_id):
+    def get_customer_joined_accounts_country_or_404(self, customer_id):
         return Customer.query.filter_by(id=customer_id).options(
             joinedload(Customer.accounts),
             joinedload(Customer.country_details)
             ).one_or_404()
     
-    def get_customer_from_national_id(national_id):
+    def get_customer_from_national_id(self, national_id):
         return Customer.query.filter_by(national_id=national_id).one_or_none()
     
-    def get_all_customers_for(country: Country):
+    def get_all_customers_for(self, country: Country):
         return Customer.query.filter_by(country=country.country_code).all()
     
-    def get_customer_from_transaction(transaction: Transaction):
+    def get_customer_from_transaction(self, transaction: Transaction):
         return db.session.execute(
             select(Customer)
             .join(Account, Account.customer_id==Customer.id)
@@ -29,10 +29,10 @@ class CustomerRepository():
             .where(Transaction.id==transaction.id)
         ).scalar_one_or_none()
     
-    def get_customer_from_national_id_or_404(national_id):
+    def get_customer_from_national_id_or_404(self, national_id):
         return Customer.query.filter_by(national_id=national_id).one_or_404()
     
-    def edit_customer(customer, form) -> bool:
+    def edit_customer(self, customer, form) -> bool:
         changes_made = False
         for field_name, field in form._fields.items():
             if field_name in form.user_defined_fields:
@@ -44,7 +44,7 @@ class CustomerRepository():
             db.session.commit()
         return changes_made
     
-    def create_customer_and_new_account(form: PrefixedForm) -> Customer:
+    def create_customer_and_new_account(self, form: FlaskForm) -> Customer:
         new_customer = Customer()
 
         for field_name, field in form._fields.items():

@@ -3,15 +3,15 @@ from datetime import datetime, timedelta
 from models import db, Customer, Account, Transaction, Country
 from sqlalchemy import select, func, desc, between
 from sqlalchemy.orm import joinedload
-from business_logic.constants import TransactionTypes
+from constants.constants import TransactionTypes
 
 
 class TransactionRepository():
-    def execute_transaction(account, amount: Decimal, transaction_type):
+    def execute_transaction(self, account: Account, amount: Decimal, transaction_type: TransactionTypes, new_balance: Decimal):
         transaction = Transaction()
         transaction.amount = amount
         transaction.timestamp = datetime.now()
-        transaction.new_balance = account.balance + amount
+        transaction.new_balance = new_balance
         transaction.account_id = account.id
         transaction.type = transaction_type.value
 
@@ -20,13 +20,13 @@ class TransactionRepository():
         db.session.add(transaction)
         db.session.commit()
     
-    def get_limited_offset_transactions(account_id, limit, offset):
+    def get_limited_offset_transactions(self, account_id: int, limit: int, offset: int):
         return Transaction.query.filter_by(account_id=account_id).order_by(Transaction.timestamp.desc()).limit(limit).offset(offset).all()
-        
-    def get_count_of_transactions(account_id):
+
+    def get_count_of_transactions(self, account_id):
         return Transaction.query.filter_by(account_id=account_id).count()
     
-    def get_sum_recent_transactions_of_country(customer: Customer, time_period: timedelta):
+    def get_sum_recent_transactions_of_country(self, customer: Customer, time_period: timedelta):
         from_date = datetime.now() - time_period
         
         return db.session.execute(
@@ -39,7 +39,7 @@ class TransactionRepository():
                    .where(between(Transaction.timestamp, from_date, datetime.now()))
         ).scalar()
 
-    def get_summed_transaction_ids(customer: Customer, time_period: timedelta):
+    def get_summed_transaction_ids(self, customer: Customer, time_period: timedelta):
         from_date = datetime.now() - time_period
         
         return db.session.execute(
@@ -51,7 +51,7 @@ class TransactionRepository():
                    .where(between(Transaction.timestamp, from_date, datetime.now()))
         ).scalars().all()
 
-    def get_recent_unchecked_transactions_for(customer: Customer, from_date) -> list[Transaction]:
+    def get_recent_unchecked_transactions_for(self, customer: Customer, from_date) -> list[Transaction]:
         return db.session.execute(
             select(Transaction)
             .join(Account, Account.id==Transaction.account_id)

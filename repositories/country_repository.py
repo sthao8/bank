@@ -3,13 +3,13 @@ from sqlalchemy import func, select, desc
 from sqlalchemy.orm import joinedload
 
 class CountryRepository():
-    def get_country_or_404(country_name):
+    def get_country_or_404(self, country_name):
         return Country.query.filter(func.lower(Country.name)==country_name.lower()).one_or_404()
 
-    def get_all_countries() -> Country:
+    def get_all_countries(self) -> Country:
         return Country.query.all()
     
-    def get_top_10_country_customers(country_name):
+    def get_top_10_country_customers(self, country_name):
         return db.session.execute(
                 select(
                 Customer, 
@@ -23,7 +23,7 @@ class CountryRepository():
                 .limit(10)
             ).all()
     
-    def get_all_country_customers(country_name) -> Country:
+    def get_all_country_customers(self, country_name) -> Country:
         return Country.query.filter_by(
             name=country_name
             ).options(
@@ -32,7 +32,7 @@ class CountryRepository():
                 .joinedload(Account.transactions)
             ).all()
 
-    def get_country_stats():
+    def get_country_stats(self):
         return db.session.execute(
             select(
                 Country.name,

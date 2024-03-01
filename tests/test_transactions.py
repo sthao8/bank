@@ -1,6 +1,6 @@
 from decimal import Decimal
 from services.transaction_services import TransactionService, TransactionRepository
-from business_logic.constants import TransactionTypes 
+from constants.constants import TransactionTypes 
 import unittest
 from unittest.mock import Mock
 from app import create_app
@@ -12,7 +12,8 @@ class TestTransactions(unittest.TestCase):
         transaction_type = TransactionTypes.WITHDRAW
         amount = Decimal(-5)
 
-        service = TransactionService(TransactionRepository)
+        transaction_repo = TransactionRepository()
+        service = TransactionService(transaction_repo)
 
         with self.assertRaises(ValueError):
             service.process_transaction(mock_account, amount, transaction_type)
@@ -23,7 +24,8 @@ class TestTransactions(unittest.TestCase):
         transaction_type = TransactionTypes.DEPOSIT
         amount = Decimal(-5)
 
-        service = TransactionService(TransactionRepository)
+        transaction_repo = TransactionRepository()
+        service = TransactionService(transaction_repo)
 
         with self.assertRaises(ValueError):
             service.process_transaction(mock_account, amount, transaction_type)
@@ -36,7 +38,8 @@ class TestTransactions(unittest.TestCase):
         transaction_type = TransactionTypes.WITHDRAW
         amount = Decimal(100.01)
 
-        service = TransactionService(TransactionRepository)
+        transaction_repo = TransactionRepository()
+        service = TransactionService(transaction_repo)
 
         with self.assertRaises(ValueError):
             service.process_transaction(mock_account, amount, transaction_type)
@@ -49,7 +52,8 @@ class TestTransactions(unittest.TestCase):
 
         amount = Decimal(100.01)
 
-        service = TransactionService(TransactionRepository)
+        transaction_repo = TransactionRepository()
+        service = TransactionService(transaction_repo)
 
         with self.assertRaises(ValueError):
             service.process_transfer(mock_account_1, mock_account_2, amount)

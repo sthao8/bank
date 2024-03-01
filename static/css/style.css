@@ -135,17 +135,21 @@ form {
     display: inline;
 }
 
- a:link, a:visited, .icon-btn {
-    color: grey;
-    text-decoration: none;
-  }
+a:link, a:visited, .icon-btn {
+color: grey;
+text-decoration: none;
+}
+
+a:hover, .icon-btn:hover {
+color: darkgray;
+text-decoration: none;
+}
   
-  a:hover, .icon-btn:hover {
-    color: darkgray;
-    text-decoration: none;
-  }
-  
-  a:active, .icon-btn:active {
-    color: white;
-    text-decoration: none;
-  } 
+a:active, .icon-btn:active {
+color: white;
+text-decoration: none;
+} 
+
+.custom-rounded-button {
+    border-radius: 0 0 5px 5px; /* Adjust the '5px' to your preference */
+}

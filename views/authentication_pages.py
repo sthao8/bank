@@ -5,7 +5,8 @@ from views.forms import LoginForm
 from services.user_services import UserService, UserRepository
 
 
-user_service = UserService(UserRepository)
+user_repo = UserRepository()
+user_service = UserService(user_repo)
 
 authentication_blueprint = Blueprint("authentication", __name__)
 

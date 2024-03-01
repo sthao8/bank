@@ -21,6 +21,8 @@ from views.transactions_pages import transactions_blueprint
 from views.api import api_blueprint
 
 # TODO work on frontend errors (WITH FORMS in jinja tag in base)
+# TODO fix the form_failed etc
+# TODO change things to use the respos/services in seed and console app 
 
 def create_app():
     locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")

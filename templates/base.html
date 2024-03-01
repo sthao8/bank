@@ -1,4 +1,4 @@
-{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_field, render_input_group %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -28,32 +28,32 @@
                         <div class="collapse navbar-collapse h-100 align-items-stretch" id="navbar">
                             <ul class="navbar-nav me-auto mb-2 mb-lg-0 h-100">
                                 <li class="nav-item d-flex align-items-center px-1 {{ 'active' if active_page=='index' }}">
-                                    <i class="bx bx-home bx-xs icons "></i>
+                                    <i class="bx bx-home icons "></i>
                                     <a href="{{ url_for('customers.index') }}" class="nav-link">Home</a>
                                 </li>
-                                <li class="nav-item d-flex align-items-center px-1 {{ 'active' if active_page=='search_customer' }}">
-                                    <i class="bx bx-search bx-xs icons"></i>
-                                    <a href="{{ url_for('search.search_customer') }}" class="nav-link">Advanced Search</a>
+                                <li class="nav-item d-flex align-items-center px-1 {{ 'active' if active_page=='transactions' }}">
+                                    <i class="bx bx-money-withdraw icons"></i>
+                                    <a href="{{ url_for('transactions.transactions') }}" class="nav-link">Transactions</a>
                                 </li>
-                                {% if "cashier" in current_user.roles %}
                                 <li class="nav-item d-flex align-items-center px-1 {{ 'active' if active_page=='register_customer' }}">
-                                    <i class="bx bx-smile bx-xs icons"></i>
+                                    <i class="bx bx-face icons"></i>
                                     <a href="{{ url_for('customers.register_customer') }}" class="nav-link">Register customer</a>
                                 </li>
-                                {% endif %}
                                 {% if "admin" in current_user.roles %}
                                 <li class="nav-item d-flex align-items-center px-1 {{ 'active' if active_page=='crud_user' }}">
-                                    <i class="bx bx-user-pin bx-xs icons"></i>
+                                    <i class="bx bx-user-pin icons"></i>
                                     <a href="{{ url_for('users.crud_user') }}" class="nav-link">Manage users</a>
                                 </li>
                                 {% endif %}
+                                <li class="nav-item d-flex align-items-center px-1 {{ 'active' if active_page=='search_customer' }}">
+                                    <i class="bx bx-search icons"></i>
+                                    <a href="{{ url_for('search.search_customer') }}" class="nav-link">Advanced Search</a>
+                                </li>
                                 <li class="nav-item d-flex align-items-center px-1 ">
-                                    <form action="{{ url_for('search.search_account_number') }}" method="post" role="search" class="needs-validation" novalidate>
-                                        <!-- TODO fix this, the errors will show up in button lol -->
+                                    <form action="{{ url_for('search.search_account_number') }}" method="post" role="search">
                                         {{ search_account_form.hidden_tag() }}
-                                        <div class="input-group ">
-                                            {{ search_account_form.search_customer_id(class="form-control", autocomplete=off) }}
-                                            <button class="btn btn-outline-secondary rounded-end-2" type="submit">Quick search</button>
+                                        <div>
+                                            {{ render_input_group(search_account_form.search_customer_id, padding="", addon="Quick search",no_label=True, button_addon=True, show_errors=False) }}
                                         </div>
                                     </form>
                                 </li>
@@ -112,9 +112,22 @@
                     }
                 }
 
+                function getNextElementWithClass(element, className) {
+                    let nextElement = element.nextElementSibling;
+                    
+                    while (nextElement) {
+                        if (nextElement.classList.contains(className)) {
+                            return nextElement;
+                        }
+                        nextElement = nextElement.nextElementSibling;
+                    }
+
+                    return null;
+                }
+
                 // If a field(element) is invalid, add appropriate class name and message; otherwise hide message div
                 function showErrors(element) {
-                    const feedbackElement = element.nextElementSibling;
+                    const feedbackElement = getNextElementWithClass(element, "field-errors");
                     if (!element.validity.valid) {
                         if (feedbackElement) {
                             element.classList.add('is-invalid');
@@ -167,7 +180,6 @@
                 });
             })()
         </script>
-        {% block extra_js %}{% endblock %}
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
         <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
     </body>

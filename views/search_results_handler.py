@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from sqlalchemy import func, desc, asc
 
-from views.forms import PrefixedForm
+from views.forms import FlaskForm
 from utils import string_to_bool
 
 
@@ -12,7 +12,7 @@ class SearchResultsHandler():
     Takes flaskform, request.args from a GET request, and the ORM model to query against.
     Has ability to dynamically filter, sort, and order results based on form and args.
     """
-    def __init__(self, form: PrefixedForm, args, model) -> None:
+    def __init__(self, form: FlaskForm, args, model) -> None:
         self.form = form
         self.args = args
         self.model = model
@@ -47,9 +47,8 @@ class SearchResultsHandler():
         """
         query_criteria = {}
         for field_name, field_object in self.form._fields.items():
-            if field_name.startswith(self.form.field_prefix) and field_object.data:
-                col_name = self.form.get_column_name(field_name)
-                query_criteria[col_name] = field_object.data.lower()
+            if field_name in self.form.user_defined_fields and field_object.data:
+                query_criteria[field_name] = field_object.data.lower()
         return query_criteria
 
     @property

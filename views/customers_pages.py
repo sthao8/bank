@@ -8,7 +8,7 @@ from .api_models import (
     TransactionsApiModel,
     CustomerApiModel
     )
-from views.forms import RegisterCustomerForm, PrefixedForm, TransactionForm, TransferForm, FlaskForm
+from views.forms import RegisterCustomerForm, TransactionForm, TransferForm, FlaskForm
 
 from services.country_services import CountryService, CountryRepository
 from services.transaction_services import TransactionService, TransactionRepository
@@ -19,10 +19,17 @@ from utils import format_money
 
 customers_blueprint = Blueprint("customers", __name__)
 
-country_service = CountryService(CountryRepository)
-customer_service = CustomerService(CustomerRepository)
-transaction_service = TransactionService(TransactionRepository)
-account_service = AccountService(AccountRepository)
+country_repo = CountryRepository()
+country_service = CountryService(country_repo)
+
+customer_repo = CustomerRepository()
+customer_service = CustomerService(customer_repo)
+
+account_repo = AccountRepository()
+account_service = AccountService(account_repo)
+
+transaction_repo = TransactionRepository()
+transaction_service = TransactionService(transaction_repo, account_service)
 
 @customers_blueprint.route("/", methods=["GET"])
 @login_required
@@ -52,7 +59,7 @@ def country_page(country_name):
         country_customers=country_customer)
     
 @customers_blueprint.route("/register_customer", methods=["GET", "POST"])
-@roles_accepted("cashier")
+@roles_accepted("cashier", "admin")
 def register_customer():
     # TODO: do maybe some more validation stuff here
     #TODO random place, but make sure birthdate is in past
@@ -81,32 +88,14 @@ def customer_page(customer_id):
     
     total_balance = sum([account.balance for account in customer.accounts])
 
-    # transaction form
-    trans_form: PrefixedForm = TransactionForm()
-    trans_form.type.choices = ["withdraw", "deposit"]
-    accounts_labels = [(account.id, f"{account.id}: current balance: {format_money(account.balance)}") for account in customer.accounts]
-    trans_form.accounts.choices = accounts_labels
-
-    current_date = date.today()
-
-    #transfer form
-    transfer_form: FlaskForm = TransferForm()
-    accounts_choices = account_service.get_account_choices(customer)
-    transfer_form.account_from.choices = accounts_choices
-    transfer_form.account_to.choices = accounts_choices
-
-
     return render_template(
         "customers/customer_page.html",
         customer=customer,
-        total_balance=total_balance,
-        form=trans_form,
-        transfer_form=transfer_form,
-        current_date=current_date,
+        total_balance=total_balance
         )
 
 @customers_blueprint.route("/edit-customer/<int:customer_id>")
-@roles_accepted("cashier")
+@roles_accepted("cashier", "admin")
 def edit_customer(customer_id):
     customer = customer_service.get_customer_or_404(customer_id)
 
@@ -116,7 +105,7 @@ def edit_customer(customer_id):
     return render_template("customers/customer_details.html", customer=customer, form=form, edit=True)
 
 @customers_blueprint.route("/process-customer-edits", methods=["POST"])
-@roles_accepted("cashier")
+@roles_accepted("cashier", "admin")
 def process_customer_edits():
     form = RegisterCustomerForm()
     form.country.choices = country_service.get_form_country_choices()
@@ -134,7 +123,7 @@ def process_customer_edits():
     return redirect(url_for("customers.customer_page", customer_id=customer.id))
 
 @customers_blueprint.route("/account/<account_id>", methods=["GET"])
-@roles_accepted("cashier")
+@roles_accepted("cashier", "admin")
 def account_page(account_id):
-    account = account_service.get_account_or_404(account_id)
+    account = account_service.get_account_from_id(account_id, raise_404=True)
     return render_template("customers/account_page.html", account=account)

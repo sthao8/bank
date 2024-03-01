@@ -14,7 +14,8 @@ from wtforms import (
     TelField,
     SelectField,
     RadioField,
-    DecimalField)
+    DecimalField,
+    SearchField)
 from wtforms.validators import (
     InputRequired,
     Email,
@@ -27,24 +28,9 @@ from views.validators import (
     Age,
     CheckIfAllPasswordFieldsHaveDataIfOneHasData,
     CheckIfFormHasData,
-    CheckThatTwoFieldsDoNotMatch)
-from business_logic.constants import BusinessConstants
-
-class PrefixedForm(FlaskForm):
-    """
-    Prefixed forms use a field naming convention of prefix_ + ORM model column 
-    name for easier retreival of form data via for looping
-
-    Example:
-    field_prefix = "search_"
-    search_email = EmailField()
-    """
-    field_prefix = ""
-
-    @classmethod
-    def get_column_name(cls, field_name):
-        """Remove prefix and return the ORM model column name"""
-        return field_name.removeprefix(cls.field_prefix)
+    CheckThatTwoFieldsDoNotMatch,
+    InputRequiredIfOtherFieldHasSpecificValue)
+from constants.constants import BusinessConstants
 
 class LoginForm(FlaskForm):
     email = EmailField(
@@ -99,23 +85,23 @@ class SearchAccountForm(FlaskForm):
     def validation_failed(self):
         return bool(self.errors)
     
-class SearchCustomerForm(PrefixedForm):
+class SearchCustomerForm(FlaskForm):
     class Meta:
         csrf = False
 
-    field_prefix = "search_"
+    user_defined_fields = ["first_name", "last_name", "city"]
 
-    search_first_name = StringField(
+    first_name = StringField(
         "First name",
         render_kw={"placeholder": "Bob", "size": 20},
     )
 
-    search_last_name = StringField(
+    last_name = StringField(
         "Last name",
         render_kw={"placeholder": "Bobertson", "size": 20},
     )
 
-    search_city = StringField(
+    city = StringField(
         "City",
         render_kw={"placeholder": "Stockholm", "size": 20}
     )
@@ -126,9 +112,7 @@ class SearchCustomerForm(PrefixedForm):
     def validation_failed(self):
         return bool(self.errors)
 
-class RegisterCustomerForm(PrefixedForm):
-    field_prefix = "register_"
-
+class RegisterCustomerForm(FlaskForm):
     user_defined_fields = ["first_name", "last_name", "address", "city", "postal_code", "birthday", "national_id", "telephone", "email", "country"]
 
     first_name = StringField(
@@ -199,9 +183,7 @@ class RegisterCustomerForm(PrefixedForm):
     
 
 
-class RegisterUserForm(PrefixedForm):
-    field_prefix = "register_"
-
+class RegisterUserForm(FlaskForm):
     user_defined_fields = ["email", "password", "confirm_password", "role"]
 
     email = EmailField(
@@ -233,9 +215,7 @@ class RegisterUserForm(PrefixedForm):
     def validation_failed(self):
         return bool(self.errors)
 
-class CrudUserForm(PrefixedForm):
-    field_prefix = "crud_"
-
+class CrudUserForm(FlaskForm):
     user_defined_fields = ["new_password", "confirm_password", "role"]
 
     new_password = PasswordField(
@@ -270,15 +250,24 @@ class CrudUserForm(PrefixedForm):
         return bool(self.errors)
 
 
-class TransactionForm(PrefixedForm):
-    field_prefix = "trans_"
-
-    user_defined_fields = ["accounts", "type", "amount"]
-
-    accounts = SelectField(
-        "Account(s)",
-        validators=[InputRequired()],
-        render_kw={"placeholder": "accounts"})
+class TransactionForm(FlaskForm):
+    from_account = SearchField(
+        "Account",
+        validators=[InputRequired(),
+                    Regexp(r'^\d+$', message="Only numbers allowed for account number"),
+                    CheckThatTwoFieldsDoNotMatch("to_account", "You have choosen the same account.")],
+        render_kw={"placeholder": "Account",
+                   "pattern": r'^\d+$',
+                   "title": "Only numbers allowed for account number"})
+    
+    to_account = SearchField(
+        "To account",
+        validators=[InputRequiredIfOtherFieldHasSpecificValue("type", "transfer"),
+                    Regexp(r'^\d+$',message="Only numbers allowed for account number"),
+                    CheckThatTwoFieldsDoNotMatch("from_account", "You have choosen the same account.")],
+        render_kw={"placeholder": "Account",
+                   "pattern": r'^\d+$',
+                   "title": "Only numbers allowed for account number"})
 
     type = SelectField(
         "Type",
@@ -298,9 +287,7 @@ class TransactionForm(PrefixedForm):
     def validation_failed(self):
         return bool(self.errors)
     
-class TransferForm(PrefixedForm):
-    field_prefix = "transfer_"
-
+class TransferForm(FlaskForm):
     user_defined_fields = ["account_from", "account_to", "amount"]
 
     account_from = SelectField(
