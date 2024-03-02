@@ -195,8 +195,6 @@ class RegisterCustomerForm(FlaskForm):
     @property
     def validation_failed(self):
         return bool(self.errors)
-    
-
 
 class RegisterUserForm(FlaskForm):
     user_defined_fields = ["email", "password", "confirm_password", "role"]
@@ -242,7 +240,7 @@ class CrudUserForm(FlaskForm):
     confirm_password = PasswordField(
         "Confirm password",
         validators=[Optional(strip_whitespace=True), Length(min=8, max=32, message="Password must be between 8 and 32 characters"),
-                    EqualTo("crud_new_password")],
+                    EqualTo("new_password")],
         render_kw={"placeholder": "********", "autocomplete": "new-password"}
     )
 

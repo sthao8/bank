@@ -1,21 +1,13 @@
-from flask import Blueprint, render_template, redirect, flash, url_for, jsonify, request, abort
-from flask_security import login_required, roles_accepted, roles_required
-from datetime import date
-from math import ceil
+from flask import Blueprint, render_template, redirect, flash, url_for
+from flask_security import login_required, roles_accepted
 
-from models import db
-from .api_models import (
-    TransactionsApiModel,
-    CustomerApiModel
-    )
-from views.forms import RegisterCustomerForm, TransactionForm, TransferForm, FlaskForm
+from views.forms import RegisterCustomerForm
 
 from services.country_services import CountryService, CountryRepository
 from services.transaction_services import TransactionService, TransactionRepository
 from services.customer_services import CustomerService, CustomerRepository
 from services.account_services import AccountService, AccountRepository
 
-from utils import format_money
 
 customers_blueprint = Blueprint("customers", __name__)
 
@@ -50,7 +42,7 @@ def index():
 def country_page(country_name):
     country = country_service.get_country_or_404(country_name)
 
-    country_customer = country_service.get_top_10_country_customer(country.name)
+    country_customer = customer_service.get_top_10_customers_for_country(country.name)
     
     return render_template(
         "customers/country_page.html",
@@ -89,7 +81,7 @@ def register_customer():
 @customers_blueprint.route("/customer/<customer_id>", methods=["GET"])
 @login_required
 def customer_page(customer_id):
-    customer = customer_service.get_customer_or_404(customer_id)
+    customer = customer_service.get_customer_accounts_country(customer_id)
     
     total_balance = sum([account.balance for account in customer.accounts])
 
@@ -102,7 +94,7 @@ def customer_page(customer_id):
 @customers_blueprint.route("/edit-customer/<int:customer_id>")
 @roles_accepted("cashier", "admin")
 def edit_customer(customer_id):
-    customer = customer_service.get_customer_or_404(customer_id)
+    customer = customer_service.get_customer_accounts_country(customer_id)
 
     form = RegisterCustomerForm(obj=customer)
     form.country.choices = country_service.get_form_country_choices()

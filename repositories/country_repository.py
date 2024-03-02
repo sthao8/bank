@@ -6,33 +6,12 @@ class CountryRepository():
     def get_country_or_404(self, country_name):
         return Country.query.filter(func.lower(Country.name)==country_name.lower()).one_or_404()
 
-    def get_all_countries(self) -> Country:
+    def get_all_countries(self) -> list[Country]:
         return Country.query.all()
-    
-    def get_top_10_country_customers(self, country_name):
-        return db.session.execute(
-                select(
-                Customer, 
-                func.count(Account.id).label("number_of_accounts"),
-                func.sum(Account.balance).label("sum_of_accounts"))
-                .join(Account, Account.customer_id==Customer.id)
-                .join(Country, Country.country_code==Customer.country)
-                .where(Country.name==country_name)
-                .group_by(Customer.id)
-                .order_by(desc("sum_of_accounts"))
-                .limit(10)
-            ).all()
-    
-    def get_all_country_customers(self, country_name) -> Country:
-        return Country.query.filter_by(
-            name=country_name
-            ).options(
-                joinedload(Country.customers)
-                .joinedload(Customer.accounts)
-                .joinedload(Account.transactions)
-            ).all()
 
     def get_country_stats(self):
+        """Get country-level stats for all countries in database,:
+        country name, number of customers, number of accounts, sum of accounts"""
         return db.session.execute(
             select(
                 Country.name,

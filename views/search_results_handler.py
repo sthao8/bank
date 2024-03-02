@@ -57,7 +57,7 @@ class SearchResultsHandler():
         return bool(self.query_criteria)
 
     def _apply_filters(self, query):
-        """Apply filters from query criteria onto query based on given args"""
+        """Apply filter onto query based on given args"""
         if self.has_query_criteria:
             for col_name, data in self.query_criteria.items():
                 query_col = getattr(self.model, col_name)

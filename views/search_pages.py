@@ -22,7 +22,7 @@ def search_account_number():
     form = SearchAccountForm()
 
     if form.validate_on_submit():
-        customer = customer_service.get_customer_or_none(form.search_customer_id.data)
+        customer = customer_service.get_customer_from_id(form.search_customer_id.data)
 
         if customer:
             return redirect(url_for(

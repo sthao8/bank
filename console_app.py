@@ -33,14 +33,14 @@ def audit_transactions(scheduler=None):
     for country in countries:
         suspicious_transactions = []
         suspicious_customers = []
-        customers = customer_service.get_all_customers_for(country)
+        customers = customer_service.get_all_customers_for_country(country)
         
         for customer in customers:
             customer_flagged_transactions = []
             if recent_transactions_exceeds_limit(customer): #TODO maybe this returns a list of all transactions accounted for
                 suspicious_customers.append(customer)
 
-            transactions = transaction_service.get_transactions_for(customer, yesterday)
+            transactions = transaction_service.get_transactions_for_customer_on_date(customer, yesterday)
             for transaction in transactions:
                 if single_transaction_amount_exceeds_limit(transaction):
                     customer_flagged_transactions.append(transaction)
@@ -48,18 +48,12 @@ def audit_transactions(scheduler=None):
             if customer_flagged_transactions:
                 suspicious_transactions.append(dict({customer.id:customer_flagged_transactions}))
 
-        #TODO maybe export this into own function
         recipient = f"{country.name}@testbanken.se"
 
         if suspicious_customers or suspicious_transactions:
             msg = Message("Suspicious transactions found at " + datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), sender="bank@bank.com", recipients=[recipient])
             
             msg.body = compose_message(suspicious_transactions, suspicious_customers)
-            mail.send(msg)
-        else:
-            msg = Message("No suspicious transactions found at " + datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), sender="bank@bank.com", recipients=[recipient])
-            
-            msg.body = "No transactions found"
             mail.send(msg)
 
     schedule_audit(scheduler)
@@ -78,13 +72,13 @@ def recent_transactions_exceeds_limit(customer):
         return True
     return False
 
-def compose_message(flagged_transactions, customers):
+def compose_message(flagged_transactions:list, customers) -> None:
     message_1_data = []
     # TODO make this function more general
     if flagged_transactions:
         for flagged_transaction in flagged_transactions:
             for customer_id, list_of_transactions in flagged_transaction.items():
-                customer = customer_service.get_customer_or_404(customer_id)
+                customer = customer_service.get_customer_accounts_country(customer_id)
                 transaction_data = {
                     "account_holder_id": customer.id,
                     "account_holder_first_name": customer.first_name,
@@ -136,7 +130,15 @@ def compose_message(flagged_transactions, customers):
 
     return message_header + table.get_string() + "\n" + message_header2 + table2.get_string()
 
+def compose_message(flagged_transactions):
+    message_data = []
+    for flagged_transaction in flagged_transactions:
+        for customer_id, list_of_transactions in flagged_transaction.items():
+            customer = customer_service.get_customer_accounts_country(customer_id)
+
+
 def schedule_audit(scheduler=None):
+    """schedules an audit for next midnight"""
     if not scheduler:
         s = sched.scheduler(time.time, time.sleep)
 

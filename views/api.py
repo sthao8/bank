@@ -30,7 +30,7 @@ def user_api(user_id):
 
 @api_blueprint.route("/<int:customer_id>")
 def customer_api(customer_id):
-    customer = customer_service.get_customer_or_404(customer_id)
+    customer = customer_service.get_customer_from_id(customer_id, raise_404=True)
 
     customer_dict = CustomerApiModel(customer).to_dict()
 

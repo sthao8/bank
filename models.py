@@ -1,5 +1,4 @@
 from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore
-from flask_security.utils import hash_password
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
