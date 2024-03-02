@@ -51,10 +51,10 @@
                                     <a href="{{ url_for('search.search_customer') }}" class="nav-link">Advanced Search</a>
                                 </li>
                                 <li class="nav-item d-flex align-items-center px-1 ">
-                                    <form action="{{ url_for('search.search_account_number') }}" method="post" role="search">
+                                    <form action="{{ url_for('search.search_customer_id') }}" method="post" role="search">
                                         {{ search_account_form.hidden_tag() }}
                                         <div>
-                                            {{ render_input_group(search_account_form.search_customer_id, padding="", addon="Quick search",no_label=True, button_addon=True, show_errors=False) }}
+                                            {{ render_input_group(search_account_form.customer_id, padding="", addon="Quick search",no_label=True, button_addon=True, show_errors=False) }}
                                         </div>
                                     </form>
                                 </li>

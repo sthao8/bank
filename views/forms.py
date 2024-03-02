@@ -2,18 +2,13 @@ from datetime import datetime
 from typing import Any
 from flask_wtf import FlaskForm
 from wtforms import (
-    Form,
     StringField,
     EmailField,
     PasswordField,
-    BooleanField,
-    TextAreaField,
-    IntegerField,
     SubmitField,
     DateField,
     TelField,
     SelectField,
-    RadioField,
     DecimalField,
     SearchField)
 from wtforms.validators import (
@@ -30,7 +25,6 @@ from views.validators import (
     CheckIfFormHasData,
     CheckThatTwoFieldsDoNotMatch,
     InputRequiredIfOtherFieldHasSpecificValue)
-from constants.constants import BusinessConstants
 
 class LoginForm(FlaskForm):
     email = EmailField(
@@ -63,8 +57,8 @@ class LoginForm(FlaskForm):
     def validation_failed(self):
         return bool(self.errors)
 
-class SearchAccountForm(FlaskForm):
-    search_customer_id = StringField(
+class SearchCustumerIDForm(FlaskForm):
+    customer_id = StringField(
         "Customer ID",
         render_kw={
             "size": 20,
@@ -86,6 +80,11 @@ class SearchAccountForm(FlaskForm):
         return bool(self.errors)
     
 class SearchCustomerForm(FlaskForm):
+    """
+    For use with SearchResultsHandler, in order to add more fields to search by,
+    add a field in the form and its fieldname to user_defined_fields. 
+    Fields should of course only correspond to columns existing inside of the Customer model!!! 
+    """
     class Meta:
         csrf = False
 

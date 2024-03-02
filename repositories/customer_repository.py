@@ -1,5 +1,5 @@
 from models import Customer, Account, db, Country, Transaction
-from sqlalchemy import select, func, desc
+from sqlalchemy import select, func, desc, asc
 from sqlalchemy.orm import joinedload
 
 class CustomerRepository():
@@ -53,3 +53,22 @@ class CustomerRepository():
         db.session.commit()
 
         return new_customer
+    
+    def get_paginated_sorted_search_results(self, query_criteria: dict, sort_col, sort_order, page, results_per_page) -> list[Customer]:
+        """Dynamically constructs a query based on supplied filters in query_criteria and sort args"""
+        query = Customer.query
+        
+        # apply filters
+        for attribute_name, data in query_criteria.items():
+            query_col = getattr(Customer, attribute_name)
+            query = query.filter(func.lower(query_col) == data)
+        
+        # apply sorting
+        order_by_col = getattr(Customer, sort_col)
+
+        if sort_order == "asc":
+            query = query.order_by(asc(order_by_col))
+        elif sort_order == "desc":
+            query = query.order_by(desc(order_by_col))
+
+        return query.paginate(page=page, per_page=results_per_page)

@@ -12,7 +12,7 @@ from seed import (
     seed_roles,
     seed_users
     )
-from views.forms import SearchAccountForm
+from views.forms import SearchCustumerIDForm
 from views.authentication_pages import authentication_blueprint
 from views.users_pages import users_blueprint
 from views.customers_pages import customers_blueprint
@@ -51,7 +51,7 @@ def create_app():
 
     @app.context_processor
     def inject_search_account_form():
-        search_account_form = SearchAccountForm()
+        search_account_form = SearchCustumerIDForm()
         return dict(search_account_form=search_account_form)
     
     @app.context_processor
