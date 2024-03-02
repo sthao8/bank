@@ -1,4 +1,4 @@
-from models import Customer, Account, db, Country, Transaction
+from models import Customer, Account, db, Country
 from sqlalchemy import select, func, desc, asc
 from sqlalchemy.orm import joinedload
 

@@ -10,27 +10,27 @@ class SearchService():
     Prepares data from a SearchCustomerForm and request.args
     before calling repository layer to return paginated, sorted, filtered results
     """
-    def __init__(self, customer_repo: CustomerRepository, form: SearchCustomerForm, args) -> None:
+    def __init__(self, customer_repo: CustomerRepository, form: SearchCustomerForm, request_args) -> None:
         self.customer_repo = customer_repo
         self.form = form
-        self.args = args
+        self.request_args = request_args
         # Get these static attributes from url params
-        self.previous_sort_col = args.get("previous_sort_col", "id")
-        self.current_sort_col = args.get("sort_col", "id")
-        self.toggle_order = args.get("toggle_order", False, string_to_bool)
+        self.previous_sort_col = request_args.get("previous_sort_col", "id")
+        self.current_sort_col = request_args.get("sort_col", "id")
+        self.toggle_order = request_args.get("toggle_order", False, string_to_bool)
 
     # Set these following dynamic properties based on certain conditions
     @property
     def page(self) -> int:
         # Reset the page to 1 if a new sort column is clicked or same sort column clicked again 
-        page = self.args.get("page", 1, int)
+        page = self.request_args.get("page", 1, int)
         if self.current_sort_col != self.previous_sort_col or self.toggle_order:
             page = 1
         return page
 
     @property
     def sort_order(self) -> str:
-        sort_order = self.args.get("sort_order", "asc")
+        sort_order = self.request_args.get("sort_order", "asc")
 
         # Reset the order to ascending if new column clicked, otherwise swap if toggled
         if self.current_sort_col != self.previous_sort_col:

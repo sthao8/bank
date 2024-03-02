@@ -57,7 +57,7 @@ class LoginForm(FlaskForm):
     def validation_failed(self):
         return bool(self.errors)
 
-class SearchCustumerIDForm(FlaskForm):
+class SearchCustomerIDForm(FlaskForm):
     customer_id = StringField(
         "Customer ID",
         render_kw={

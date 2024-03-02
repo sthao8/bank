@@ -63,9 +63,9 @@ class TransactionService():
         sum = self.transaction_repository.get_sum_recent_transactions_of_country(customer, from_date)
         return Decimal(sum) if sum is not None else 0
     
-    def get_summed_transaction_ids(self, customer: Customer, time_period: timedelta) -> list[int]:
+    def get_summed_transactions(self, customer: Customer, time_period: timedelta) -> list[Transaction]:
         from_date = datetime.now() - time_period
-        return self.transaction_repository.get_summed_transaction_ids(customer, from_date)
+        return self.transaction_repository.get_summed_transactions(customer, from_date)
     
     def get_transactions_for_customer_on_date(self, customer: Customer, target_date: date) -> list[Transaction]:
         return self.transaction_repository.get_recent_transactions_for_customer(customer, target_date)

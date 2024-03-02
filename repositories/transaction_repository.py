@@ -34,15 +34,15 @@ class TransactionRepository():
                    ).join(Account, Account.id==Transaction.account_id)
                    .join(Customer, Customer.id==Account.customer_id)
                    .join(Country, Country.country_code==Customer.country)
-                   .group_by(Customer.id)
                    .where(Customer.id==customer.id)
                    .where(between(Transaction.timestamp, from_date, datetime.now()))
+                   .group_by(Customer.id)
         ).scalar()
 
-    def get_summed_transaction_ids(self, customer: Customer, from_date: datetime) -> list[int]:
-        """Get the ids of all transactions for a customer from the from_date to now"""
+    def get_summed_transactions(self, customer: Customer, from_date: datetime) -> list[Transaction]:
+        """Get all transactions for a customer from the from_date to now"""
         return db.session.execute(
-            select(Transaction.id
+            select(Transaction
                    ).join(Account, Account.id==Transaction.account_id)
                    .join(Customer, Customer.id==Account.customer_id)
                    .join(Country, Country.country_code==Customer.country)

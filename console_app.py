@@ -6,7 +6,7 @@ import sched, time
 
 from extensions import mail
 from app import create_app
-from models import Country, Transaction, db
+from models import Country, Transaction
 from services.country_services import CountryService, CountryRepository
 from services.customer_services import CustomerService, CustomerRepository
 from services.transaction_services import TransactionService, TransactionRepository
@@ -31,34 +31,47 @@ def audit_transactions(scheduler=None):
     yesterday = (datetime.now() - timedelta(days=1)).date()
 
     for country in countries:
-        suspicious_transactions = []
-        suspicious_customers = []
+        flagged_customers:list[dict] = []
         customers = customer_service.get_all_customers_for_country(country)
         
         for customer in customers:
-            customer_flagged_transactions = []
-            if recent_transactions_exceeds_limit(customer): #TODO maybe this returns a list of all transactions accounted for
-                suspicious_customers.append(customer)
-
+            # Sets needed to deduplicate entries
+            flagged_transaction_ids = set()
+            flagged_account_ids = set()
+            
+            # Check first rule
             transactions = transaction_service.get_transactions_for_customer_on_date(customer, yesterday)
             for transaction in transactions:
                 if single_transaction_amount_exceeds_limit(transaction):
-                    customer_flagged_transactions.append(transaction)
-            
-            if customer_flagged_transactions:
-                suspicious_transactions.append(dict({customer.id:customer_flagged_transactions}))
+                    flagged_transaction_ids.add(transaction.id)
+                    flagged_account_ids.add(transaction.account_id)
 
-        recipient = f"{country.name}@testbanken.se"
+            # Check second rule
+            if recent_transactions_exceeds_limit(customer):
+                summed_transactions = transaction_service.get_summed_transactions(customer, TIME_PERIOD)
 
-        if suspicious_customers or suspicious_transactions:
+                for transaction in summed_transactions:
+                    flagged_transaction_ids.add(transaction.id)
+                    flagged_account_ids.add(transaction.account_id)
+
+            if flagged_transaction_ids:
+                flagged_customers.append({customer.id:
+                                          {"transactions": flagged_transaction_ids, "accounts": flagged_account_ids}}
+                                        )
+
+        if flagged_customers:
+            recipient = f"{country.name}@testbanken.se"
+
             msg = Message("Suspicious transactions found at " + datetime.now().strftime("%m/%d/%Y, %H:%M:%S"), sender="bank@bank.com", recipients=[recipient])
             
-            msg.body = compose_message(suspicious_transactions, suspicious_customers)
+            customers_table = compose_message_table(flagged_customers,"Flagged customers found: ")
+
+            msg.body = customers_table
             mail.send(msg)
 
     schedule_audit(scheduler)
 
-def single_transaction_amount_exceeds_limit(transaction: Transaction):
+def single_transaction_amount_exceeds_limit(transaction:Transaction):
     LIMIT = Decimal(15000)
     if transaction.amount > LIMIT:
         return True
@@ -72,73 +85,36 @@ def recent_transactions_exceeds_limit(customer):
         return True
     return False
 
-def compose_message(flagged_transactions:list, customers) -> None:
-    message_1_data = []
-    # TODO make this function more general
-    if flagged_transactions:
-        for flagged_transaction in flagged_transactions:
-            for customer_id, list_of_transactions in flagged_transaction.items():
-                customer = customer_service.get_customer_accounts_country(customer_id)
-                transaction_data = {
-                    "account_holder_id": customer.id,
-                    "account_holder_first_name": customer.first_name,
-                    "account_holder_last_name": customer.last_name,
-                    "account_numbers": set([transaction.account_id for transaction in list_of_transactions]),
-                    "transaction_numbers": [transaction.id for transaction in list_of_transactions]
-                }
-                message_1_data.append(transaction_data)
-    message_2_data = []
-    if customers:
-        for customer in customers:
-            transaction_ids = transaction_service.get_summed_transaction_ids(customer, TIME_PERIOD)
+def compose_message_table(flagged_entities:list[dict], message_header) -> None:
+    table_data = []
+    for flagged_entitiy in flagged_entities:
+        for customer_id, flagged_accounts_transactions in flagged_entitiy.items():
+            customer = customer_service.get_customer_accounts_country(customer_id)
             customer_data = {
                 "account_holder_id": customer.id,
                 "account_holder_first_name": customer.first_name,
                 "account_holder_last_name": customer.last_name,
-                "account_numbers": set([account.id for account in customer.accounts]),
-                "transaction_numbers": transaction_ids
+                "account_numbers": set([account_id for account_id in flagged_accounts_transactions["accounts"]]),
+                "transaction_numbers": [transaction_id for transaction_id in flagged_accounts_transactions["transactions"]]
             }
-            message_2_data.append(customer_data)
+            table_data.append(customer_data)
     
     table = PrettyTable()
     table.field_names = ["Id", "Name", "Account number(s)", "Transaction number(s)"]    
-    for data in message_1_data:
+    for data in table_data:
         message_row = [
             data["account_holder_id"],
             f"{data['account_holder_first_name']} {data['account_holder_last_name']}",
-            ", ".join(str(item) for item in data["account_numbers"]),
-            ", ".join(str(item) for item in data["transaction_numbers"])
+            ", ".join(str(account_number) for account_number in data["account_numbers"]),
+            ", ".join(str(transaction_number) for transaction_number in data["transaction_numbers"])
         ]
         table.add_row(message_row)
     table.align["Transaction number(s)"] = "l"
 
-    table2 = PrettyTable()
-    table2.field_names = ["Id", "Name", "Account number(s)", "Transaction number(s)"]    
-    for data in message_2_data:
-        message_row = [
-            data["account_holder_id"],
-            f"{data['account_holder_first_name']} {data['account_holder_last_name']}",
-            ", ".join(str(item) for item in data["account_numbers"]),
-            ", ".join(str(item) for item in data["transaction_numbers"])
-        ]
-        table2.add_row(message_row)
-    table2.align["Transaction number(s)"] = "l"
-
-    # TODO: you may want to do also an html of this list
-    message_header = f"Flagged transactions violate rule 1: \n"
-    message_header2 = f"Flagged transactions violate rule 2: \n"
-
-    return message_header + table.get_string() + "\n" + message_header2 + table2.get_string()
-
-def compose_message(flagged_transactions):
-    message_data = []
-    for flagged_transaction in flagged_transactions:
-        for customer_id, list_of_transactions in flagged_transaction.items():
-            customer = customer_service.get_customer_accounts_country(customer_id)
-
+    return message_header + "\n" + table.get_string() + "\n"
 
 def schedule_audit(scheduler=None):
-    """schedules an audit for next midnight"""
+    """Schedules an audit for next midnight"""
     if not scheduler:
         s = sched.scheduler(time.time, time.sleep)
 
@@ -154,5 +130,5 @@ def schedule_audit(scheduler=None):
 if __name__ == "__main__":
     app = create_app()
     with app.app_context():
-        audit_transactions()
+        # audit_transactions()
         schedule_audit()

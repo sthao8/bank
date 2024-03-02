@@ -1,12 +1,10 @@
 from flask import render_template, redirect, url_for, Blueprint, flash, request
 from flask_security import login_required
 
-from views.forms import SearchCustumerIDForm, SearchCustomerForm
+from views.forms import SearchCustomerIDForm, SearchCustomerForm
 from services.search_service import SearchService
 from services.customer_services import CustomerService, CustomerRepository
 from services.account_services import AccountService, AccountRepository
-from models import Customer
-from utils import string_to_bool
 
 
 account_repo = AccountRepository()
@@ -21,7 +19,7 @@ search_blueprint = Blueprint("search", __name__)
 @search_blueprint.route("/search-customer-id", methods=["POST"])
 @login_required
 def search_customer_id():
-    form = SearchCustumerIDForm()
+    form = SearchCustomerIDForm()
 
     if form.validate_on_submit():
         customer = customer_service.get_customer_from_id(form.customer_id.data)
@@ -29,18 +27,14 @@ def search_customer_id():
         if customer:
             return redirect(url_for(
                 "customers.customer_page",
-                active_page="search_customer", #TODO this is not strictly true
                 customer_id=customer.id,)
             )
-        else:
-            flash("No results found!")
-            return redirect(url_for("search.search_customer", active_page="search_customer"))
-    #TODO actually decide what to do here if they can't validate. maybe front end validation beforehands and then??
-    return redirect(url_for("customers.index"))
+    flash("No results found!")
+    return redirect(url_for("search.advanced_search", active_page="search_customer"))
 
-@search_blueprint.route("/search-customer")
+@search_blueprint.route("/advanced-search")
 @login_required
-def search_customer():
+def advanced_search():
     form = SearchCustomerForm()
 
     return render_template(

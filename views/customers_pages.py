@@ -53,8 +53,6 @@ def country_page(country_name):
 @customers_blueprint.route("/register_customer", methods=["GET", "POST"])
 @roles_accepted("cashier", "admin")
 def register_customer():
-    # TODO: do maybe some more validation stuff here
-    #TODO random place, but make sure birthdate is in past
     form = RegisterCustomerForm()
     form.country.choices = country_service.get_form_country_choices()
 

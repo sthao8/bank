@@ -48,7 +48,7 @@
                                 
                                 <li class="nav-item d-flex align-items-center px-1 {{ 'active' if active_page=='search_customer' }}">
                                     <i class="bx bx-search icons"></i>
-                                    <a href="{{ url_for('search.search_customer') }}" class="nav-link">Advanced Search</a>
+                                    <a href="{{ url_for('search.advanced_search') }}" class="nav-link">Advanced Search</a>
                                 </li>
                                 <li class="nav-item d-flex align-items-center px-1 ">
                                     <form action="{{ url_for('search.search_customer_id') }}" method="post" role="search">
