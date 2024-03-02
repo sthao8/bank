@@ -40,6 +40,8 @@
     </div>
 </div>
 
+<script src="/static/js/format_currency.js"></script>
+
 <script>
     // fetch account via api
     async function fetchAccountData(accountId) {
@@ -66,7 +68,7 @@
         if (accountData) {
             resultsDiv.classList.remove("text-danger");
             resultsDiv.classList.add("text-info");
-            resultsDiv.innerText = `Account ${accountData.account_id}, Available balance: ${accountData.balance}`;
+            resultsDiv.innerText = `Account ${accountData.account_id}, Available balance: ${format_currency(accountData.balance)}`;
         } else {
             resultsDiv.classList.remove("text-info");
             resultsDiv.classList.add("text-danger");

@@ -1,7 +1,7 @@
 from flask import render_template, redirect, url_for, Blueprint, flash, request
 from flask_security import login_required
 
-from views.forms import SearchCustomerIDForm, SearchCustomerForm
+from forms import SearchCustomerIDForm, SearchCustomerForm
 from services.search_service import SearchService
 from services.customer_services import CustomerService, CustomerRepository
 from services.account_services import AccountService, AccountRepository

@@ -1,6 +1,6 @@
 from sqlalchemy import func, desc, asc
 
-from views.forms import SearchCustomerForm
+from forms import SearchCustomerForm
 from utils import string_to_bool
 from repositories.customer_repository import CustomerRepository
 

@@ -3,7 +3,7 @@ from flask import render_template, flash, redirect, url_for, Blueprint, request
 from flask_security import roles_accepted
 
 from models import Account, db
-from views.forms import TransactionForm, TransferForm, FlaskForm
+from forms import TransactionForm, TransferForm, FlaskForm
 from services.transaction_services import TransactionService
 from repositories.transaction_repository import TransactionRepository
 from repositories.customer_repository import CustomerRepository
@@ -27,7 +27,7 @@ transaction_service = TransactionService(transaction_repo, account_service)
 
 transactions_blueprint = Blueprint("transactions", __name__)
 
-@transactions_blueprint.route("/transactions-test", methods=["GET", "POST"])
+@transactions_blueprint.route("/transactions", methods=["GET", "POST"])
 def transactions():
     form = TransactionForm()
     form.type.choices = [type.value for type in TransactionTypes] + ["transfer"]
@@ -48,6 +48,12 @@ def transactions():
             flash(error)
         else:
             flash(f"{transaction_type_name} success")
+            return render_template("transactions/transaction_confirmation.html",
+                                   account_id=account_id,
+                                   to_account=to_account,
+                                   transaction_type_name=transaction_type_name,
+                                   amount=amount,
+                                   current_date=current_date)
     elif request.method == "POST":
         flash(form.errors)
     return render_template("transactions/transactions.html",

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, flash, url_for
 from flask_security import login_required, roles_accepted
 
-from views.forms import RegisterCustomerForm
+from forms import RegisterCustomerForm
 
 from services.country_services import CountryService, CountryRepository
 from services.transaction_services import TransactionService, TransactionRepository

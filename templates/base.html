@@ -54,7 +54,13 @@
                                     <form action="{{ url_for('search.search_customer_id') }}" method="post" role="search">
                                         {{ search_account_form.hidden_tag() }}
                                         <div>
-                                            {{ render_input_group(search_account_form.customer_id, padding="", addon="Quick search",no_label=True, button_addon=True, show_errors=False) }}
+                                            {{ render_input_group(
+                                                search_account_form.customer_id,
+                                                padding="",
+                                                addon="Quick search",
+                                                no_label=True,
+                                                button_addon=True,
+                                                show_errors=False) }}
                                         </div>
                                     </form>
                                 </li>
@@ -67,8 +73,6 @@
                         </div>
                     </div>
                 </nav>
-
-                    
                     
             {% endif %}
 
@@ -113,7 +117,7 @@
                     }
                 }
 
-                function getNextElementWithClass(element, className) {
+                function getNextElementWithClassname(element, className) {
                     let nextElement = element.nextElementSibling;
                     
                     while (nextElement) {
@@ -126,9 +130,9 @@
                     return null;
                 }
 
-                // If a field(element) is invalid, add appropriate class name and message; otherwise hide message div
+                // If a field(element) is invalid, add appropriate class name and message; otherwise hide errors div
                 function showErrors(element) {
-                    const feedbackElement = getNextElementWithClass(element, "field-errors");
+                    const feedbackElement = getNextElementWithClassname(element, "field-errors");
                     if (!element.validity.valid) {
                         if (feedbackElement) {
                             element.classList.add('is-invalid');
@@ -140,7 +144,6 @@
                         if (feedbackElement) feedbackElement.style.display = 'none';
                     }
                 }
-
                 
                 // Loop over them and prevent submission
                 Array.from(forms).forEach(form => {
@@ -152,7 +155,7 @@
 
                         form.classList.add('was-validated');
                         
-                        // Immediate show errors after submission
+                        // Immediately show errors after submission
                         Array.from(form.elements).forEach(element => {
                             if (element.type !== "hidden" && !element.readOnly){
                                 showErrors(element);
@@ -162,15 +165,12 @@
                     
                     //Reset validation if serverside errors
                     var validationFailed = {{ validation_failed|tojson }};
-                    {% if form %}
-                        validationFailed = {{ validation_failed|tojson }} || {{ form.validation_failed|tojson }};
-                    {% endif %}
 
                     if (validationFailed) {
                         selectivelyResetFormValidation(form);
                     }
 
-                    // Show errors on input only after submission
+                    // Show errors on input only after form is submitted once
                     Array.from(form.elements).forEach(element => {
                         element.addEventListener('input', function() {
                             if (form.classList.contains('was-validated') || validationFailed) {

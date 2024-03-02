@@ -1,6 +1,6 @@
 from flask import render_template, Blueprint, redirect, url_for, flash, request
 from flask_security import roles_accepted, roles_required
-from views.forms import CrudUserForm, RegisterUserForm, FlaskForm
+from forms import CrudUserForm, RegisterUserForm, FlaskForm
 
 from repositories.user_repository import UserRepository
 from services.user_services import UserService
@@ -34,17 +34,16 @@ def crud_user():
         register_form=register_form,
         users=users)
 
-@users_blueprint.route("/user-page/<user_id>", methods=["GET"])
-@roles_required("admin")
-def user_page(user_id):
-    user = user_service.get_user_or_404(user_id)
+# @users_blueprint.route("/user-page/<user_id>", methods=["GET"])
+# @roles_required("admin")
+# def user_page(user_id):
+#     user = user_service.get_user_or_404(user_id)
 
-    form = CrudUserForm()
-    form.role.choices = user_service.get_user_roles()
-    form.role.data = user.roles[0]
+#     form = CrudUserForm()
+#     form.role.choices = user_service.get_user_roles()
+#     form.role.data = user.roles[0]
 
-    return render_template("users/edit_user.html", user=user, form=form)
-
+#     return render_template("users/edit_user.html", user=user, form=form)
 
 @users_blueprint.route("/register_user", methods=["POST"])
 @roles_accepted("admin")

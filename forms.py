@@ -19,7 +19,7 @@ from wtforms.validators import (
     NumberRange,
     Regexp,
     Optional)
-from views.validators import (
+from validators import (
     Age,
     CheckIfAllPasswordFieldsHaveDataIfOneHasData,
     CheckIfFormHasData,
@@ -31,13 +31,11 @@ class LoginForm(FlaskForm):
         "Email",
         validators=[
             InputRequired(),
-            Length(min=5, max=32),
-            Email(message="Unrecognized email format.")
+            Length(min=5, max=32)
         ],
         render_kw={
             "autofocus": True,
-            "size": 20,
-            "placeholder": "youremail@mail.com"
+            "size": 20
         }
     )
     password = PasswordField(
@@ -47,8 +45,7 @@ class LoginForm(FlaskForm):
             Length(min=8, max=32, message="Password must be between 8 and 32 characters")
         ],
          render_kw={
-            "size": 20,
-            "placeholder": "*******"
+            "size": 20
         }
     )
     submit = SubmitField("Login")
@@ -62,7 +59,7 @@ class SearchCustomerIDForm(FlaskForm):
         "Customer ID",
         render_kw={
             "size": 20,
-            "placeholder": "1238",
+            "placeholder": "Customer ID",
             "autocomplete": "off",
             "pattern": r'^\d+$',
             "title": "Only numbers allowed for customer id",
@@ -201,19 +198,19 @@ class RegisterUserForm(FlaskForm):
     email = EmailField(
         "Email",
         validators=[InputRequired(), Length(min=1, max=50, message="Email cannot exceed 50 characters.")],
-        render_kw={"placeholder": "bob.bobertson@mail.com", "autocomplete": "new-email"}
+        render_kw={"autocomplete": "new-email"}
     )
 
     password = PasswordField(
         "Password",
         validators=[InputRequired(), Length(min=8, max=32, message="Password must be between 8 and 32 characters")],
-        render_kw={"placeholder": "********", "autocomplete": "new-password"}
+        render_kw={"autocomplete": "new-password"}
     )
 
     confirm_password = PasswordField(
         "Confirm password",
         validators=[InputRequired(), Length(min=8, max=32, message="Password must be between 8 and 32 characters"), EqualTo("password")],
-        render_kw={"placeholder": "********", "autocomplete": "new-password"}
+        render_kw={"autocomplete": "new-password"}
     )
 
     role = SelectField(
