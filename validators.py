@@ -1,11 +1,14 @@
 from typing import Any
 from constants.constants import BusinessConstants
 from datetime import date
-from wtforms.validators import (ValidationError, StopValidation)
+from wtforms.validators import ValidationError, StopValidation
 
 class Age(object):
     """Checks if date entered is in proper range for age restirctions"""
-    def __init__(self, min=BusinessConstants.MINIMUM_AGE, max=BusinessConstants.MAXIMUM_AGE, message=None):
+    def __init__(self,
+                 min=BusinessConstants.MINIMUM_AGE,
+                 max=BusinessConstants.MAXIMUM_AGE,
+                 message=None):
         self.min = min
         self.max = max
         if not message:
@@ -25,7 +28,8 @@ class CheckIfAllPasswordFieldsHaveDataIfOneHasData(object):
         self.message = message
 
     def __call__(self, form, field):
-        password_fields = [field for field_name, field in form._fields.items() if "password" in field_name]
+        password_fields = [field for field_name, field in form._fields.items()
+                           if "password" in field_name]
         filled_password_fields = [True if field.data else False for field in password_fields]
         
         if any(filled_password_fields) and not all(filled_password_fields):

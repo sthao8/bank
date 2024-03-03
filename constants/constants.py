@@ -23,7 +23,8 @@ class TransactionTypes(Enum):
         raise ValueError(f"{value} is not a valid value in {cls.__name__}")
 
 class BusinessConstants:
-    SUPPORTED_LOCALES = [supported_country_locale.name for supported_country_locale in TelephoneCountryCodes]
+    SUPPORTED_LOCALES = [supported_country_locale.name 
+                         for supported_country_locale in TelephoneCountryCodes]
     MINIMUM_AGE = 18
     MAXIMUM_AGE = 100
     BANK_ESTABLISHED_DATE = date(year=1905, month=12, day=5)
