@@ -45,7 +45,7 @@ class TransactionRepository():
         """Returns count of transactions for an account"""
         return Transaction.query.filter_by(account_id=account_id).count()
     
-    def get_sum_recent_transactions_of_country(
+    def get_sum_transactions_of_customer(
             self,
             customer: Customer,
             from_date: datetime
@@ -72,7 +72,7 @@ class TransactionRepository():
                    .where(between(Transaction.timestamp, from_date, datetime.now()))
         ).scalars().all()
 
-    def get_recent_transactions_for_customer(self,
+    def get_transactions_for_customer_on_date(self,
                                              customer: Customer,
                                              target_date: date
                                              ) -> list[Transaction]:

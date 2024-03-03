@@ -87,12 +87,12 @@ class TransactionService():
                                         ) -> list[Transaction]:
         return self.transaction_repository.get_limited_offset_transactions(account_id, limit, offset)
     
-    def get_sum_recent_transactions_of(self,
+    def get_sum_transactions_of_customer(self,
                                        customer: Customer,
                                        time_period: timedelta
                                        ) -> Decimal:
         from_date = datetime.now() - time_period
-        sum = self.transaction_repository.get_sum_recent_transactions_of_country(customer, from_date)
+        sum = self.transaction_repository.get_sum_transactions_of_customer(customer, from_date)
         return Decimal(sum) if sum is not None else 0
     
     def get_summed_transactions(self,
@@ -106,4 +106,4 @@ class TransactionService():
                                               customer: Customer,
                                               target_date: date
                                               ) -> list[Transaction]:
-        return self.transaction_repository.get_recent_transactions_for_customer(customer, target_date)
+        return self.transaction_repository.get_transactions_for_customer_on_date(customer, target_date)

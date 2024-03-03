@@ -84,7 +84,7 @@ def single_transaction_amount_exceeds_limit(transaction:Transaction):
 def recent_transactions_exceeds_limit(customer):
     LIMIT = Decimal(23000)
 
-    sum_recent_transactions = transaction_service.get_sum_recent_transactions_of(customer, TIME_PERIOD)
+    sum_recent_transactions = transaction_service.get_sum_transactions_of_customer(customer, TIME_PERIOD)
     if sum_recent_transactions > LIMIT:
         return True
     return False
