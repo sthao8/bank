@@ -48,7 +48,11 @@ def transactions_api(account_id):
 
     has_more = offset + limit < total_transactions_count
     if has_more:
-        next_url = f"{url_for('api.transactions_api', account_id=account_id, offset=offset + limit, limit=limit, _external=True)}"
+        next_url = url_for('api.transactions_api',
+                              account_id=account_id,
+                              offset=offset + limit,
+                              limit=limit,
+                              _external=True)
     else:
         next_url = None
 

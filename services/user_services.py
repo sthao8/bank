@@ -12,7 +12,8 @@ class UserService():
         return self.user_repository.get_all_users()
     
     def fetch_users_by_active_status(self, show_inactive_users):
-        return self.user_repository.get_all_users() if show_inactive_users else self.user_repository.get_active_users()
+        return (self.user_repository.get_all_users() if show_inactive_users
+                else self.user_repository.get_active_users())
     
     def get_user_roles(self) -> list[str]:
         return [role.value for role in UserRoles]

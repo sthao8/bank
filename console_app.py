@@ -54,15 +54,18 @@ def audit_transactions(scheduler=None):
                     flagged_transaction_ids.add(transaction.id)
                     flagged_account_ids.add(transaction.account_id)
 
+            # Add customer only if they have any flagged transactions
             if flagged_transaction_ids:
                 flagged_customers.append({customer.id:
-                                          {"transactions": flagged_transaction_ids, "accounts": flagged_account_ids}}
+                                          {"transactions": flagged_transaction_ids,
+                                           "accounts": flagged_account_ids}}
                                         )
 
         if flagged_customers:
             recipient = f"{country.name}@testbanken.se"
 
-            msg = Message("Suspicious transactions found at " + datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+            msg = Message("Suspicious transactions found at "
+                          + datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
                           sender="bank@bank.com", recipients=[recipient])
             
             customers_table = compose_message_table(flagged_customers,"Flagged customers found: ")
@@ -95,7 +98,8 @@ def compose_message_table(flagged_entities:list[dict], message_header) -> None:
                 "account_holder_id": customer.id,
                 "account_holder_first_name": customer.first_name,
                 "account_holder_last_name": customer.last_name,
-                "account_numbers": [account_id for account_id in flagged_accounts_transactions["accounts"]],
+                "account_numbers": [account_id for account_id
+                                    in flagged_accounts_transactions["accounts"]],
                 "transaction_numbers": [transaction_id for transaction_id
                                         in flagged_accounts_transactions["transactions"]]
             }
