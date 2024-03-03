@@ -21,7 +21,6 @@ from views.transactions_pages import transactions_blueprint
 from views.api import api_blueprint
 
 
-# TODO check tests
 # TODO add new bal to trans confirm
 
 def create_app():
