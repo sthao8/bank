@@ -102,14 +102,6 @@ form {
     color:cyan;
 }
 
-/* .flashed-messages {
-    position: fixed;
-    top: 0;
-    left: 0; nav bar height
-    width: 100%;
-    z-index: 1050;
-} */
-
 .large_icon {
     font-size: 100px;
 }
@@ -151,5 +143,18 @@ text-decoration: none;
 } 
 
 .custom-rounded-button {
-    border-radius: 0 0 5px 5px; /* Adjust the '5px' to your preference */
+    border-radius: 0 0 5px 5px;
+}
+
+.sticky-top-2 {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
+    z-index: 1020;
+}
+
+@media (max-width: 1200px) {
+    .sticky-top-2 {
+        top: 320px;
+    }
 }

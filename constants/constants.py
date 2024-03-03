@@ -22,7 +22,6 @@ class TransactionTypes(Enum):
                 return member
         raise ValueError(f"{value} is not a valid value in {cls.__name__}")
 
-
 class BusinessConstants:
     SUPPORTED_LOCALES = [supported_country_locale.name for supported_country_locale in TelephoneCountryCodes]
     MINIMUM_AGE = 18

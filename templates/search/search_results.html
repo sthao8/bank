@@ -37,10 +37,10 @@
                     } %}
 
                     <div class="row pt-4">
-                        <div class="table-responsive ">
+                        <div class="position-relative  ">
                             <table class="caption-top table table-light table-bordered">
                                 <caption><i>Showing page {{ page }} of {{ customers.pages }} page(s)</i></caption>
-                                <thead>
+                                <thead class="sticky-top-2">
                                     <tr>
                                         <th></th>
                                         {% for label, url_param in columns.items() %}

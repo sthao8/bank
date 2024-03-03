@@ -1,9 +1,7 @@
 from datetime import date
-from flask import render_template, flash, redirect, url_for, Blueprint, request
-from flask_security import roles_accepted
+from flask import render_template, flash, Blueprint, request
 
-from models import Account, db
-from forms import TransactionForm, TransferForm, FlaskForm
+from forms import TransactionForm
 from services.transaction_services import TransactionService
 from repositories.transaction_repository import TransactionRepository
 from repositories.customer_repository import CustomerRepository

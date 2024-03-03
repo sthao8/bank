@@ -61,7 +61,7 @@ def register_customer():
             fieldname: field.data for fieldname, field in form._fields.items()
             if fieldname in form.user_defined_fields
             }
-        
+
         try:
             new_customer = customer_service.create_customer_and_new_account(customer_details)
         except ValueError as error:

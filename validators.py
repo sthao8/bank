@@ -16,20 +16,6 @@ class Age(object):
         age = (date.today() - field.data).days / 365
         if not self.min < age < self.max:
             raise ValidationError(self.message)
-        
-class CheckIfFormHasData(object):
-    """Checks if field has any data in it"""
-    def __init__(self, message=None):
-        if not message:
-            message = "No fields filled in"
-        self.message = message
-
-    def __call__(self, form, field):
-        for field in form:
-            if not field.data:
-                break
-        else:
-            raise ValidationError(self.message)
 
 class CheckIfAllPasswordFieldsHaveDataIfOneHasData(object):
     """Checks if password fields have been filled in"""
@@ -57,7 +43,7 @@ class CheckThatTwoFieldsDoNotMatch(object):
         other_field = form._fields.get(self.other_field_name)
         if field.data and other_field.data and field.data == other_field.data:
             raise ValidationError(self.message)
-        
+    
 class InputRequiredIfOtherFieldHasSpecificValue(object):
     """Only require this field if other field equal to some value"""
     def __init__(self, other_field_name, target_value, message=None) -> None:

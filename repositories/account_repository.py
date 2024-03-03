@@ -1,7 +1,7 @@
 from models import Account, db
 
 class AccountRepository():
-    def get_account_from_id(self, account_id: int, raise_404: bool = False):
+    def get_account_from_id(self, account_id :int, raise_404 :bool=False):
         """get account from id, use raise_404 to show 404 if account doesn't exist"""
         query = Account.query.filter_by(id=account_id)
         if raise_404:
@@ -18,4 +18,3 @@ class AccountRepository():
 
         db.session.add(new_account)
         db.session.commit()
-

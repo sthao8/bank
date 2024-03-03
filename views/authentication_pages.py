@@ -1,4 +1,4 @@
-from flask_login import login_user, login_required, logout_user, current_user
+from flask_login import login_user, login_required, logout_user
 from flask import redirect, url_for, flash, render_template, Blueprint
 
 from forms import LoginForm

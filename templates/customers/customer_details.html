@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block main %}
-<div class="container h-100 d-flex flex-column justify-content-center  ">
+<div class="container h-100 d-flex flex-column justify-content-center py-3">
     <div class="row justify-content-center">
         <div class="col-xs-12 col-md-10 col-xl-8 d-flex flex-column align-items-center ">
             <div class="pb-3 text-start w-100">
@@ -54,8 +54,8 @@
                 <div class="row">
                     {{ render_field(form.country) }}
                 </div>
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-outline-secondary " >{{"Register" if not edit else "Edit customer"}}</button>
+                <div class="d-grid pt-3">
+                    <button type="submit" class="btn btn-outline-secondary" >{{"Register" if not edit else "Edit customer"}}</button>
                 </div>
             </form>
         </div>

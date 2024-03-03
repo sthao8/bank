@@ -21,6 +21,9 @@ from views.transactions_pages import transactions_blueprint
 from views.api import api_blueprint
 
 
+# TODO check tests
+# TODO add new bal to trans confirm
+
 def create_app():
     locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
 
@@ -40,14 +43,13 @@ def create_app():
 
     security = Security(app, user_datastore)
 
-    app.jinja_env.filters["enumerate"] = enumerate
-
     mail.init_app(app)
 
     app.template_filter("format_money")(format_money)
 
     @app.context_processor
     def inject_search_account_form():
+        """Makes search account form accessible to all templates"""
         search_account_form = SearchCustomerIDForm()
         return dict(search_account_form=search_account_form)
     

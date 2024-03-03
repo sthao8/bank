@@ -5,6 +5,8 @@ from forms import CrudUserForm, RegisterUserForm, FlaskForm
 from repositories.user_repository import UserRepository
 from services.user_services import UserService
 
+from utils import get_first_error_message
+
 
 user_repo = UserRepository()
 user_service = UserService(user_repo)
@@ -34,17 +36,6 @@ def crud_user():
         register_form=register_form,
         users=users)
 
-# @users_blueprint.route("/user-page/<user_id>", methods=["GET"])
-# @roles_required("admin")
-# def user_page(user_id):
-#     user = user_service.get_user_or_404(user_id)
-
-#     form = CrudUserForm()
-#     form.role.choices = user_service.get_user_roles()
-#     form.role.data = user.roles[0]
-
-#     return render_template("users/edit_user.html", user=user, form=form)
-
 @users_blueprint.route("/register_user", methods=["POST"])
 @roles_accepted("admin")
 def register_user():
@@ -61,7 +52,7 @@ def register_user():
         except ValueError as error:
             flash(f"ERROR: {error}")
     else:
-        flash(f"ERROR: {form.errors}")
+        flash(f"ERROR: {get_first_error_message(form.errors)}")
 
     return redirect(url_for("users.crud_user"))
 
@@ -86,7 +77,7 @@ def update_user():
         except ValueError as error:
             flash(f"Error: {error}")
     else:
-        flash(f"ERROR: {form.errors}")
+        flash(f"ERROR: {get_first_error_message(form.errors)}")
     return redirect(url_for("users.crud_user"))
 
 @users_blueprint.route("/change_user_status", methods=["POST"])

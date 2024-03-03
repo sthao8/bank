@@ -43,7 +43,7 @@ class CustomerRepository():
 
     def create_customer(self, customer_details: dict) -> Customer:
         """Creates a new customer from customer_details dict,
-        which should have all the attribute values needed for Customer objecy"""
+        which should have all the attribute values needed for Customer object"""
         new_customer = Customer()
 
         for attribute_name, value in customer_details.items():

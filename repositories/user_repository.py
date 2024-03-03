@@ -1,7 +1,6 @@
 from models import User, user_datastore, db, Role
 from sqlalchemy import desc
-from constants.constants import UserRoles
-from flask_security.utils import verify_password, hash_password
+from flask_security.utils import hash_password
 
 class UserRepository():
     def get_user_from_email(self, user_email: str) -> User:

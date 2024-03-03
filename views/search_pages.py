@@ -15,7 +15,6 @@ customer_service = CustomerService(customer_repo, account_service)
 
 search_blueprint = Blueprint("search", __name__)
 
-
 @search_blueprint.route("/search-customer-id", methods=["POST"])
 @login_required
 def search_customer_id():

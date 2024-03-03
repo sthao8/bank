@@ -10,7 +10,7 @@
     <div class="container px-lg-5">
         <div class="row py-5">
             <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#registerModal">
-                Register New User
+                <i class="bx bx-user-plus"></i> Register New User
             </button>
         </div>
 
@@ -79,7 +79,7 @@
     <div class="modal fade" tabindex="-1" id="registerModal">
         <div class="modal-dialog-centered modal-dialog modal-fullscreen-sm-down ">
             <div class="modal-content">
-                    <div class="modal-header ">
+                    <div class="modal-header">
                         <h1>User Details</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -107,7 +107,7 @@
                                                         {{ render_field(register_form.confirm_password) }}
                                                     </div>
                                                 </div>
-                                                <div class="row">
+                                                <div class="row pt-3">
                                                         {{ render_field(register_form.submit) }}
                                                 </div>
                                         </form>

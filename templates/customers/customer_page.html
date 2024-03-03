@@ -34,9 +34,9 @@
                         </div>
                     </div>
                     <div class="row">
-                        <form action="{{ url_for('customers.edit_customer', customer_id=customer.id) }}" method="get">
+                        <form action="{{ url_for('customers.edit_customer', customer_id=customer.id) }}" method="get" class="px-0">
                             <div class="col-12">
-                                <button type="submit" class="btn btn-light w-100 py-3 custom-rounded-button"><h5>Edit customer details</h5></button>
+                                <button type="submit" class="btn btn-light w-100 py-3 custom-rounded-button"><h5><i class="bx bx-edit"></i>Edit customer details</h5></button>
                             </div>
                         </form>
                     </div>
