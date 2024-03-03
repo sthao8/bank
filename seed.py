@@ -90,7 +90,9 @@ def seed_data(db: SQLAlchemy):
             initial_deposit_timestamp = fake.date_time_between(
                 start_date=account.created,
                 end_date=account.created + timedelta(days=1))
-            account.balance = calculate_new_balance(account, initial_deposit_amount, TransactionTypes.DEPOSIT.value)
+            account.balance = calculate_new_balance(account,
+                                                    initial_deposit_amount,
+                                                    TransactionTypes.DEPOSIT.value)
             initial_deposit = create_transaction_for_account(
                 initial_deposit_timestamp,
                 TransactionTypes.DEPOSIT.value,
@@ -173,7 +175,10 @@ def create_account_for_customer(fake: Faker, customer: Customer):
     
     return account
 
-def create_transaction_for_account(timestamp:datetime, transaction_type: str, amount: Decimal, new_account_balance: Decimal):
+def create_transaction_for_account(timestamp:datetime,
+                                   transaction_type: str,
+                                   amount: Decimal,
+                                   new_account_balance: Decimal):
     transaction = Transaction()
     transaction.timestamp = timestamp
     transaction.amount = amount

@@ -100,7 +100,8 @@ def compose_message_table(flagged_entities:list[dict], message_header) -> None:
                 "account_holder_last_name": customer.last_name,
                 "account_numbers": [account_id for account_id
                                     in flagged_accounts_transactions["accounts"]],
-                "transaction_numbers": [transaction_id for transaction_id
+                "transaction_numbers": [transaction_id 
+                                        for transaction_id
                                         in flagged_accounts_transactions["transactions"]]
             }
             table_data.append(customer_data)
