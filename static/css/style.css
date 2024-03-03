@@ -31,12 +31,12 @@
 
 /*clickable cells*/
 td a, th a {
-    display: block; /* Fill the cell */
-    width: 100%; /* Optional, depending on your layout */
-    height: 100%; /* Make the link fill the cell */
-    color: inherit; /* Inherit text color from the cell */
-    text-decoration: none; /* Remove underline from link */
-    padding: 10px; /* Match cell padding */
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+    padding: 10px;
 }
 
 tr[data-href], th[data-href], tr[data-bs-toggle]:not(.inactive) {
