@@ -8,11 +8,8 @@ class CountryService():
     def get_country_stats(self):
         return self.country_repository.get_country_stats()
     
-    def get_all_countries(self) -> Country:
+    def get_all_countries(self) -> list[Country]:
         return self.country_repository.get_all_countries()
-    
-    def get_all_country_customers(self, country_name):
-        return self.country_repository.get_all_country_customers(country_name)
 
     def calculate_global_stats(self, country_stats):
         return {
@@ -20,9 +17,6 @@ class CountryService():
             "number_of_accounts": sum([country.number_of_accounts for country in country_stats]),
             "sum_of_accounts": sum([country.sum_of_accounts for country in country_stats])
         }
-    
-    def get_top_10_country_customer(self, country_name):
-        return self.country_repository.get_top_10_country_customers(country_name)
 
     def get_country_or_404(self, country_name):
         return self.country_repository.get_country_or_404(country_name)

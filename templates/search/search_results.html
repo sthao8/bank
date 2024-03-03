@@ -21,9 +21,9 @@
                     {% set query_params = {
                         "sort_order": sort_order,
                         "previous_sort_col": sort_col,
-                        "search_first_name": form.search_first_name.data,
-                        "search_last_name": form.search_last_name.data,
-                        "search_city": form.search_city.data
+                        "first_name": form.first_name.data,
+                        "last_name": form.last_name.data,
+                        "city": form.city.data
                     } %}
 
                     <!-- Add any customer details to be added here -->
@@ -37,10 +37,10 @@
                     } %}
 
                     <div class="row pt-4">
-                        <div class="table-responsive ">
+                        <div class="position-relative  ">
                             <table class="caption-top table table-light table-bordered">
                                 <caption><i>Showing page {{ page }} of {{ customers.pages }} page(s)</i></caption>
-                                <thead>
+                                <thead class="sticky-top-2">
                                     <tr>
                                         <th></th>
                                         {% for label, url_param in columns.items() %}
@@ -93,7 +93,7 @@
                             </table>
                         </div>
                     </div>
-                    {% elif form.search_first_name.data or form.search_last_name.data or form.search_city.data %}
+                    {% elif form.first_name.data or form.last_name.data or form.city.data %}
                         <div class="row">
                             no results found!
                         </div>

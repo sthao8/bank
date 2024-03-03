@@ -1,5 +1,4 @@
 from flask_security import UserMixin, RoleMixin, SQLAlchemyUserDatastore
-from flask_security.utils import hash_password
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -71,6 +70,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100), unique=False,nullable=True)
     active = db.Column(db.Boolean(), nullable=True)
     fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
+
     roles = db.relationship('Role', secondary=roles_users, backref=db.backref('user', lazy='dynamic'))
 
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)

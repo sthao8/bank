@@ -1,38 +1,16 @@
 from models import Country, Customer, db, Account
 from sqlalchemy import func, select, desc
-from sqlalchemy.orm import joinedload
 
 class CountryRepository():
-    def get_country_or_404(country_name):
+    def get_country_or_404(self, country_name: str) -> Country:
         return Country.query.filter(func.lower(Country.name)==country_name.lower()).one_or_404()
 
-    def get_all_countries() -> Country:
+    def get_all_countries(self) -> list[Country]:
         return Country.query.all()
-    
-    def get_top_10_country_customers(country_name):
-        return db.session.execute(
-                select(
-                Customer, 
-                func.count(Account.id).label("number_of_accounts"),
-                func.sum(Account.balance).label("sum_of_accounts"))
-                .join(Account, Account.customer_id==Customer.id)
-                .join(Country, Country.country_code==Customer.country)
-                .where(Country.name==country_name)
-                .group_by(Customer.id)
-                .order_by(desc("sum_of_accounts"))
-                .limit(10)
-            ).all()
-    
-    def get_all_country_customers(country_name) -> Country:
-        return Country.query.filter_by(
-            name=country_name
-            ).options(
-                joinedload(Country.customers)
-                .joinedload(Customer.accounts)
-                .joinedload(Account.transactions)
-            ).all()
 
-    def get_country_stats():
+    def get_country_stats(self):
+        """Get country-level stats for all countries in database:
+        country name, number of customers, number of accounts, sum of accounts"""
         return db.session.execute(
             select(
                 Country.name,

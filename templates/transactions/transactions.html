@@ -1,0 +1,126 @@
+{% from "_formhelpers.html" import render_field %}
+
+{% extends "base.html" %}
+
+{% block title %}
+    Transaction
+{% endblock %}
+
+{% block main %}
+
+<div class="container d-flex py-5 h-100">
+    <div class="row d-flex justify-content-center align-content-center w-100  ">
+        <div class="col-xs-12 col-sm-10 col-md-8 col-lg-6 bg-light-subtle rounded">
+            <div class="row pt-5 px-5 rounded-top border-bottom border-secondary-subtle   ">
+                <h3>Transaction Details</h3>
+            </div>
+            <form action="{{ url_for('transactions.transactions') }}" method="post" class="needs-validation" novalidate id="transForm">
+                <div class="row py-5 px-5 ">
+                    {{ form.hidden_tag() }}
+                    {{ render_field(form.type) }}
+                    {{ render_field(form.from_account, padding="", html_kw={"autocomplete": "off"}) }}
+                    <div class=" pb-3 bg-transparent" id="from_accounts"></div>
+                    <div id="toAccount">
+                        {{ render_field(form.to_account, padding="", html_kw={"autocomplete": "off"}) }}
+                    </div>
+                    <div class="bg-transparent pb-3" id="to_accounts"></div>
+                    {{ render_field(form.amount) }}
+                    <div>
+                        <label for="date" class="mb-2">Transaction date</label>
+                        <input type="text" class="form-control" readonly disabled value="{{ current_date }}" id="date">
+                    </div>
+                </div>
+                <div class="row text-center rounded-bottom ">
+                    <div class="col px-0">
+                        <button class="btn btn-light w-100 py-3 custom-rounded-button"><h5>Submit</h5></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/format_currency.js"></script>
+
+<script>
+    // fetch account via api
+    async function fetchAccountData(accountId) {
+        try {
+            const response = await fetch(`api/accounts/${accountId}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return await response.json();
+        } catch (error) {
+            return null;
+        }
+    };
+
+    // show account data inside of results div
+    async function showAccountDataOnInput(field, resultsDiv) {
+        const accountId = field.value;
+        if (!accountId) {
+            resultsDiv.innerText = '';
+            return;
+        }
+
+        const accountData = await fetchAccountData(accountId);
+        if (accountData) {
+            resultsDiv.classList.remove("text-danger");
+            resultsDiv.classList.add("text-info");
+            resultsDiv.innerText = `Account ${accountData.account_id}, Available balance: ${format_currency(accountData.balance)}`;
+        } else {
+            resultsDiv.classList.remove("text-info");
+            resultsDiv.classList.add("text-danger");
+            resultsDiv.innerText = "No account found";
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const fromAccountField = document.querySelector('#from_account');
+        const fromAccountResults = document.querySelector('#from_accounts');
+        const toAccountDiv = document.querySelector("#toAccount");
+        const toAccountField = document.querySelector('#to_account');
+        const toAccountResults = document.querySelector('#to_accounts');
+        const form = document.querySelector('#transForm');
+        const typeField = document.querySelector("#type");
+
+        // hide/reset/show the to_account field
+        function ToggleVisibility(initialLoad=false) {
+            if (typeField.value === "transfer") {
+                toAccountDiv.style.display = 'block';
+                toAccountField.required = true;
+                toAccountResults.style.display = "block";
+
+            } else {
+                toAccountDiv.style.display = "none";
+                toAccountField.removeAttribute("required");
+                toAccountResults.style.display = "none";
+            }
+            // hide and reset to_account on every toggle except initial load
+            if (!initialLoad) {
+                toAccountField.value = "";
+                toAccountResults.innerText = "";
+            }
+        };
+
+        // upon first load, do these functions once
+        ToggleVisibility(initialLoad=true);
+        showAccountDataOnInput(fromAccountField, fromAccountResults);
+        showAccountDataOnInput(toAccountField, toAccountResults);
+
+        // run these functions again when event triggered
+        typeField.addEventListener("change", function() {
+            ToggleVisibility();
+        });
+
+        fromAccountField.addEventListener("input", function() {
+            showAccountDataOnInput(fromAccountField, fromAccountResults);
+        });
+
+        toAccountField.addEventListener("input", function() {
+            showAccountDataOnInput(toAccountField, toAccountResults);
+        });
+    });
+</script>
+{% endblock %}

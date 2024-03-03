@@ -1,14 +1,12 @@
 from datetime import date
-from flask import render_template, flash, redirect, url_for, Blueprint, request
-from flask_security import roles_accepted
+from flask import render_template, flash, Blueprint, request
 
-from models import Account, db
-from views.forms import PrefixedForm, TransactionForm, TransferForm, FlaskForm
+from forms import TransactionForm
 from services.transaction_services import TransactionService
 from repositories.transaction_repository import TransactionRepository
 from repositories.customer_repository import CustomerRepository
 from repositories.account_repository import AccountRepository
-from business_logic.constants import TransactionTypes
+from constants.constants import TransactionTypes
 from utils import format_money
 
 from services.customer_services import CustomerService, CustomerRepository
@@ -16,99 +14,47 @@ from services.account_services import AccountService, AccountRepository
 from services.transaction_services import TransactionService, TransactionRepository
 
 
-customer_service = CustomerService(CustomerRepository)
-account_service = AccountService(AccountRepository)
-transaction_service = TransactionService(TransactionRepository)
+account_repo = AccountRepository()
+account_service = AccountService(account_repo)
+
+customer_repo = CustomerRepository()
+customer_service = CustomerService(customer_repo, account_service)
+
+transaction_repo = TransactionRepository()
+transaction_service = TransactionService(transaction_repo, account_service)
 
 transactions_blueprint = Blueprint("transactions", __name__)
 
-@transactions_blueprint.route("/transactions", methods=["POST"])
-@roles_accepted("cashier")
+@transactions_blueprint.route("/transactions", methods=["GET", "POST"])
 def transactions():
-    customer_id = request.form.get("customer_id", None)
-    customer = customer_service.get_customer_or_404(customer_id)
-    form: PrefixedForm = TransactionForm()
-    form.type.choices = ["withdraw", "deposit"]
-    accounts_labels = [(account.id, f"{account.id}: current balance: {format_money(account.balance)}") for account in customer.accounts]
-    form.accounts.choices = accounts_labels
+    form = TransactionForm()
+    form.type.choices = [type.value for type in TransactionTypes] + ["transfer"]
     current_date = date.today()
-
-    return render_template("transactions/withdraw_deposit.html", active_page="transaction", form=form, current_date=current_date, customer=customer)
-    
-@transactions_blueprint.route("/process-transaction", methods=["POST"])
-@roles_accepted("cashier")
-def process_transaction():
-    customer_id = request.form.get("customer_id", None)
-    customer = customer_service.get_customer_or_404(customer_id)
-    
-    form: PrefixedForm = TransactionForm()
-    form.type.choices = ["withdraw", "deposit"]
-    form.accounts.choices = account_service.get_account_choices(customer)
-
-    account: Account = account_service.get_account_or_404(int(form.accounts.data))
-    
     if form.validate_on_submit():
-
-        amount = form.amount.data
-    
-        if form.type.data == "withdraw":
-            transaction_type = TransactionTypes.WITHDRAW
-        elif form.type.data == "deposit":
-            transaction_type = TransactionTypes.DEPOSIT
-
-        try:
-            transaction_service.process_transaction(account, amount, transaction_type)
-        except ValueError as error:
-            flash(f"ERROR: {error}")
-        else:
-            flash(f"Success! {form.type.data} money in account number {account.id}.")
-        
-        return redirect(url_for("customers.customer_page", customer_id=customer.id))
-    else:
-        flash("didn't pass validation")
-    return redirect(url_for("customers.customer_page", customer_id=customer.id))
-
-@transactions_blueprint.route("/transfer", methods=["POST"])
-@roles_accepted("cashier")
-def transfer():
-    customer_id = request.form.get("customer_id", None)
-    customer = customer_service.get_customer_or_404(customer_id)
-    form: FlaskForm = TransferForm()
-    current_date = date.today()
-
-    accounts_choices = account_service.get_account_choices(customer)
-    form.account_from.choices = accounts_choices
-    form.account_to.choices = accounts_choices
-
-    return render_template("transactions/transfer.html", active_page="transfer", customer=customer, form=form, current_date=current_date)
-    
-@transactions_blueprint.route("/process-transfer", methods=["POST"])
-@roles_accepted("cashier")
-def process_transfer():
-    customer_id = request.form.get("customer_id", None)
-    customer = customer_service.get_customer_or_404(customer_id)
-    form: FlaskForm = TransferForm()
-
-    accounts_choices = account_service.get_account_choices(customer)
-    form.account_from.choices = accounts_choices
-    form.account_to.choices = accounts_choices
-
-    validation_failed = False
-
-    if form.validate_on_submit():
-        from_account = account_service.get_account_or_404(form.account_from.data)
-        to_account = account_service.get_account_or_404(form.account_to.data)
+        account_id = form.from_account.data
+        to_account = form.to_account.data
+        transaction_type_name = form.type.data
         amount = form.amount.data
 
         try:
-            transaction_service.process_transfer(from_account, to_account, amount)
-        except ValueError as error:
-            validation_failed = True
-            flash(f"ERROR: {error}")
+            transaction_service.initiate_transaction_process(
+                account_id,
+                amount,
+                transaction_type_name,
+                to_account)
+        except (ValueError, KeyError) as error:
+            flash(error)
         else:
-            flash(f"Success! Transferred {amount} from account no. {from_account} to account no. {to_account}!")
-    else:
-        errors = [error for errors_list in form.errors.values() for error in errors_list]
-        error_message = ", ".join(errors)
-        flash(f"ERROR: {error_message}")
-    return redirect(url_for("customers.customer_page", customer_id=customer.id, validation_failed=validation_failed))
+            flash(f"{transaction_type_name} success")
+            return render_template("transactions/transaction_confirmation.html",
+                                   account_id=account_id,
+                                   to_account=to_account,
+                                   transaction_type_name=transaction_type_name,
+                                   amount=amount,
+                                   current_date=current_date)
+    elif request.method == "POST":
+        flash(form.errors)
+    return render_template("transactions/transactions.html",
+                           active_page="transactions",
+                           form=form,
+                           current_date=current_date)

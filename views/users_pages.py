@@ -1,15 +1,15 @@
 from flask import render_template, Blueprint, redirect, url_for, flash, request
 from flask_security import roles_accepted, roles_required
-from flask_security.utils import verify_password, hash_password
-from models import user_datastore, db
-from views.forms import CrudUserForm, RegisterUserForm, FlaskForm
+from forms import CrudUserForm, RegisterUserForm, FlaskForm
 
-from utils import string_to_bool
 from repositories.user_repository import UserRepository
 from services.user_services import UserService
 
+from utils import get_first_error_message
 
-user_service = UserService(UserRepository)
+
+user_repo = UserRepository()
+user_service = UserService(user_repo)
 
 users_blueprint = Blueprint("users", __name__)
 
@@ -36,18 +36,6 @@ def crud_user():
         register_form=register_form,
         users=users)
 
-@users_blueprint.route("/user-page/<user_id>", methods=["GET"])
-@roles_required("admin")
-def user_page(user_id):
-    user = user_service.get_user_or_404(user_id)
-
-    form = CrudUserForm()
-    form.role.choices = user_service.get_user_roles()
-    form.role.data = user.roles[0]
-
-    return render_template("users/edit_user.html", user=user, form=form)
-
-
 @users_blueprint.route("/register_user", methods=["POST"])
 @roles_accepted("admin")
 def register_user():
@@ -55,13 +43,16 @@ def register_user():
     form.role.choices = user_service.get_user_roles()
 
     if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        role = form.role.data
         try:
-            user_service.create_and_register_user(form)
+            user_service.create_and_register_user(email, password, role)
             flash("User registered")
         except ValueError as error:
             flash(f"ERROR: {error}")
     else:
-        flash("Didn't pass validation")
+        flash(f"ERROR: {get_first_error_message(form.errors)}")
 
     return redirect(url_for("users.crud_user"))
 
@@ -79,14 +70,14 @@ def update_user():
         new_password = form.new_password.data
         
         try:
-            if user_service.update_user_if_changes(user, new_password, new_role):
+            if user_service.update_user(user, new_password, new_role):
                 flash("User updated")
             else:
                 flash("No changes made!")
         except ValueError as error:
             flash(f"Error: {error}")
     else:
-        flash("didn't pass validation")
+        flash(f"ERROR: {get_first_error_message(form.errors)}")
     return redirect(url_for("users.crud_user"))
 
 @users_blueprint.route("/change_user_status", methods=["POST"])
@@ -95,7 +86,7 @@ def change_user_status():
     user_id = request.form.get("user_id", None, int)
     user = user_service.get_user_or_404(user_id)
 
-    result = user_service.changed_user_status(user)
+    result = user_service.change_user_status(user)
     flash(result)
     
     return redirect(url_for("users.crud_user"))
@@ -106,7 +97,7 @@ def delete_user():
     user_id = request.form.get("user_id", None, int)
     user = user_service.get_user_or_404(user_id)
 
-    user_service.deleted_user(user)
+    user_service.delete_user(user)
     flash("User deleted")
     
     return redirect(url_for("users.crud_user"))

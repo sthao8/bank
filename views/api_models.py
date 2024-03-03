@@ -58,7 +58,6 @@ class CustomerApiModel:
             "total_balance": self.total_balance
         }
   
-  
 class UserApiModel:
     def __init__(self, user: User) -> None:
         self.id = user.id

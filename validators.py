@@ -1,7 +1,7 @@
 from typing import Any
-from business_logic.constants import BusinessConstants
-from datetime import date, timedelta
-from wtforms.validators import (ValidationError)
+from constants.constants import BusinessConstants
+from datetime import date
+from wtforms.validators import (ValidationError, StopValidation)
 
 class Age(object):
     """Checks if date entered is in proper range for age restirctions"""
@@ -15,20 +15,6 @@ class Age(object):
     def __call__(self, form, field):
         age = (date.today() - field.data).days / 365
         if not self.min < age < self.max:
-            raise ValidationError(self.message)
-        
-class CheckIfFormHasData(object):
-    """Checks if field has any data in it"""
-    def __init__(self, message=None):
-        if not message:
-            message = "No fields filled in"
-        self.message = message
-
-    def __call__(self, form, field):
-        for field in form:
-            if not field.data:
-                break
-        else:
             raise ValidationError(self.message)
 
 class CheckIfAllPasswordFieldsHaveDataIfOneHasData(object):
@@ -46,7 +32,7 @@ class CheckIfAllPasswordFieldsHaveDataIfOneHasData(object):
             raise ValidationError(self.message)
 
 class CheckThatTwoFieldsDoNotMatch(object):
-    """Checks if two fields have the same value, Fails if they do"""
+    """Checks if two fields have the same value if they both have data, fails if they match"""
     def __init__(self, other_field_name, message=None) -> None:
         self.other_field_name = other_field_name
         if not message:
@@ -55,5 +41,22 @@ class CheckThatTwoFieldsDoNotMatch(object):
 
     def __call__(self, form, field) -> Any:
         other_field = form._fields.get(self.other_field_name)
-        if field.data == other_field.data:
+        if field.data and other_field.data and field.data == other_field.data:
             raise ValidationError(self.message)
+    
+class InputRequiredIfOtherFieldHasSpecificValue(object):
+    """Only require this field if other field equal to some value"""
+    def __init__(self, other_field_name, target_value, message=None) -> None:
+        self.type_field_name = other_field_name
+        self.target_value = target_value 
+        if not message:
+            message = "This field is required."
+        self.message = message
+
+    def __call__(self, form, field) -> Any:
+        type_field = form._fields.get(self.type_field_name)
+        if type_field.data == self.target_value:
+            if not field.data:
+                raise ValidationError(self.message)
+        else:
+            raise StopValidation()

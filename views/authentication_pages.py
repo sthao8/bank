@@ -1,11 +1,12 @@
-from flask_login import login_user, login_required, logout_user, current_user
+from flask_login import login_user, login_required, logout_user
 from flask import redirect, url_for, flash, render_template, Blueprint
 
-from views.forms import LoginForm
+from forms import LoginForm
 from services.user_services import UserService, UserRepository
 
 
-user_service = UserService(UserRepository)
+user_repo = UserRepository()
+user_service = UserService(user_repo)
 
 authentication_blueprint = Blueprint("authentication", __name__)
 
@@ -18,8 +19,7 @@ def login():
             user = user_service.authenticate_user(form.email.data, form.password.data)
         except ValueError as error:
             flash(f"ERROR: {error}")
-            validation_failed = True
-            return render_template("authentication/login.html", form=form, validation_failed=validation_failed)
+            return render_template("authentication/login.html", form=form, validation_failed=True)
         else:
             login_user(user)
             return redirect(url_for("customers.index"))

@@ -12,7 +12,7 @@ from seed import (
     seed_roles,
     seed_users
     )
-from views.forms import SearchAccountForm
+from forms import SearchCustomerIDForm
 from views.authentication_pages import authentication_blueprint
 from views.users_pages import users_blueprint
 from views.customers_pages import customers_blueprint
@@ -20,7 +20,9 @@ from views.search_pages import search_blueprint
 from views.transactions_pages import transactions_blueprint
 from views.api import api_blueprint
 
-# TODO work on frontend errors (WITH FORMS in jinja tag in base)
+
+# TODO check tests
+# TODO add new bal to trans confirm
 
 def create_app():
     locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
@@ -41,19 +43,20 @@ def create_app():
 
     security = Security(app, user_datastore)
 
-    app.jinja_env.filters["enumerate"] = enumerate
-
     mail.init_app(app)
 
     app.template_filter("format_money")(format_money)
 
     @app.context_processor
     def inject_search_account_form():
-        search_account_form = SearchAccountForm()
+        """Makes search account form accessible to all templates"""
+        search_account_form = SearchCustomerIDForm()
         return dict(search_account_form=search_account_form)
     
     @app.context_processor
     def inject_validation_failed():
+        """Return this when serverside validation fails to next route
+        in order to reset validation of empty fields, like password"""
         return dict(validation_failed=False)
         
     return app

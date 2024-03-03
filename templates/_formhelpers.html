@@ -1,32 +1,76 @@
-<!-- TODO: this maybe unecessary since we disable submit until frontend validation is processed -->
-
 {% macro render_field(
     field,
-    input_group=False,
-    input_group_text=None,
     no_label=False,
     padding="mb-3",
-    readonly=False) %}
+    readonly=False,
+    html_kw=None) %}
 
-<div class="{{ padding + (' input-group' if input_group else '') + (' d-grid' if field.type == 'SubmitField' else '')}}">
-    {% if field.type != "SubmitField" %}
-        {% if not (no_label or input_group) %}
-            {{ field.label(class="form-label") }}
-        {% endif %}
-        {% if input_group and input_group_text %}
-            <span class="input-group-text">{{input_group_text}}</span>
-        {% endif %}
-        {{ field(class=("form-select" if field.type == "SelectField" else "form-control")+(" is-invalid" if field.errors else "") + (" is-valid" if not field.errors and field.data else ""), readonly=readonly, **(field.render_kw or {})) }}
-        <div class="invalid-feedback text-break form-text">
-            {% if field.errors %}
-                {% for error in field.errors %}
-                    {{error}}
-                {% endfor %}
-            {% endif %}
-        </div>
-    {% else %}
-        {{ field(class="btn btn-outline-secondary", **(field.render_kw or {})) }}
+    {% set combined_kw = field.render_kw or {} %}
+    {% if html_kw %}
+        {% for key, value in html_kw.items() %}
+        {% if combined_kw.update({key: value}) %}{% endif %}
+        {% endfor %}
     {% endif %}
-</div>
+
+    <div class="{{ padding + (' d-grid' if field.type == 'SubmitField' else '')}}">
+        {% if field.type != "SubmitField" %}
+            {% if not (no_label) %}
+                {{ field.label(class="form-label") }}
+            {% endif %}
+            {{ field(class=("form-select" if field.type == "SelectField" else "form-control")+(" is-invalid" if field.errors else "") + (" is-valid" if not field.errors and field.data else ""), readonly=readonly, **( combined_kw or {} )) }}
+            <div class="invalid-feedback text-break form-text field-errors">
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        {{error}}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% else %}
+            {{ field(class="btn btn-outline-secondary", **(field.render_kw or {})) }}
+        {% endif %}
+    </div>
 
 {% endmacro %}
+
+{% macro render_input_group(
+    field,
+    addon,
+    padding="mb-3",
+    html_kw=None,
+    addon_end=False,
+    no_label=False,
+    button_addon=False,
+    show_errors=True) %}
+
+    {% set combined_kw = field.render_kw or {} %}
+    {% if html_kw %}
+        {% for key, value in html_kw.items() %}
+        {% if combined_kw.update({key: value}) %}{% endif %}
+        {% endfor %}
+    {% endif %}
+
+    {% if not (no_label) %}
+        {{ field.label(class="form-label") }}
+    {% endif %}
+    <div class="input-group + {{ padding }}">
+        {% if not addon_end and not button_addon %}
+            <span class="input-group-text">{{ addon }}</span>
+        {% endif %}
+        {{ field(class=("form-select" if field.type == "SelectField" else "form-control")+(" is-invalid" if field.errors else "") + (" is-valid" if not field.errors and field.data else ""), **( combined_kw or {} )) }}
+        {% if addon_end and not button_addon %}
+            <span class="input-group-text">{{ addon }}</span>
+        {% else %}
+            <button class="btn btn-outline-secondary " type="submit">{{ addon }}</button>
+        {% endif %}
+        {% if show_errors %}
+            <div class="invalid-feedback text-break form-text field-errors">
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        {{error}}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}
+

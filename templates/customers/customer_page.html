@@ -4,27 +4,39 @@
     Customer profile
 {% endblock %}
 
+
 {% block main %}
 <div class="container px-sm-0 p-5 ">
     <div class="row justify-content-center ">
         <div class="col-10">
             <div class="row">
-                <div class="col-xl-6">
-                    <div>
-                        <h3>Customer number: {{ customer.id }}</h3>
-                        <ul>
-                            <li>Name: {{ customer.first_name }} {{ customer.last_name }} </li>
-                            <li>National id: {{ customer.national_id }} </li>
-                            <li>Address: {{ customer.address }}, {{ customer.city }} {{ customer.postal_code }} {{ customer.country_details.name }}</li>
-                            <li>Birthday: {{ customer.birthday }} </li>
-                            <li>Telephone: {{ customer.country_details.telephone_country_code }}  {{ customer.telephone }} </li>
-                            <li>Email: {{ customer.email }}</li>
-                        </ul>
+                <div class="col-xl-8 bg-light rounded">
+                    <div class="row rounded-top px-3 pt-3 border-bottom border-secondary-subtle ">
+                        <h3>{{ customer.first_name }} {{ customer.last_name }}</h3>
                     </div>
-                    <div>
-                        <form action="{{ url_for('customers.edit_customer', customer_id=customer.id) }}" method="get">
-                            <div class="d-grid mb-3">
-                                <button type="submit" class="btn btn-outline-secondary w-100 ">Edit customer details</button>
+                    <div class="row py-3 px-3">
+                        <div class="col-2 d-flex justify-content-end px-3 ">
+                            <i class="bx bx-detail bx-lg"></i>
+                        </div>
+                        <div class="col-2">
+                            {% set labels = ["Customer ID", "National ID", "Address", "Birthday", "Phone Number", "Email" ] %}
+                            {% for label in labels %}
+                            <div class="row">{{ label }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-8 ps-4 border-start border-secondary-subtle">
+                            <div class="row">{{ customer.id }}</div>
+                            <div class="row">{{ customer.national_id }}</div>
+                            <div class="row">{{ customer.address }}, {{ customer.city }} {{ customer.postal_code }} {{ customer.country_details.name }}</div>
+                            <div class="row">{{ customer.birthday }}</div>
+                            <div class="row">{{ customer.country_details.telephone_country_code }}  {{ customer.telephone }} </div>
+                            <div class="row">{{ customer.email }}</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <form action="{{ url_for('customers.edit_customer', customer_id=customer.id) }}" method="get" class="px-0">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-light w-100 py-3 custom-rounded-button"><h5><i class="bx bx-edit"></i>Edit customer details</h5></button>
                             </div>
                         </form>
                     </div>
@@ -32,11 +44,7 @@
             </div>
             <div class="row">
                 <div class="col pt-xs-5 pt-sm-5 pt-md-5 pt-5">
-                    <h3>Accounts:</h3>
-                    <div class="d-grid gap-2 pb-3">
-                        <button type="button" class="btn btn-outline-secondary w-100 " data-bs-toggle="modal" data-bs-target="#transactionModal">Withdraw/Deposit</button>
-                        <button type="button" class="btn btn-outline-secondary w-100 " data-bs-toggle="modal" data-bs-target="#transferModal">Transfer</button>
-                    </div>
+                    <h3>Accounts</h3>
                     <div class="table-responsive ">
                         <table class="table table-light table-bordered ">
                             <thead>
@@ -67,112 +75,6 @@
     </div>
 </div>
 
-<div class="modal fade" tabindex="-1" id="transferModal">
-    <div class="modal-dialog-centered modal-dialog modal-fullscreen-sm-down ">
-        <div class="modal-content">
-            <div class="modal-header text-break ">
-                <h3>Transfer</h3>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row justify-content-center">
-                        <form action="{{ url_for('transactions.process_transfer') }}" method="post" class="needs-validation" id="transferForm" novalidate>
-                            {{ transfer_form.hidden_tag() }}
-                            <input type="hidden" value="{{customer.id}}" name="customer_id">
-                            {{ render_field(transfer_form.account_from) }}
-                            {{ render_field(transfer_form.account_to) }}
-                            {{ render_field(transfer_form.amount) }}
-                            <label for="date2" class="pb-2">Transaction date</label>
-                            <input type="text" id="date2" class="w-100 mb-3 form-control " readonly disabled value="{{ current_date }}">
-                            {{ render_field(transfer_form.submit) }}
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" tabindex="-1" id="transactionModal">
-    <div class="modal-dialog-centered modal-dialog modal-fullscreen-sm-down ">
-        <div class="modal-content">
-            <div class="modal-header text-break ">
-                <h3>Withdraw/Deposit</h3>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row justify-content-center">
-                        <form action="{{ url_for('transactions.process_transaction') }}" method="post" class="needs-validation" novalidate>
-                            {{ form.hidden_tag() }}
-                            <input type="hidden" value="{{customer.id}}" name="customer_id">
-                            {{ render_field(form.accounts) }}
-                            {{ render_field(form.type) }}
-                            {{ render_field(form.amount) }}
-                            <label for="date1" class="pb-2">Transaction date</label>
-                            <input type="text" id="date1" class="form-control w-100 mb-3" readonly disabled value="{{ current_date }}">
-                            {{ render_field(form.submit) }}
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="/static/js/click_table_row.js"></script>
 
-
-
-
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    (function() {
-        'use strict';
-
-        const fromAccount = document.querySelector("#account_from");
-        const toAccount = document.querySelector("#account_to");
-        const transferForm = document.querySelector("#transferForm");
-        const toFeedbackElement = toAccount.nextElementSibling; // Ensure you define or correctly select this
-        const fromFeedbackElement = toAccount.nextElementSibling; // Ensure you define or correctly select this
-
-        function validateAccountSelected() {
-            const errorMessage = "You have chosen the same account.";
-            if (fromAccount && toAccount && feedbackElement) {
-                if (fromAccount.value === toAccount.value) {
-                    fromAccount.setCustomValidity(errorMessage);
-                    fromFeedbackElement.textContent = errorMessage;
-                    fromFeedbackElement.style.display = "block";
-                    fromAccount.classList.add("is-invalid");
-                    toAccount.setCustomValidity(errorMessage);
-                    toFeedbackElement.textContent = errorMessage;
-                    toFeedbackElement.style.display = "block";
-                    toAccount.classList.add("is-invalid");
-                } else {
-                    toAccount.setCustomValidity(""); // Clear custom error
-                    fromAccount.setCustomValidity("");
-                    toFeedbackElement.style.display = 'none'; // Hide the feedback element
-                    fromFeedbackElement.style.display = 'none'; // Hide the feedback element
-                    fromAccount.classList.remove('is-invalid'); // Optionally clear the invalid class
-                    toAccount.classList.remove('is-invalid');
-                }
-            }
-        }
-
-        transferForm.addEventListener("submit", event => {
-            validateAccountSelected();
-            fromAccount.addEventListener("on_change", event => {
-                validateAccountSelected();
-            });
-
-            toAccount.addEventListener("on_change", event => {
-                validateAccountSelected();
-            });
-        });
-    })();
-
-</script>
 {% endblock %}
