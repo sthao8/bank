@@ -64,8 +64,11 @@ class TransactionService():
                 raise ValueError(ErrorMessages.INSUFFICIENT_FUNDS.value)
             
         new_balance = self._calculate_new_balance(target_account, amount, transaction_type)      
-        return (self.transaction_repository
-                .execute_transaction(target_account, amount, transaction_type, new_balance))
+        return self.transaction_repository.execute_transaction(
+            target_account,
+            amount,
+            transaction_type,
+            new_balance)
 
     def process_transfer(self,
                          from_account: Account,
