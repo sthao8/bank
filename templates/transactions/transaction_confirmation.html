@@ -10,35 +10,41 @@
 
 <div class="container d-flex py-5 h-100">
     <div class="row d-flex justify-content-center align-content-center w-100  ">
-        <div class="col-xs-12 col-md-10 col-lg-6 bg-light-subtle rounded">
+        <div class="col bg-light-subtle rounded">
             <div class="row pt-5 px-5 rounded-top border-bottom border-secondary-subtle text-center">
-                <h3>Transaction Confirmation</h3>
+                <h3>{{ transaction_type_name }} confirmation</h3>
             </div>
-            <div class="row d-flex justify-content-center  align-content-center ">
-                <div class="col-md-12 col-lg-7 py-5">
+            <div class="row d-flex justify-content-center align-content-center py-5 px-5">
+                {% for transaction in result %}
+                <div class="col-6 border border-secondary-subtle ">
                     <div class="row py-2 px-3">
-                        <div class="col-4 me-5"><b>Type</b></div>
-                        <div class="col-auto">{{transaction_type_name}}</div>
+                        <div class="col-4 me-5"><b>Transaction ID</b></div>
+                        <div class="col-auto">{{transaction.id}}</div>
                     </div>
                     <div class="row py-2 px-3">
                         <div class="col-4 me-5"><b>Account</b></div>
-                        <div class="col-auto">{{account_id}}</div>
+                        <div class="col-auto">{{transaction.account_id}}</div>
                     </div>
                     {% if transaction_type_name == "transfer" %}
                     <div class="row py-2 px-3">
-                        <div class="col-4 me-5"><b>To Account</b></div>
-                        <div class="col-auto">{{to_account}}</div>
+                        <div class="col-4 me-5"><b>Type</b></div>
+                        <div class="col-auto">{{transaction.type}}</div>
                     </div>
                     {% endif %}
                     <div class="row py-2 px-3">
                         <div class="col-4 me-5"><b>Amount</b></div>
-                        <div class="col-auto">{{amount|format_money}}</div>
+                        <div class="col-auto">{{transaction.amount|format_money}}</div>
                     </div>
                     <div class="row py-2 px-3">
                         <div class="col-4 me-5"><b>Date</b></div>
-                        <div class="col-auto">{{current_date}}</div>
+                        <div class="col-auto">{{transaction.timestamp}}</div>
+                    </div>
+                    <div class="row py-2 px-3">
+                        <div class="col-4 me-5"><b>New balance</b></div>
+                        <div class="col-auto">{{transaction.new_balance|format_money}}</div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
     </div>

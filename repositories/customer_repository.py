@@ -54,8 +54,16 @@ class CustomerRepository():
 
         return new_customer
     
-    def get_paginated_sorted_search_results(self, query_criteria: dict, sort_col, sort_order, page, results_per_page) -> list[Customer]:
-        """Dynamically constructs a query based on supplied filters in query_criteria and sort args"""
+    def get_paginated_sorted_search_results(
+            self,
+            query_criteria: dict,
+            sort_col,
+            sort_order,
+            page,
+            results_per_page
+            ) -> list[Customer]:
+        """ Dynamically constructs a query based on supplied filters in query_criteria
+        and sort args """
         query = Customer.query
         
         # apply filters

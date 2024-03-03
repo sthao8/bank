@@ -7,7 +7,7 @@ from repositories.transaction_repository import TransactionRepository
 from repositories.customer_repository import CustomerRepository
 from repositories.account_repository import AccountRepository
 from constants.constants import TransactionTypes
-from utils import format_money
+from utils import get_first_error_message
 
 from services.customer_services import CustomerService, CustomerRepository
 from services.account_services import AccountService, AccountRepository
@@ -37,7 +37,7 @@ def transactions():
         amount = form.amount.data
 
         try:
-            transaction_service.initiate_transaction_process(
+            result = transaction_service.initiate_transaction_process(
                 account_id,
                 amount,
                 transaction_type_name,
@@ -47,13 +47,10 @@ def transactions():
         else:
             flash(f"{transaction_type_name} success")
             return render_template("transactions/transaction_confirmation.html",
-                                   account_id=account_id,
-                                   to_account=to_account,
                                    transaction_type_name=transaction_type_name,
-                                   amount=amount,
-                                   current_date=current_date)
+                                   result=result)
     elif request.method == "POST":
-        flash(form.errors)
+        flash(get_first_error_message(form.errors))
     return render_template("transactions/transactions.html",
                            active_page="transactions",
                            form=form,

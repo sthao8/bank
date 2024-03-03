@@ -4,7 +4,10 @@ from models import Customer, Country
 from constants.errors_messages import ErrorMessages
 
 class CustomerService():
-    def __init__(self, customer_repository: CustomerRepository, account_service: AccountService) -> None:
+    def __init__(self,
+                 customer_repository: CustomerRepository,
+                 account_service: AccountService
+                 ) -> None:
         self.customer_repository = customer_repository
         self.account_service = account_service
 

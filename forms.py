@@ -267,7 +267,8 @@ class TransactionForm(FlaskForm):
         "Account",
         validators=[InputRequired(),
                     Regexp(r'^\d+$', message=ErrorMessages.ACCOUNT_ID_INT.value),
-                    CheckThatTwoFieldsDoNotMatch("to_account", message=ErrorMessages.SAME_ACCOUNT.value)],
+                    CheckThatTwoFieldsDoNotMatch("to_account",
+                                                 message=ErrorMessages.SAME_ACCOUNT.value)],
         render_kw={"placeholder": "Account",
                    "pattern": r'^\d+$',
                    "title": ErrorMessages.ACCOUNT_ID_INT.value})
@@ -276,7 +277,8 @@ class TransactionForm(FlaskForm):
         "To account",
         validators=[InputRequiredIfOtherFieldHasSpecificValue("type", "transfer"),
                     Regexp(r'^\d+$',message=ErrorMessages.ACCOUNT_ID_INT.value),
-                    CheckThatTwoFieldsDoNotMatch("from_account", message=ErrorMessages.SAME_ACCOUNT.value)],
+                    CheckThatTwoFieldsDoNotMatch("from_account",
+                                                 message=ErrorMessages.SAME_ACCOUNT.value)],
         render_kw={"placeholder": "Account",
                    "pattern": r'^\d+$',
                    "title": ErrorMessages.ACCOUNT_ID_INT.value})
