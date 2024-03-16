@@ -137,5 +137,5 @@ def schedule_audit(scheduler=None):
 if __name__ == "__main__":
     app = create_app()
     with app.app_context():
-        # audit_transactions()
+        audit_transactions()
         schedule_audit()

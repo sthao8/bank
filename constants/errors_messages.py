@@ -2,7 +2,7 @@ from enum import Enum
 
 class ErrorMessages(Enum):
     INSUFFICIENT_FUNDS = "Insufficient funds for transaction"
-    NEGATIVE_AMOUNT = "Amount cannot be negative"
+    NEGATIVE_AMOUNT = "Amount cannot be negative or 0"
     UNKNOWN_ACCOUNT = "Cannot find account"
     NATIONAL_ID_NOT_UNIQUE = "National ID is already associated with a customer "
     EMAIL_NOT_UNIQUE = "Email is already associated with a user"

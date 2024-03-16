@@ -292,9 +292,12 @@ class TransactionForm(FlaskForm):
         use_locale=False,
         places=2,
         validators=[InputRequired(),
-                    NumberRange(min=0.01, message=ErrorMessages.NEGATIVE_AMOUNT.value)],
-        render_kw={"placeholder": "123.43", "min": 0, "type": "number", "step": "0.01"}
-    )
+                    NumberRange(min=0, message=ErrorMessages.NEGATIVE_AMOUNT.value)],
+        render_kw={"placeholder": "123.43",
+                   "min": 0.01,
+                   "type": "number",
+                   "step": "0.01"}
+        )
 
     submit = SubmitField()
 
