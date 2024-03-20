@@ -55,7 +55,7 @@ class TransactionService():
                             amount: Decimal,
                             transaction_type: TransactionTypes
                             ) -> Transaction:
-        """Checks amount for negatives and against account balance, finally executing transaction"""
+        """Checks amount for negatives/zero and against account balance, finally executing transaction"""
         if amount < 0:
             raise ValueError(ErrorMessages.NEGATIVE_AMOUNT.value)
         
@@ -76,9 +76,9 @@ class TransactionService():
                          amount: Decimal
                          ) -> list[Transaction]:
         """Initiates two transactions, withdraw from from_account and deposit into to_account"""
-        transaction_1 = self.process_transaction(from_account, amount, TransactionTypes.WITHDRAW)
-        transaction2 = self.process_transaction(to_account, amount, TransactionTypes.DEPOSIT)
-        return [transaction_1, transaction2]
+        withdraw_transaction = self.process_transaction(from_account, amount, TransactionTypes.WITHDRAW)
+        deposit_transaction = self.process_transaction(to_account, amount, TransactionTypes.DEPOSIT)
+        return [withdraw_transaction, deposit_transaction]
 
     def get_count_of_transactions(self, account_id: int) -> int:
         return self.transaction_repository.get_count_of_transactions(account_id)

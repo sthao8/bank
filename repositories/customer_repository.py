@@ -67,9 +67,9 @@ class CustomerRepository():
         query = Customer.query
         
         # apply filters
-        for attribute_name, data in query_criteria.items():
+        for attribute_name, value in query_criteria.items():
             query_col = getattr(Customer, attribute_name)
-            query = query.filter(func.lower(query_col) == data)
+            query = query.filter(func.lower(query_col) == value)
         
         # apply sorting
         order_by_col = getattr(Customer, sort_col)

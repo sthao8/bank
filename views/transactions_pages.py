@@ -30,7 +30,6 @@ def transactions():
     form = TransactionForm()
     form.type.choices = [type.value for type in TransactionTypes] + ["transfer"]
     current_date = date.today()
-    print(form.amount.data)
 
     if form.validate_on_submit():
         account_id = form.from_account.data
