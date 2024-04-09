@@ -22,7 +22,10 @@ from views.api import api_blueprint
 
 
 def create_app():
-    locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
+    try:
+        locale.setlocale(locale.LC_ALL, "sv_SE.UTF-8")
+    except locale.Error:
+        print("Locale sv_SE.UTF-8 not supported, falling back to default.")
 
     app = Flask(__name__)
     app.config.from_object('config.Config')
