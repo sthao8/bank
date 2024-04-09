@@ -1,5 +1,5 @@
 class Config:
-    SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://root:password@localhost/bank'
+    SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://sthao008:kgqZjFmo6ZhTeXG@bank-app-demo.mysql.database.azure.com/bank'
     SECRET_KEY = "bankassignmentforpythonprogrammingwebframeworkcourse"
     SECURITY_REGISTERABLE = True
     SECURITY_PASSWORD_SALT = 'supersecretsalt'

@@ -51,7 +51,7 @@ def seed_countries(db):
             db.session.add(country)
     db.session.commit()
 
-def seed_roles(db, user_datastore):
+def seed_roles(db, user_datastore: SQLAlchemyUserDatastore):
     seed_roles = [role.value for role in UserRoles]
     for role in seed_roles:
         user_datastore.find_or_create_role(name=role)

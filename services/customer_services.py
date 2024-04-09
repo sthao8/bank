@@ -43,7 +43,6 @@ class CustomerService():
             raise ValueError(ErrorMessages.NATIONAL_ID_NOT_UNIQUE.value)
         else:
             new_customer = self.customer_repository.create_customer(customer_details)
-            print(new_customer.id)
             self.account_service.create_account_for_new_customer(new_customer.id)
 
         return new_customer
