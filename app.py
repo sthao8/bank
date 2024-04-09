@@ -58,8 +58,10 @@ def create_app():
         
     return app
 
+
+app = create_app()
+
 if __name__  == "__main__":
-    app = create_app()
     with app.app_context():
         upgrade()
         seed_countries(db)
@@ -67,4 +69,4 @@ if __name__  == "__main__":
         seed_roles(db, user_datastore)
         seed_users(db, user_datastore)
     
-    app.run(debug=True)
+    app.run(debug=False)
