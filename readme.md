@@ -1,29 +1,65 @@
-# Notes since meeting
-I tried to follow PEP-8 and made lines shorter than 79 to 99 characters (most of them, anyways). I find it less readable. Maybe you can tell me if you think it's better!
+# Bank App
 
-### Unittest:
-I couldn't resolve the module not found error when test_transactions.py was in a separate tests folder, so I was forced to move it out into root folder. Either press play to run tests or run py -m unittest to run!
+## Description:
 
-### Transactions Page:
-There is now a separate transactions page that shows frontend balance of accounts. Validation is of course handled serverside as well. It is now possible to transfer money from any account to any other account, except the same account, of course.
+### Purpose
 
-### Console app
-The console app now deduplicates any transactions/accounts/customers that are flagged in both the first and second checks, returning a single table in mail. To test, simply uncomment the function in console_app.py.
+Bank App is a simple web app that simulates an internal banking application used by bank employees.
 
-As mentioned during meeting, there is not way to keep track of where you left off (checked column in transactions) since the program is made to run at midnight the next day. So we always check and get all of yesterday's transactions. 
+### Features
+<ul>
+<li>On initial run, the database seeds dummy customer and user accounts, including configurable localized customer information limited to countries supported by Faker.</li>
+<li>App supports withdraw, deposit, and transfer transactions.</li>
+<li>A simple search bar is always visible on the navbar that allows search via customer id.</li>
+<li>If a simple search fails to find any results, user is redirected to advanced search to filter customers by name or city.</li>
+<li>Admin users have ability to CRUD users: add users, change password, and set roles.</li>
+<li>Users can add new customers.</li>
+<li>Often there is front-end validation of input fields with dynamic error messages and backend validation before writing to database.</li>
+<li>Console app requires manual run to audit for suspicious transactions and accounts, emailing results through email.</li>
+<li>API-querying allows for returning sorted and limited search results without refreshing.</li>
+</ul>
 
-### Search
-Try searching for first name "maria" in order to get more than 50 results.
+### Technologies
+<ul>
+<li>Python 3.11.5</li>
+<li>Database with MySQL, implemented in python with SQLAlchem 3.1.1</li>
+<li>Frontend development using Bootstrap 5.3</li>
+<li>Flask 2.3.3 for web framework</li>
+<li>Login and security via Flask Security Too 5.3.3</li>
+<li>Input validation using Flask-WTF 1.2.1</li>
+<li>Seeding of data using Faker 22.5.0</li>
+</ul>
 
-### Account transactions
-Due to the seeding limitation of only one transaction seeded for today's date, there may not be more than 20 transactions. I would suggest making a bunch of transactions for one account if you would like to test the fetch feature.
+### How to install:
+<ol>
+<li>Create a MySql database according to this line: SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://root:password@localhost/bank, or alternatively change this line to fit your database type, name, and password</li>
+<li>Download or clone this repo onto your computer.</li>
+<li>Navigate to downloaded/cloned folder in the development environment of your choice, like VS Code, and open the folder</li>
+<li>Run `pip install -r requirements.txt'</li>
+<li>Run `flask run` in the terminal to start the Flask application.</li>
+<li>CTRL-click the generated link from step 4 to open Bank App in a browser.</li>
+<li>You should now see the login page of Bank app in the browser.</li>
+</ol>
 
-### Base.html
-Some syntax errors are showing up in base.html, but I believe that is because I am using Jinja inside of Javascript, which should be ok since Jinja renders before any Javascript does.
+## How to use:
+<ol>
+<li>Log in to Bank App using your provided credentials.</li>
+<li>Explore the application!</li>
+</ol>
 
-### Money input
-Money, when shown, is in swedish locale, but needs to use decimal point when inputted
+## Notable files
 
-### API urls:
-/api/<int: customer_id>
-/api/accounts/<int: account_id>
+### /constants/constants.py
+In class TelephoneCountryCodes, add a country's country code and phone code to be able to seed customers from that country. This will seed localized data, including national ids, names, postal codes, and cities.
+
+Other constants can be changed here, such as the types of accounts, user roles, and min/max age used in the birthday validator when creating new customers, etc.
+
+### seed.py
+
+Here, you can change how many accounts are seeded and the max transaction amount. Changing the latter will affect the console app's results. You can also determine which user accounts to seed. Remember to empty your database if you have made changes and want to redo the seeding process.
+
+## API urls:
+<ul>
+<li>/api/<int: customer_id></li>
+<li>/api/accounts/<int: account_id></li>
+</ul>
